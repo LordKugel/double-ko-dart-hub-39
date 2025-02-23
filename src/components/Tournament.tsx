@@ -31,6 +31,33 @@ const createInitialMatches = (players: Player[]): MatchType[] => {
       });
     }
   }
+
+  const totalRounds = Math.ceil(Math.log2(players.length));
+  let matchesInRound = Math.floor(players.length / 4);
+
+  for (let round = 2; round <= totalRounds; round++) {
+    for (let i = 0; i < matchesInRound; i++) {
+      matches.push({
+        id: `match-r${round}-${i}`,
+        player1: {
+          id: "tbd",
+          firstName: "TBD",
+          lastName: "",
+          winPercentage: 0
+        },
+        player2: {
+          id: "tbd",
+          firstName: "TBD",
+          lastName: "",
+          winPercentage: 0
+        },
+        scores: Array(3).fill({ player1Won: null, player2Won: null }),
+        completed: false,
+        round: round
+      });
+    }
+    matchesInRound = Math.floor(matchesInRound / 2);
+  }
   
   return matches;
 };
@@ -56,7 +83,7 @@ export const Tournament = () => {
       return;
     }
     
-    const players = generateRandomPlayers(50);
+    const players = generateRandomPlayers(20);
     setTournament(prev => ({
       ...prev,
       players,
@@ -65,7 +92,7 @@ export const Tournament = () => {
     
     toast({
       title: "Players Generated",
-      description: "50 random players have been generated"
+      description: "20 random players have been generated"
     });
   };
 
@@ -155,7 +182,6 @@ export const Tournament = () => {
         const worksheet = workbook.Sheets[workbook.SheetNames[0]];
         const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
-        // Hier können Sie die Daten verarbeiten und in das Tournament-State übernehmen
         toast({
           title: "Import erfolgreich",
           description: "Die Turnierdaten wurden erfolgreich importiert"
@@ -215,15 +241,22 @@ export const Tournament = () => {
         />
       </div>
 
-      <div className="grid gap-6">
-        {tournament.matches.map(match => (
-          <Match
-            key={match.id}
-            match={match}
-            onScoreUpdate={handleScoreUpdate}
-          />
-        ))}
-      </div>
+      {Array.from(new Set(tournament.matches.map(m => m.round))).map(round => (
+        <div key={round} className="mb-8">
+          <h2 className="text-xl font-semibold mb-4">Runde {round}</h2>
+          <div className="grid gap-6">
+            {tournament.matches
+              .filter(match => match.round === round)
+              .map(match => (
+                <Match
+                  key={match.id}
+                  match={match}
+                  onScoreUpdate={handleScoreUpdate}
+                />
+              ))}
+          </div>
+        </div>
+      ))}
 
       {!tournament.started && tournament.players.length > 0 && (
         <div className="mt-8 p-4 bg-white rounded-lg shadow-md">
