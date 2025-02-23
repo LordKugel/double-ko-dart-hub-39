@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Player, Match as MatchType, Tournament as TournamentType } from "../types/tournament";
 import { Match } from "./Match";
@@ -97,11 +96,8 @@ export const Tournament = () => {
         player2Won: !player1Won
       };
 
-      // Check if match is complete
-      const player1Wins = match.scores.filter(s => s.player1Won).length;
-      const player2Wins = match.scores.filter(s => s.player2Won).length;
-      
-      if (player1Wins > match.scores.length / 2 || player2Wins > match.scores.length / 2) {
+      const gamesPlayed = match.scores.filter(s => s.player1Won !== null).length;
+      if (gamesPlayed === 3) {
         match.completed = true;
       }
 
