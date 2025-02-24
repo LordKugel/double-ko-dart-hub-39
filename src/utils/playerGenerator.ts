@@ -23,5 +23,6 @@ export function generateRandomPlayers(count: number): Player[] {
     lastName: lastNames[Math.floor(Math.random() * lastNames.length)],
     team: Math.random() > 0.3 ? teams[Math.floor(Math.random() * teams.length)] : undefined,
     winPercentage: 0,
+    group: Math.random() > 0.5 ? "Premium" : "Professional" // Zufällige Gruppenzuweisung
   }));
 }
