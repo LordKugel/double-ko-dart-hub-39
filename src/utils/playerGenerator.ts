@@ -22,6 +22,9 @@ export function generateRandomPlayers(count: number): Player[] {
     firstName: firstNames[Math.floor(Math.random() * firstNames.length)],
     lastName: lastNames[Math.floor(Math.random() * lastNames.length)],
     team: Math.random() > 0.3 ? teams[Math.floor(Math.random() * teams.length)] : undefined,
-    winPercentage: 0
+    winPercentage: 0,
+    losses: 0,
+    eliminated: false,
+    bracket: null
   }));
 }
