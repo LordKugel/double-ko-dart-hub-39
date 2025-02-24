@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Player, Match as MatchType, Tournament as TournamentType } from "../types/tournament";
 import { generateRandomPlayers } from "@/utils/playerGenerator";
@@ -16,6 +17,7 @@ const createInitialMatches = (players: Player[]): MatchType[] => {
   
   const matches: MatchType[] = [];
   
+  // Premium-Matches erstellen
   for (let i = 0; i < shuffledPremium.length; i += 2) {
     if (i + 1 < shuffledPremium.length) {
       matches.push({
@@ -29,6 +31,7 @@ const createInitialMatches = (players: Player[]): MatchType[] => {
     }
   }
   
+  // Professional-Matches erstellen
   for (let i = 0; i < shuffledProfessional.length; i += 2) {
     if (i + 1 < shuffledProfessional.length) {
       matches.push({
@@ -47,6 +50,7 @@ const createInitialMatches = (players: Player[]): MatchType[] => {
   let professionalMatchesInRound = Math.floor(professionalPlayers.length / 4);
 
   for (let round = 2; round <= totalRounds; round++) {
+    // Premium-Gruppe zukünftige Matches
     for (let i = 0; i < premiumMatchesInRound; i++) {
       matches.push({
         id: `match-premium-r${round}-${i}`,
@@ -58,6 +62,7 @@ const createInitialMatches = (players: Player[]): MatchType[] => {
       });
     }
     
+    // Professional-Gruppe zukünftige Matches
     for (let i = 0; i < professionalMatchesInRound; i++) {
       matches.push({
         id: `match-prof-r${round}-${i}`,
