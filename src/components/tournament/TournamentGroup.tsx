@@ -1,6 +1,6 @@
 
 import { Match as MatchType } from "@/types/tournament";
-import { Match } from "../Match";
+import { Match } from "./Match";
 
 interface TournamentGroupProps {
   title: string;
