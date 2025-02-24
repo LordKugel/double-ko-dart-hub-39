@@ -264,12 +264,19 @@ export const Tournament = () => {
       />
 
       {!tournament.started ? (
-        <PlayersList players={tournament.players} />
+        <PlayersList 
+          players={tournament.players}
+          title="Alle Spieler"
+        />
       ) : (
         <div className="mt-8">
           <div className="grid grid-cols-2 gap-8">
             <div>
               <h2 className="text-xl font-bold mb-4">Winner's Bracket</h2>
+              <PlayersList 
+                players={tournament.players.filter(p => p.bracket === "winners")}
+                title="Aktive Spieler"
+              />
               {tournament.winnersBracketMatches.map(match => (
                 <Match
                   key={match.id}
@@ -280,6 +287,10 @@ export const Tournament = () => {
             </div>
             <div>
               <h2 className="text-xl font-bold mb-4">Loser's Bracket</h2>
+              <PlayersList 
+                players={tournament.players.filter(p => p.bracket === "losers")}
+                title="Aktive Spieler"
+              />
               {tournament.losersBracketMatches.map(match => (
                 <Match
                   key={match.id}
@@ -288,6 +299,14 @@ export const Tournament = () => {
                 />
               ))}
             </div>
+          </div>
+
+          <div className="mt-8">
+            <h2 className="text-xl font-bold mb-4">Ausgeschiedene Spieler</h2>
+            <PlayersList 
+              players={tournament.players.filter(p => p.eliminated)}
+              title="Eliminierte Spieler"
+            />
           </div>
 
           {tournament.finalMatches.length > 0 && (
