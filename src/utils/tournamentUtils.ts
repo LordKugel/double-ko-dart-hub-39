@@ -56,12 +56,18 @@ export const calculateWinPercentage = (matches: MatchType[], playerId: string): 
   
   if (playerMatches.length === 0) return 0;
   
-  const wonMatches = playerMatches.filter(m => {
-    const player1Wins = m.scores.filter(s => s.player1Won).length;
-    if (m.player1.id === playerId) return player1Wins > 1;
-    if (m.player2.id === playerId) return player1Wins < 2;
-    return false;
-  }).length;
+  const totalGames = playerMatches.reduce((total, match) => {
+    // Zähle nur die gespielten Spiele
+    return total + match.scores.filter(s => s.player1Won !== null).length;
+  }, 0);
   
-  return (wonMatches / playerMatches.length) * 100;
+  const wonGames = playerMatches.reduce((wins, match) => {
+    const isPlayer1 = match.player1.id === playerId;
+    return wins + match.scores.filter(s => 
+      s.player1Won !== null && // Nur gespielte Spiele zählen
+      (isPlayer1 ? s.player1Won : s.player2Won)
+    ).length;
+  }, 0);
+  
+  return totalGames > 0 ? (wonGames / totalGames) * 100 : 0;
 };

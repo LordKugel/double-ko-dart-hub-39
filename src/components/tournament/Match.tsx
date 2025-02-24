@@ -35,6 +35,11 @@ export const Match = ({ match, onScoreUpdate }: MatchProps) => {
     return won ? "✓" : "×";
   };
 
+  // Prüfen, ob das Match bereits entschieden ist
+  const player1Wins = match.scores.filter(s => s.player1Won).length;
+  const player2Wins = match.scores.filter(s => s.player2Won).length;
+  const isMatchDecided = player1Wins === 2 || player2Wins === 2;
+
   return (
     <div className="bg-white rounded-lg shadow-md p-4 mb-4 animate-fade-in">
       <div className="flex items-center justify-between mb-2">
@@ -43,30 +48,36 @@ export const Match = ({ match, onScoreUpdate }: MatchProps) => {
       </div>
       
       <div className="flex justify-center gap-2 my-2">
-        {match.scores.map((score, index) => (
-          <div key={index} className="flex flex-col gap-1">
-            <button
-              onClick={() => !match.completed && onScoreUpdate(match.id, index, true)}
-              disabled={match.completed}
-              className={cn(
-                "w-8 h-8 rounded-full transition-all duration-200 flex items-center justify-center",
-                getButtonStyle(score.player1Won)
-              )}
-            >
-              {getButtonContent(score.player1Won)}
-            </button>
-            <button
-              onClick={() => !match.completed && onScoreUpdate(match.id, index, false)}
-              disabled={match.completed}
-              className={cn(
-                "w-8 h-8 rounded-full transition-all duration-200 flex items-center justify-center",
-                getButtonStyle(score.player2Won)
-              )}
-            >
-              {getButtonContent(score.player2Won)}
-            </button>
-          </div>
-        ))}
+        {match.scores.map((score, index) => {
+          // Wenn das Match bereits entschieden ist und dieses Spiel noch nicht gespielt wurde,
+          // deaktivieren wir die Buttons
+          const isGameDisabled = isMatchDecided && score.player1Won === null;
+          
+          return (
+            <div key={index} className="flex flex-col gap-1">
+              <button
+                onClick={() => !match.completed && !isGameDisabled && onScoreUpdate(match.id, index, true)}
+                disabled={match.completed || isGameDisabled}
+                className={cn(
+                  "w-8 h-8 rounded-full transition-all duration-200 flex items-center justify-center",
+                  isGameDisabled ? "bg-gray-200 cursor-not-allowed" : getButtonStyle(score.player1Won)
+                )}
+              >
+                {getButtonContent(score.player1Won)}
+              </button>
+              <button
+                onClick={() => !match.completed && !isGameDisabled && onScoreUpdate(match.id, index, false)}
+                disabled={match.completed || isGameDisabled}
+                className={cn(
+                  "w-8 h-8 rounded-full transition-all duration-200 flex items-center justify-center",
+                  isGameDisabled ? "bg-gray-200 cursor-not-allowed" : getButtonStyle(score.player2Won)
+                )}
+              >
+                {getButtonContent(score.player2Won)}
+              </button>
+            </div>
+          );
+        })}
       </div>
 
       <div className="flex items-center justify-between mt-2">
@@ -77,6 +88,12 @@ export const Match = ({ match, onScoreUpdate }: MatchProps) => {
       {match.completed && (
         <div className="mt-2 text-center text-sm text-gray-500">
           Match completed
+        </div>
+      )}
+      
+      {isMatchDecided && !match.completed && (
+        <div className="mt-2 text-center text-sm text-orange-500">
+          Match entschieden - weitere Spiele deaktiviert
         </div>
       )}
     </div>
