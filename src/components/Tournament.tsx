@@ -236,13 +236,25 @@ export const Tournament = () => {
       return;
     }
 
-    const initialMatches = createInitialMatches(tournament.players);
+    // Setze alle Spieler initial ins Winner's Bracket
+    const playersWithBracket = tournament.players.map(player => ({
+      ...player,
+      bracket: "winners" as const,
+      losses: 0,
+      eliminated: false
+    }));
+
+    const initialMatches = createInitialMatches(playersWithBracket);
+    
     setTournament(prev => ({
       ...prev,
       started: true,
+      players: playersWithBracket,  // Wichtig: Aktualisierte Spieler speichern
       matches: initialMatches,
       currentRound: 1,
-      winnersBracketMatches: initialMatches
+      winnersBracketMatches: initialMatches,
+      losersBracketMatches: [],
+      finalMatches: []
     }));
 
     toast({
