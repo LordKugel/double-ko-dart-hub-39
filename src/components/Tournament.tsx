@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Player, Match as MatchType, Tournament as TournamentType } from "../types/tournament";
 import { generateRandomPlayers } from "@/utils/playerGenerator";
@@ -7,6 +6,8 @@ import { TournamentControls } from "./tournament/TournamentControls";
 import { PlayersList } from "./tournament/PlayersList";
 import { MatchesTable } from "./tournament/MatchesTable";
 import { TournamentGroup } from "./tournament/TournamentGroup";
+import { GroupDisplay } from "./tournament/GroupDisplay";
+import { Match } from "./tournament/Match";
 
 const createInitialMatches = (players: Player[]): MatchType[] => {
   const premiumPlayers = players.filter(p => p.group === "Premium");
@@ -92,6 +93,9 @@ export const Tournament = () => {
     currentRound: 0
   });
 
+  const [premiumPlayers, setPremiumPlayers] = useState<Player[]>([]);
+  const [professionalPlayers, setProfessionalPlayers] = useState<Player[]>([]);
+
   const generatePlayers = () => {
     if (tournament.started) {
       toast({
@@ -102,7 +106,7 @@ export const Tournament = () => {
       return;
     }
     
-    const players = generateRandomPlayers(20);
+    const players = generateRandomPlayers(12);
     setTournament(prev => ({
       ...prev,
       players,
@@ -111,7 +115,7 @@ export const Tournament = () => {
     
     toast({
       title: "Players Generated",
-      description: "20 random players have been generated"
+      description: "12 random players have been generated"
     });
   };
 
@@ -125,11 +129,26 @@ export const Tournament = () => {
       return;
     }
 
-    const matches = createInitialMatches(tournament.players);
+    const shuffledPlayers = [...tournament.players].sort(() => Math.random() - 0.5);
+    const initialMatches: MatchType[] = [];
+    
+    for (let i = 0; i < shuffledPlayers.length; i += 2) {
+      if (i + 1 < shuffledPlayers.length) {
+        initialMatches.push({
+          id: `match-${i/2}`,
+          player1: shuffledPlayers[i],
+          player2: shuffledPlayers[i + 1],
+          scores: Array(3).fill({ player1Won: null, player2Won: null }),
+          completed: false,
+          round: 1
+        });
+      }
+    }
+
     setTournament(prev => ({
       ...prev,
       started: true,
-      matches,
+      matches: initialMatches,
       currentRound: 1
     }));
 
@@ -158,20 +177,14 @@ export const Tournament = () => {
 
         const player1Wins = match.scores.filter(s => s.player1Won).length;
         const winner = player1Wins > 1 ? match.player1 : match.player2;
-        
-        const nextRoundMatches = newMatches.filter(m => 
-          m.round === match.round + 1 && 
-          m.player1.id === "tbd" && 
-          (matchId.includes("premium") === m.id.includes("premium"))
-        );
-        
-        if (nextRoundMatches.length > 0) {
-          const nextMatch = nextRoundMatches[0];
-          if (nextMatch.player1.id === "tbd") {
-            nextMatch.player1 = winner;
-          } else {
-            nextMatch.player2 = winner;
-          }
+        const loser = player1Wins > 1 ? match.player2 : match.player1;
+
+        if (!premiumPlayers.find(p => p.id === winner.id)) {
+          setPremiumPlayers(prev => [...prev, {...winner, group: "Premium"}]);
+        }
+
+        if (!professionalPlayers.find(p => p.id === loser.id)) {
+          setProfessionalPlayers(prev => [...prev, {...loser, group: "Professional"}]);
         }
       }
 
@@ -184,12 +197,24 @@ export const Tournament = () => {
     });
   };
 
-  const premiumMatches = tournament.matches.filter(m => m.id.includes("premium"));
-  const professionalMatches = tournament.matches.filter(m => m.id.includes("prof"));
-
   return (
     <div className="container mx-auto p-4 max-w-4xl animate-fade-in pb-[400px]">
       <h1 className="text-3xl font-bold text-center mb-8">Dart Tournament</h1>
+      
+      {tournament.started && (
+        <>
+          <GroupDisplay 
+            title="Premium Gruppe" 
+            players={premiumPlayers}
+            className="left-4"
+          />
+          <GroupDisplay 
+            title="Professional Gruppe" 
+            players={professionalPlayers}
+            className="right-4"
+          />
+        </>
+      )}
       
       <TournamentControls
         onGeneratePlayers={generatePlayers}
@@ -199,23 +224,15 @@ export const Tournament = () => {
         matches={tournament.matches}
       />
 
-      {tournament.started && (
-        <>
-          <TournamentGroup
-            title="Premium Gruppe"
-            titleColor="text-purple-600"
-            matches={premiumMatches}
+      <div className="mt-8">
+        {tournament.matches.map(match => (
+          <Match
+            key={match.id}
+            match={match}
             onScoreUpdate={handleScoreUpdate}
           />
-
-          <TournamentGroup
-            title="Professional Gruppe"
-            titleColor="text-blue-600"
-            matches={professionalMatches}
-            onScoreUpdate={handleScoreUpdate}
-          />
-        </>
-      )}
+        ))}
+      </div>
 
       {!tournament.started && (
         <PlayersList players={tournament.players} />

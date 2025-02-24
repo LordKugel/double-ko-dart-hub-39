@@ -1,6 +1,7 @@
 
 import { Match as MatchType } from "../types/tournament";
 import { cn } from "@/lib/utils";
+import { useEffect, useState } from "react";
 
 interface MatchProps {
   match: MatchType;
@@ -8,6 +9,22 @@ interface MatchProps {
 }
 
 export const Match = ({ match, onScoreUpdate }: MatchProps) => {
+  const [isVisible, setIsVisible] = useState(true);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (match.completed) {
+      timer = setTimeout(() => {
+        setIsVisible(false);
+      }, 10000); // 10 Sekunden
+    }
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [match.completed]);
+
+  if (!isVisible) return null;
+
   const getButtonStyle = (won: boolean | null) => {
     if (won === null) return "bg-gray-300";
     return won ? "bg-green-500 text-white" : "bg-red-500 text-white";
@@ -17,16 +34,6 @@ export const Match = ({ match, onScoreUpdate }: MatchProps) => {
     if (won === null) return "-";
     return won ? "✓" : "×";
   };
-
-  if (match.player1.id === "tbd" || match.player2.id === "tbd") {
-    return (
-      <div className="bg-gray-100 rounded-lg shadow-md p-4 mb-4 animate-fade-in opacity-50">
-        <div className="text-center text-gray-500">
-          Waiting for players...
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="bg-white rounded-lg shadow-md p-4 mb-4 animate-fade-in">
