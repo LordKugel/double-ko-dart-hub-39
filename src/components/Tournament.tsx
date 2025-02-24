@@ -18,15 +18,43 @@ const createInitialMatches = (players: Player[]): MatchType[] => {
     if (i + 1 < shuffledPlayers.length) {
       matches.push({
         id: `match-${i/2}`,
-        player1: shuffledPlayers[i],
-        player2: shuffledPlayers[i + 1],
+        player1: { ...shuffledPlayers[i], losses: 0, eliminated: false, bracket: "winners" },
+        player2: { ...shuffledPlayers[i + 1], losses: 0, eliminated: false, bracket: "winners" },
         scores: Array(3).fill({ player1Won: null, player2Won: null }),
         completed: false,
-        round: 1
+        round: 1,
+        bracket: "winners",
+        matchNumber: i/2 + 1
       });
     }
   }
   
+  return matches;
+};
+
+const createNextRoundMatches = (
+  winners: Player[], 
+  losers: Player[], 
+  round: number, 
+  currentBracket: "winners" | "losers"
+): MatchType[] => {
+  const matches: MatchType[] = [];
+  const players = currentBracket === "winners" ? winners : losers;
+
+  for (let i = 0; i < players.length; i += 2) {
+    if (i + 1 < players.length) {
+      matches.push({
+        id: `match-${currentBracket}-${round}-${i/2}`,
+        player1: players[i],
+        player2: players[i + 1],
+        scores: Array(3).fill({ player1Won: null, player2Won: null }),
+        completed: false,
+        round,
+        bracket: currentBracket,
+        matchNumber: i/2 + 1
+      });
+    }
+  }
   return matches;
 };
 
@@ -38,11 +66,11 @@ export const Tournament = () => {
     matches: [],
     started: false,
     completed: false,
-    currentRound: 0
+    currentRound: 0,
+    winnersBracketMatches: [],
+    losersBracketMatches: [],
+    finalMatches: []
   });
-
-  const [premiumPlayers, setPremiumPlayers] = useState<Player[]>([]);
-  const [professionalPlayers, setProfessionalPlayers] = useState<Player[]>([]);
 
   const calculateWinPercentage = (playerId: string): number => {
     const playerMatches = tournament.matches.filter(m => 
@@ -59,35 +87,6 @@ export const Tournament = () => {
     }).length;
     
     return (wonMatches / playerMatches.length) * 100;
-  };
-
-  const updatePlayerStats = (playerId: string, isWinner: boolean) => {
-    const winPercentage = calculateWinPercentage(playerId);
-    
-    setPremiumPlayers(prev => 
-      prev.map(p => p.id === playerId ? { ...p, winPercentage } : p)
-    );
-    
-    setProfessionalPlayers(prev => 
-      prev.map(p => p.id === playerId ? { ...p, winPercentage } : p)
-    );
-  };
-
-  const createNextRoundMatches = (winners: Player[], round: number, group: "Premium" | "Professional") => {
-    const matches: MatchType[] = [];
-    for (let i = 0; i < winners.length; i += 2) {
-      if (i + 1 < winners.length) {
-        matches.push({
-          id: `match-${group}-${round}-${i/2}`,
-          player1: winners[i],
-          player2: winners[i + 1],
-          scores: Array(3).fill({ player1Won: null, player2Won: null }),
-          completed: false,
-          round
-        });
-      }
-    }
-    return matches;
   };
 
   const handleScoreUpdate = (matchId: string, gameIndex: number, player1Won: boolean) => {
@@ -110,51 +109,84 @@ export const Tournament = () => {
         match.completed = true;
         const winner = player1Wins > player2Wins ? match.player1 : match.player2;
         const loser = player1Wins > player2Wins ? match.player2 : match.player1;
+        
+        // Update Spieler-Statistiken
+        winner.winPercentage = calculateWinPercentage(winner.id);
+        loser.winPercentage = calculateWinPercentage(loser.id);
+        loser.losses += 1;
 
-        // Erste Runde: Gruppeneinteilung
-        if (match.round === 1) {
-          if (!premiumPlayers.find(p => p.id === winner.id) && 
-              !professionalPlayers.find(p => p.id === winner.id)) {
-            setPremiumPlayers(prev => [...prev, {...winner, group: "Premium"}]);
-          }
-          if (!premiumPlayers.find(p => p.id === loser.id) && 
-              !professionalPlayers.find(p => p.id === loser.id)) {
-            setProfessionalPlayers(prev => [...prev, {...loser, group: "Professional"}]);
-          }
+        if (loser.losses >= 2) {
+          loser.eliminated = true;
         }
 
-        updatePlayerStats(winner.id, true);
-        updatePlayerStats(loser.id, false);
+        // Move loser to losers bracket if it's their first loss
+        if (loser.losses === 1 && match.bracket === "winners") {
+          loser.bracket = "losers";
+        }
 
-        // Prüfen, ob alle Matches der aktuellen Runde beendet sind
-        const currentRoundMatches = newMatches.filter(m => m.round === match.round);
-        const allMatchesCompleted = currentRoundMatches.every(m => m.completed);
-
-        if (allMatchesCompleted) {
-          // Premium Gruppe
-          const premiumWinners = currentRoundMatches
-            .filter(m => m.player1.group === "Premium" || m.player2.group === "Premium")
+        // Handle completed round
+        const currentBracketMatches = newMatches.filter(m => 
+          m.round === match.round && m.bracket === match.bracket
+        );
+        
+        if (currentBracketMatches.every(m => m.completed)) {
+          const winners = currentBracketMatches
             .map(m => {
               const wins1 = m.scores.filter(s => s.player1Won).length;
               return wins1 > 1 ? m.player1 : m.player2;
-            });
+            })
+            .filter(player => !player.eliminated);
 
-          // Professional Gruppe
-          const professionalWinners = currentRoundMatches
-            .filter(m => m.player1.group === "Professional" || m.player2.group === "Professional")
+          const losers = currentBracketMatches
             .map(m => {
               const wins1 = m.scores.filter(s => s.player1Won).length;
-              return wins1 > 1 ? m.player1 : m.player2;
-            });
+              return wins1 > 1 ? m.player2 : m.player1;
+            })
+            .filter(player => !player.eliminated);
 
-          if (premiumWinners.length > 1) {
-            const nextRoundPremium = createNextRoundMatches(premiumWinners, match.round + 1, "Premium");
-            newMatches.push(...nextRoundPremium);
+          // Create next round matches for both brackets
+          if (winners.length > 1) {
+            const nextWinnersMatches = createNextRoundMatches(
+              winners,
+              [],
+              match.round + 1,
+              "winners"
+            );
+            newMatches.push(...nextWinnersMatches);
           }
 
-          if (professionalWinners.length > 1) {
-            const nextRoundProfessional = createNextRoundMatches(professionalWinners, match.round + 1, "Professional");
-            newMatches.push(...nextRoundProfessional);
+          if (losers.length > 1 && match.bracket === "winners") {
+            const nextLosersMatches = createNextRoundMatches(
+              losers,
+              [],
+              match.round,
+              "losers"
+            );
+            newMatches.push(...nextLosersMatches);
+          }
+
+          // Check for final matches
+          if (winners.length === 1 && match.bracket === "winners") {
+            // Create final match
+            const finalMatch: MatchType = {
+              id: `final-1`,
+              player1: winners[0],
+              player2: { 
+                id: "tbd", 
+                firstName: "TBD", 
+                lastName: "", 
+                winPercentage: 0, 
+                losses: 0, 
+                eliminated: false, 
+                bracket: "losers" 
+              },
+              scores: Array(3).fill({ player1Won: null, player2Won: null }),
+              completed: false,
+              round: match.round + 1,
+              bracket: "final",
+              matchNumber: 1
+            };
+            newMatches.push(finalMatch);
           }
         }
       }
@@ -163,7 +195,10 @@ export const Tournament = () => {
       
       return {
         ...prev,
-        matches: newMatches
+        matches: newMatches,
+        winnersBracketMatches: newMatches.filter(m => m.bracket === "winners"),
+        losersBracketMatches: newMatches.filter(m => m.bracket === "losers"),
+        finalMatches: newMatches.filter(m => m.bracket === "final")
       };
     });
   };
@@ -171,14 +206,14 @@ export const Tournament = () => {
   const generatePlayers = () => {
     if (tournament.started) {
       toast({
-        title: "Tournament already started",
-        description: "Cannot generate new players after tournament has started",
+        title: "Turnier bereits gestartet",
+        description: "Es können keine neuen Spieler generiert werden",
         variant: "destructive"
       });
       return;
     }
     
-    const players = generateRandomPlayers(12);
+    const players = generateRandomPlayers(8); // Für Double Elimination ist 8 eine gute Anzahl
     setTournament(prev => ({
       ...prev,
       players,
@@ -186,16 +221,16 @@ export const Tournament = () => {
     }));
     
     toast({
-      title: "Players Generated",
-      description: "12 random players have been generated"
+      title: "Spieler generiert",
+      description: "8 zufällige Spieler wurden generiert"
     });
   };
 
   const startTournament = () => {
     if (tournament.players.length < 2) {
       toast({
-        title: "Not enough players",
-        description: "Please generate players first",
+        title: "Nicht genug Spieler",
+        description: "Bitte generieren Sie zuerst Spieler",
         variant: "destructive"
       });
       return;
@@ -206,26 +241,15 @@ export const Tournament = () => {
       ...prev,
       started: true,
       matches: initialMatches,
-      currentRound: 1
+      currentRound: 1,
+      winnersBracketMatches: initialMatches
     }));
 
     toast({
-      title: "Tournament Started",
-      description: "First round matches have been generated"
+      title: "Turnier gestartet",
+      description: "Die ersten Runden wurden generiert"
     });
   };
-
-  const premiumMatches = tournament.matches.filter(m => 
-    (m.player1.group === "Premium" || m.player2.group === "Premium") &&
-    m.round > 1
-  );
-
-  const professionalMatches = tournament.matches.filter(m => 
-    (m.player1.group === "Professional" || m.player2.group === "Professional") &&
-    m.round > 1
-  );
-
-  const firstRoundMatches = tournament.matches.filter(m => m.round === 1);
 
   return (
     <div className="container mx-auto p-4 max-w-4xl animate-fade-in pb-[400px]">
@@ -242,32 +266,43 @@ export const Tournament = () => {
       {!tournament.started ? (
         <PlayersList players={tournament.players} />
       ) : (
-        <>
-          <div className="mt-8">
-            {firstRoundMatches.map(match => (
-              <Match
-                key={match.id}
-                match={match}
-                onScoreUpdate={handleScoreUpdate}
-              />
-            ))}
+        <div className="mt-8">
+          <div className="grid grid-cols-2 gap-8">
+            <div>
+              <h2 className="text-xl font-bold mb-4">Winner's Bracket</h2>
+              {tournament.winnersBracketMatches.map(match => (
+                <Match
+                  key={match.id}
+                  match={match}
+                  onScoreUpdate={handleScoreUpdate}
+                />
+              ))}
+            </div>
+            <div>
+              <h2 className="text-xl font-bold mb-4">Loser's Bracket</h2>
+              {tournament.losersBracketMatches.map(match => (
+                <Match
+                  key={match.id}
+                  match={match}
+                  onScoreUpdate={handleScoreUpdate}
+                />
+              ))}
+            </div>
           </div>
 
-          {(premiumMatches.length > 0 || professionalMatches.length > 0) && (
-            <>
-              <TournamentBracket 
-                title="Premium Gruppe" 
-                matches={premiumMatches}
-                className="left-4"
-              />
-              <TournamentBracket 
-                title="Professional Gruppe" 
-                matches={professionalMatches}
-                className="right-4"
-              />
-            </>
+          {tournament.finalMatches.length > 0 && (
+            <div className="mt-8">
+              <h2 className="text-xl font-bold mb-4">Finals</h2>
+              {tournament.finalMatches.map(match => (
+                <Match
+                  key={match.id}
+                  match={match}
+                  onScoreUpdate={handleScoreUpdate}
+                />
+              ))}
+            </div>
           )}
-        </>
+        </div>
       )}
 
       <MatchesTable matches={tournament.matches} />

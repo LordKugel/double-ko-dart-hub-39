@@ -5,8 +5,9 @@ export interface Player {
   lastName: string;
   team?: string;
   winPercentage: number;
-  group?: "Premium" | "Professional";
-  eliminated?: boolean;
+  losses: number; // Anzahl der Niederlagen
+  eliminated: boolean;
+  bracket: "winners" | "losers" | null;
 }
 
 export interface Match {
@@ -19,6 +20,8 @@ export interface Match {
   }>;
   completed: boolean;
   round: number;
+  bracket: "winners" | "losers" | "final";
+  matchNumber: number; // Zur Identifizierung der Position im Bracket
 }
 
 export interface Tournament {
@@ -29,4 +32,7 @@ export interface Tournament {
   started: boolean;
   completed: boolean;
   currentRound: number;
+  winnersBracketMatches: Match[];
+  losersBracketMatches: Match[];
+  finalMatches: Match[];
 }
