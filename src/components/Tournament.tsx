@@ -41,7 +41,7 @@ export const Tournament = () => {
                 players={tournament.players.filter(p => p.bracket === "winners")}
                 title="Aktive Spieler"
               />
-              {tournament.winnersBracketMatches.map(match => (
+              {tournament.winnersBracketMatches.filter(m => !m.completed).map(match => (
                 <Match
                   key={match.id}
                   match={match}
@@ -67,7 +67,7 @@ export const Tournament = () => {
                 players={tournament.players.filter(p => p.bracket === "losers")}
                 title="Aktive Spieler"
               />
-              {tournament.losersBracketMatches.map(match => (
+              {tournament.losersBracketMatches.filter(m => !m.completed).map(match => (
                 <Match
                   key={match.id}
                   match={match}
