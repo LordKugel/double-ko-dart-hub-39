@@ -1,5 +1,5 @@
 
-import { Match as MatchType } from "../types/tournament";
+import { Match as MatchType } from "../../types/tournament";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 
