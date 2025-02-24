@@ -110,20 +110,33 @@ export const Tournament = () => {
         const winner = player1Wins > player2Wins ? match.player1 : match.player2;
         const loser = player1Wins > player2Wins ? match.player2 : match.player1;
         
-        // Update Spieler-Statistiken
-        winner.winPercentage = calculateWinPercentage(winner.id);
-        loser.winPercentage = calculateWinPercentage(loser.id);
-        loser.losses += 1;
+        // Aktualisiere alle Spieler im Tournament
+        const updatedPlayers = prev.players.map(p => {
+          if (p.id === loser.id) {
+            // Verlierer bekommt eine Niederlage
+            const newLosses = p.losses + 1;
+            return {
+              ...p,
+              losses: newLosses,
+              eliminated: newLosses >= 2,
+              bracket: newLosses === 1 ? "losers" : p.bracket
+            };
+          }
+          if (p.id === winner.id) {
+            // Gewinner bleibt im aktuellen Bracket
+            return {
+              ...p,
+              winPercentage: calculateWinPercentage(p.id)
+            };
+          }
+          return p;
+        });
+        
+        match.player1 = updatedPlayers.find(p => p.id === match.player1.id)!;
+        match.player2 = updatedPlayers.find(p => p.id === match.player2.id)!;
 
-        if (loser.losses >= 2) {
-          loser.eliminated = true;
-        }
-
-        // Move loser to losers bracket if it's their first loss
-        if (loser.losses === 1 && match.bracket === "winners") {
-          loser.bracket = "losers";
-        }
-
+        newMatches[matchIndex] = match;
+        
         // Handle completed round
         const currentBracketMatches = newMatches.filter(m => 
           m.round === match.round && m.bracket === match.bracket
@@ -133,18 +146,19 @@ export const Tournament = () => {
           const winners = currentBracketMatches
             .map(m => {
               const wins1 = m.scores.filter(s => s.player1Won).length;
-              return wins1 > 1 ? m.player1 : m.player2;
+              const winner = wins1 > 1 ? m.player1 : m.player2;
+              return updatedPlayers.find(p => p.id === winner.id)!;
             })
             .filter(player => !player.eliminated);
 
           const losers = currentBracketMatches
             .map(m => {
               const wins1 = m.scores.filter(s => s.player1Won).length;
-              return wins1 > 1 ? m.player2 : m.player1;
+              const loser = wins1 > 1 ? m.player2 : m.player1;
+              return updatedPlayers.find(p => p.id === loser.id)!;
             })
             .filter(player => !player.eliminated);
 
-          // Create next round matches for both brackets
           if (winners.length > 1) {
             const nextWinnersMatches = createNextRoundMatches(
               winners,
@@ -165,9 +179,7 @@ export const Tournament = () => {
             newMatches.push(...nextLosersMatches);
           }
 
-          // Check for final matches
           if (winners.length === 1 && match.bracket === "winners") {
-            // Create final match
             const finalMatch: MatchType = {
               id: `final-1`,
               player1: winners[0],
@@ -189,6 +201,15 @@ export const Tournament = () => {
             newMatches.push(finalMatch);
           }
         }
+
+        return {
+          ...prev,
+          players: updatedPlayers,
+          matches: newMatches,
+          winnersBracketMatches: newMatches.filter(m => m.bracket === "winners"),
+          losersBracketMatches: newMatches.filter(m => m.bracket === "losers"),
+          finalMatches: newMatches.filter(m => m.bracket === "final")
+        };
       }
 
       newMatches[matchIndex] = match;
