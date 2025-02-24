@@ -8,6 +8,13 @@ import { useTournament } from "@/hooks/useTournament";
 export const Tournament = () => {
   const { tournament, handleScoreUpdate, generatePlayers, startTournament } = useTournament();
 
+  // Filtere aktive Matches, die noch nicht in den Brackets angezeigt werden
+  const currentMatches = tournament.matches.filter(m => 
+    !m.completed && 
+    !tournament.winnersBracketMatches.some(wm => wm.id === m.id) &&
+    !tournament.losersBracketMatches.some(lm => lm.id === m.id)
+  );
+
   return (
     <div className="container mx-auto p-4 max-w-7xl animate-fade-in pb-[400px]">
       <h1 className="text-3xl font-bold text-center mb-8">Dart Tournament</h1>
@@ -45,15 +52,13 @@ export const Tournament = () => {
 
             <div className="w-2/3">
               <h2 className="text-xl font-bold mb-4">Aktuelle Matches</h2>
-              {tournament.matches
-                .filter(m => !m.completed)
-                .map(match => (
-                  <Match
-                    key={match.id}
-                    match={match}
-                    onScoreUpdate={handleScoreUpdate}
-                  />
-                ))}
+              {currentMatches.map(match => (
+                <Match
+                  key={match.id}
+                  match={match}
+                  onScoreUpdate={handleScoreUpdate}
+                />
+              ))}
             </div>
 
             <div className="w-1/6">

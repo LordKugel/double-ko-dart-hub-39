@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Player, Match as MatchType, Tournament as TournamentType } from "../types/tournament";
 import { createInitialMatches, calculateWinPercentage } from "../utils/tournamentUtils";
@@ -29,15 +28,13 @@ export const useTournament = () => {
       const newMatches = [...prev.matches];
       const match = updateMatchScores({ ...newMatches[matchIndex] }, gameIndex, player1Won);
       
-      const player1Wins = match.scores.filter(s => s.player1Won).length;
-      const player2Wins = match.scores.filter(s => s.player2Won).length;
-
-      if (player1Wins === 2 || player2Wins === 2) {
+      const gamesPlayed = match.scores.filter(s => s.player1Won !== null).length;
+      
+      if (gamesPlayed === 3) {
         match.completed = true;
         
         const updatedPlayers = updatePlayersAfterMatch(match, prev.players, newMatches);
         
-        // Aktualisiere die Spieler im Match
         const updatedPlayer1 = updatedPlayers.find(p => p.id === match.player1.id);
         const updatedPlayer2 = updatedPlayers.find(p => p.id === match.player2.id);
         
@@ -48,7 +45,6 @@ export const useTournament = () => {
 
         newMatches[matchIndex] = match;
         
-        // Sammle alle Matches der aktuellen Runde für beide Brackets
         const winnerBracketMatches = newMatches.filter(m => 
           m.round === match.round && m.bracket === "winners" && m.completed
         );
@@ -59,7 +55,6 @@ export const useTournament = () => {
 
         let updatedMatches = [...newMatches];
 
-        // Verarbeite Winner's und Loser's Bracket getrennt
         if (match.bracket === "winners" && winnerBracketMatches.length === Math.floor(prev.winnersBracketMatches.length)) {
           updatedMatches = processWinnersBracket(match, winnerBracketMatches, updatedPlayers, updatedMatches);
         }
