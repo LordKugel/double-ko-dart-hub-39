@@ -249,7 +249,7 @@ export const Tournament = () => {
     <div className="container mx-auto p-4 max-w-4xl animate-fade-in pb-[400px]">
       <h1 className="text-3xl font-bold text-center mb-8">Dart Tournament</h1>
       
-      {tournament.started && (
+      {tournament.started ? (
         <>
           <TournamentBracket 
             title="Premium Gruppe" 
@@ -261,6 +261,10 @@ export const Tournament = () => {
             matches={professionalMatches}
             className="right-4"
           />
+        </>
+      ) : (
+        <>
+          <PlayersList players={tournament.players} />
         </>
       )}
       
@@ -281,10 +285,6 @@ export const Tournament = () => {
           />
         ))}
       </div>
-
-      {!tournament.started && (
-        <PlayersList players={tournament.players} />
-      )}
 
       <MatchesTable matches={tournament.matches} />
     </div>
