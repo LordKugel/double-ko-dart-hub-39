@@ -9,7 +9,7 @@ export const Tournament = () => {
   const { tournament, handleScoreUpdate, generatePlayers, startTournament } = useTournament();
 
   return (
-    <div className="container mx-auto p-4 max-w-4xl animate-fade-in pb-[400px]">
+    <div className="container mx-auto p-4 max-w-7xl animate-fade-in pb-[400px]">
       <h1 className="text-3xl font-bold text-center mb-8">Dart Tournament</h1>
       
       <TournamentControls
@@ -27,8 +27,8 @@ export const Tournament = () => {
         />
       ) : (
         <div className="mt-8">
-          <div className="grid grid-cols-2 gap-8">
-            <div>
+          <div className="flex justify-between relative">
+            <div className="w-1/4">
               <h2 className="text-xl font-bold mb-4">Winner's Bracket</h2>
               <PlayersList 
                 players={tournament.players.filter(p => p.bracket === "winners")}
@@ -42,7 +42,21 @@ export const Tournament = () => {
                 />
               ))}
             </div>
-            <div>
+
+            <div className="w-1/3 mx-4">
+              <h2 className="text-xl font-bold mb-4">Aktuelle Matches</h2>
+              {tournament.matches
+                .filter(m => !m.completed)
+                .map(match => (
+                  <Match
+                    key={match.id}
+                    match={match}
+                    onScoreUpdate={handleScoreUpdate}
+                  />
+                ))}
+            </div>
+
+            <div className="w-1/4">
               <h2 className="text-xl font-bold mb-4">Loser's Bracket</h2>
               <PlayersList 
                 players={tournament.players.filter(p => p.bracket === "losers")}
