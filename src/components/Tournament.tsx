@@ -27,8 +27,8 @@ export const Tournament = () => {
         />
       ) : (
         <div className="mt-8">
-          <div className="flex justify-between relative">
-            <div className="w-1/4">
+          <div className="flex justify-between relative space-x-4">
+            <div className="w-1/6">
               <h2 className="text-xl font-bold mb-4">Winner's Bracket</h2>
               <PlayersList 
                 players={tournament.players.filter(p => p.bracket === "winners")}
@@ -43,7 +43,7 @@ export const Tournament = () => {
               ))}
             </div>
 
-            <div className="w-1/3 mx-4">
+            <div className="w-2/3">
               <h2 className="text-xl font-bold mb-4">Aktuelle Matches</h2>
               {tournament.matches
                 .filter(m => !m.completed)
@@ -56,7 +56,7 @@ export const Tournament = () => {
                 ))}
             </div>
 
-            <div className="w-1/4">
+            <div className="w-1/6">
               <h2 className="text-xl font-bold mb-4">Loser's Bracket</h2>
               <PlayersList 
                 players={tournament.players.filter(p => p.bracket === "losers")}

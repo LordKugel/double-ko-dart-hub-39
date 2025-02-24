@@ -50,21 +50,24 @@ export const createNextRoundMatches = (
 };
 
 export const calculateWinPercentage = (matches: MatchType[], playerId: string): number => {
-  const playerMatches = matches.filter(m => 
-    (m.player1.id === playerId || m.player2.id === playerId)
+  // Filtere nur die abgeschlossenen Matches des Spielers
+  const completedMatches = matches.filter(m => 
+    (m.player1.id === playerId || m.player2.id === playerId) &&
+    m.scores.some(s => s.player1Won !== null || s.player2Won !== null)
   );
+  
+  if (completedMatches.length === 0) return 0;
   
   let totalGamesPlayed = 0;
   let gamesWon = 0;
   
-  playerMatches.forEach(match => {
+  completedMatches.forEach(match => {
+    const isPlayer1 = match.player1.id === playerId;
+    
     match.scores.forEach(score => {
-      if (score.player1Won === null && score.player2Won === null) {
-        return; // Skip unplayed games
-      }
+      if (score.player1Won === null && score.player2Won === null) return;
       
       totalGamesPlayed++;
-      const isPlayer1 = match.player1.id === playerId;
       if (isPlayer1 && score.player1Won) {
         gamesWon++;
       } else if (!isPlayer1 && score.player2Won) {
@@ -73,5 +76,6 @@ export const calculateWinPercentage = (matches: MatchType[], playerId: string): 
     });
   });
   
-  return totalGamesPlayed > 0 ? (gamesWon / totalGamesPlayed) * 100 : 0;
+  console.log(`Player ${playerId} - Games played: ${totalGamesPlayed}, Games won: ${gamesWon}`);
+  return (gamesWon / totalGamesPlayed) * 100;
 };
