@@ -53,12 +53,14 @@ export const useTournament = () => {
           if (p.id === winner.id) {
             return {
               ...p,
+              // Hier geben wir jetzt matches mit
               winPercentage: calculateWinPercentage(prev.matches, p.id)
             };
           }
           return p;
         });
         
+        // Aktualisiere die Spieler im Match
         match.player1 = updatedPlayers.find(p => p.id === match.player1.id)!;
         match.player2 = updatedPlayers.find(p => p.id === match.player2.id)!;
 
@@ -72,17 +74,17 @@ export const useTournament = () => {
           const winners = currentBracketMatches
             .map(m => {
               const wins1 = m.scores.filter(s => s.player1Won).length;
-              const winner = wins1 > 1 ? m.player1 : m.player2;
-              return updatedPlayers.find(p => p.id === winner.id)!;
+              return wins1 > 1 ? m.player1 : m.player2;
             })
+            .map(winner => updatedPlayers.find(p => p.id === winner.id)!)
             .filter(player => !player.eliminated);
 
           const losers = currentBracketMatches
             .map(m => {
               const wins1 = m.scores.filter(s => s.player1Won).length;
-              const loser = wins1 > 1 ? m.player2 : m.player1;
-              return updatedPlayers.find(p => p.id === loser.id)!;
+              return wins1 > 1 ? m.player2 : m.player1;
             })
+            .map(loser => updatedPlayers.find(p => p.id === loser.id)!)
             .filter(player => !player.eliminated);
 
           if (winners.length > 1) {
