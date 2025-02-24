@@ -1,19 +1,11 @@
 import { useState } from "react";
 import { Player, Match as MatchType, Tournament as TournamentType } from "../types/tournament";
-import { Match } from "./Match";
-import { Button } from "@/components/ui/button";
 import { generateRandomPlayers } from "@/utils/playerGenerator";
 import { toast } from "@/components/ui/use-toast";
-import * as XLSX from "xlsx";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Upload, Download } from "lucide-react";
+import { TournamentControls } from "./tournament/TournamentControls";
+import { PlayersList } from "./tournament/PlayersList";
+import { MatchesTable } from "./tournament/MatchesTable";
+import { TournamentGroup } from "./tournament/TournamentGroup";
 
 const createInitialMatches = (players: Player[]): MatchType[] => {
   const premiumPlayers = players.filter(p => p.group === "Premium");
@@ -187,197 +179,44 @@ export const Tournament = () => {
     });
   };
 
-  const exportToExcel = () => {
-    const matchData = tournament.matches.map(match => ({
-      'Player 1': `${match.player1.firstName} ${match.player1.lastName}`,
-      'Team 1': match.player1.team || '-',
-      'Game 1': match.scores[0].player1Won === null ? '-' : match.scores[0].player1Won ? 'Win' : 'Loss',
-      'Game 2': match.scores[1].player1Won === null ? '-' : match.scores[1].player1Won ? 'Win' : 'Loss',
-      'Game 3': match.scores[2].player1Won === null ? '-' : match.scores[2].player1Won ? 'Win' : 'Loss',
-      'Player 2': `${match.player2.firstName} ${match.player2.lastName}`,
-      'Team 2': match.player2.team || '-',
-      'Status': match.completed ? 'Completed' : 'In Progress'
-    }));
-
-    const ws = XLSX.utils.json_to_sheet(matchData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Matches");
-    XLSX.writeFile(wb, "tournament_matches.xlsx");
-    
-    toast({
-      title: "Export erfolgreich",
-      description: "Die Turnierdaten wurden als Excel-Datei exportiert"
-    });
-  };
-
-  const importFromExcel = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const data = new Uint8Array(e.target?.result as ArrayBuffer);
-        const workbook = XLSX.read(data, { type: 'array' });
-        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-        const jsonData = XLSX.utils.sheet_to_json(worksheet);
-
-        toast({
-          title: "Import erfolgreich",
-          description: "Die Turnierdaten wurden erfolgreich importiert"
-        });
-      } catch (error) {
-        toast({
-          title: "Import fehlgeschlagen",
-          description: "Fehler beim Importieren der Datei",
-          variant: "destructive"
-        });
-      }
-    };
-    reader.readAsArrayBuffer(file);
-  };
+  const premiumMatches = tournament.matches.filter(m => m.id.includes("premium"));
+  const professionalMatches = tournament.matches.filter(m => m.id.includes("prof"));
 
   return (
     <div className="container mx-auto p-4 max-w-4xl animate-fade-in pb-[400px]">
       <h1 className="text-3xl font-bold text-center mb-8">Dart Tournament</h1>
       
-      <div className="flex justify-center gap-4 mb-8">
-        <Button 
-          onClick={generatePlayers}
-          disabled={tournament.started}
-          className="transition-all duration-200 hover:scale-105"
-        >
-          Generate Players
-        </Button>
-        <Button 
-          onClick={startTournament}
-          disabled={tournament.started || tournament.players.length === 0}
-          className="transition-all duration-200 hover:scale-105"
-        >
-          Start Tournament
-        </Button>
-        <Button
-          onClick={exportToExcel}
-          className="transition-all duration-200 hover:scale-105"
-          variant="outline"
-        >
-          <Download className="mr-2 h-4 w-4" />
-          Export Excel
-        </Button>
-        <Button
-          onClick={() => document.getElementById('excel-upload')?.click()}
-          className="transition-all duration-200 hover:scale-105"
-          variant="outline"
-        >
-          <Upload className="mr-2 h-4 w-4" />
-          Import Excel
-        </Button>
-        <input
-          id="excel-upload"
-          type="file"
-          accept=".xlsx,.xls"
-          className="hidden"
-          onChange={importFromExcel}
-        />
-      </div>
+      <TournamentControls
+        onGeneratePlayers={generatePlayers}
+        onStartTournament={startTournament}
+        isStarted={tournament.started}
+        hasPlayers={tournament.players.length > 0}
+        matches={tournament.matches}
+      />
 
-      {/* Premium Gruppe */}
-      <div className="mb-12">
-        <h2 className="text-2xl font-bold mb-6 text-purple-600">Premium Gruppe</h2>
-        {Array.from(new Set(tournament.matches.filter(m => m.id.includes("premium")).map(m => m.round))).map(round => (
-          <div key={`premium-${round}`} className="mb-8">
-            <h3 className="text-xl font-semibold mb-4">Runde {round}</h3>
-            <div className="grid gap-6">
-              {tournament.matches
-                .filter(match => match.round === round && match.id.includes("premium"))
-                .map(match => (
-                  <Match
-                    key={match.id}
-                    match={match}
-                    onScoreUpdate={handleScoreUpdate}
-                  />
-                ))}
-            </div>
-          </div>
-        ))}
-      </div>
+      {tournament.started && (
+        <>
+          <TournamentGroup
+            title="Premium Gruppe"
+            titleColor="text-purple-600"
+            matches={premiumMatches}
+            onScoreUpdate={handleScoreUpdate}
+          />
 
-      {/* Professional Gruppe */}
-      <div className="mb-12">
-        <h2 className="text-2xl font-bold mb-6 text-blue-600">Professional Gruppe</h2>
-        {Array.from(new Set(tournament.matches.filter(m => m.id.includes("prof")).map(m => m.round))).map(round => (
-          <div key={`prof-${round}`} className="mb-8">
-            <h3 className="text-xl font-semibold mb-4">Runde {round}</h3>
-            <div className="grid gap-6">
-              {tournament.matches
-                .filter(match => match.round === round && match.id.includes("prof"))
-                .map(match => (
-                  <Match
-                    key={match.id}
-                    match={match}
-                    onScoreUpdate={handleScoreUpdate}
-                  />
-                ))}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {!tournament.started && tournament.players.length > 0 && (
-        <div className="mt-8 p-4 bg-white rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold mb-4">Player List ({tournament.players.length})</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {tournament.players.map(player => (
-              <div key={player.id} className="p-2 bg-gray-50 rounded">
-                {player.firstName} {player.lastName}
-                {player.team && <span className="text-sm text-gray-500 ml-2">({player.team})</span>}
-              </div>
-            ))}
-          </div>
-        </div>
+          <TournamentGroup
+            title="Professional Gruppe"
+            titleColor="text-blue-600"
+            matches={professionalMatches}
+            onScoreUpdate={handleScoreUpdate}
+          />
+        </>
       )}
 
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg p-4 max-h-[350px] overflow-auto">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Player 1</TableHead>
-              <TableHead>Team 1</TableHead>
-              <TableHead className="text-center">Game 1</TableHead>
-              <TableHead className="text-center">Game 2</TableHead>
-              <TableHead className="text-center">Game 3</TableHead>
-              <TableHead>Player 2</TableHead>
-              <TableHead>Team 2</TableHead>
-              <TableHead>Status</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {tournament.matches.map(match => (
-              <TableRow key={match.id}>
-                <TableCell>{match.player1.firstName} {match.player1.lastName}</TableCell>
-                <TableCell>{match.player1.team || '-'}</TableCell>
-                <TableCell className="text-center">
-                  {match.scores[0].player1Won === null ? '-' : 
-                   match.scores[0].player1Won ? '✓' : '×'}
-                </TableCell>
-                <TableCell className="text-center">
-                  {match.scores[1].player1Won === null ? '-' : 
-                   match.scores[1].player1Won ? '✓' : '×'}
-                </TableCell>
-                <TableCell className="text-center">
-                  {match.scores[2].player1Won === null ? '-' : 
-                   match.scores[2].player1Won ? '✓' : '×'}
-                </TableCell>
-                <TableCell>{match.player2.firstName} {match.player2.lastName}</TableCell>
-                <TableCell>{match.player2.team || '-'}</TableCell>
-                <TableCell>
-                  {match.completed ? 'Completed' : 'In Progress'}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+      {!tournament.started && (
+        <PlayersList players={tournament.players} />
+      )}
+
+      <MatchesTable matches={tournament.matches} />
     </div>
   );
 };
