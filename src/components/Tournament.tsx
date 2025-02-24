@@ -5,9 +5,8 @@ import { toast } from "@/components/ui/use-toast";
 import { TournamentControls } from "./tournament/TournamentControls";
 import { PlayersList } from "./tournament/PlayersList";
 import { MatchesTable } from "./tournament/MatchesTable";
-import { TournamentGroup } from "./tournament/TournamentGroup";
-import { GroupDisplay } from "./tournament/GroupDisplay";
 import { Match } from "./tournament/Match";
+import { TournamentBracket } from "./tournament/TournamentBracket";
 
 const createInitialMatches = (players: Player[]): MatchType[] => {
   const premiumPlayers = players.filter(p => p.group === "Premium");
@@ -96,6 +95,39 @@ export const Tournament = () => {
   const [premiumPlayers, setPremiumPlayers] = useState<Player[]>([]);
   const [professionalPlayers, setProfessionalPlayers] = useState<Player[]>([]);
 
+  const updatePlayerStats = (
+    players: Player[],
+    setPlayers: React.Dispatch<React.SetStateAction<Player[]>>,
+    playerId: string,
+    won: boolean
+  ) => {
+    setPlayers(prev => {
+      const player = prev.find(p => p.id === playerId);
+      if (!player) return prev;
+
+      const totalMatches = tournament.matches.filter(m => 
+        (m.player1.id === playerId || m.player2.id === playerId) &&
+        m.completed
+      ).length;
+
+      const wonMatches = tournament.matches.filter(m => {
+        if (!m.completed) return false;
+        const player1Wins = m.scores.filter(s => s.player1Won).length;
+        if (m.player1.id === playerId) return player1Wins > 1;
+        if (m.player2.id === playerId) return player1Wins < 2;
+        return false;
+      }).length;
+
+      const winPercentage = (wonMatches / totalMatches) * 100;
+
+      return prev.map(p =>
+        p.id === playerId
+          ? { ...p, winPercentage }
+          : p
+      );
+    });
+  };
+
   const generatePlayers = () => {
     if (tournament.started) {
       toast({
@@ -179,12 +211,20 @@ export const Tournament = () => {
         const winner = player1Wins > 1 ? match.player1 : match.player2;
         const loser = player1Wins > 1 ? match.player2 : match.player1;
 
-        if (!premiumPlayers.find(p => p.id === winner.id)) {
-          setPremiumPlayers(prev => [...prev, {...winner, group: "Premium"}]);
+        if (!premiumPlayers.find(p => p.id === winner.id) && 
+            !professionalPlayers.find(p => p.id === winner.id)) {
+          setPremiumPlayers(prev => [...prev, {...winner, group: "Premium", winPercentage: 0}]);
+        } else {
+          updatePlayerStats(premiumPlayers, setPremiumPlayers, winner.id, true);
+          updatePlayerStats(premiumPlayers, setPremiumPlayers, loser.id, false);
         }
 
-        if (!professionalPlayers.find(p => p.id === loser.id)) {
-          setProfessionalPlayers(prev => [...prev, {...loser, group: "Professional"}]);
+        if (!premiumPlayers.find(p => p.id === loser.id) && 
+            !professionalPlayers.find(p => p.id === loser.id)) {
+          setProfessionalPlayers(prev => [...prev, {...loser, group: "Professional", winPercentage: 0}]);
+        } else {
+          updatePlayerStats(professionalPlayers, setProfessionalPlayers, winner.id, true);
+          updatePlayerStats(professionalPlayers, setProfessionalPlayers, loser.id, false);
         }
       }
 
@@ -197,20 +237,28 @@ export const Tournament = () => {
     });
   };
 
+  const premiumMatches = tournament.matches.filter(m => 
+    m.player1.group === "Premium" || m.player2.group === "Premium"
+  );
+
+  const professionalMatches = tournament.matches.filter(m => 
+    m.player1.group === "Professional" || m.player2.group === "Professional"
+  );
+
   return (
     <div className="container mx-auto p-4 max-w-4xl animate-fade-in pb-[400px]">
       <h1 className="text-3xl font-bold text-center mb-8">Dart Tournament</h1>
       
       {tournament.started && (
         <>
-          <GroupDisplay 
+          <TournamentBracket 
             title="Premium Gruppe" 
-            players={premiumPlayers}
+            matches={premiumMatches}
             className="left-4"
           />
-          <GroupDisplay 
+          <TournamentBracket 
             title="Professional Gruppe" 
-            players={professionalPlayers}
+            matches={professionalMatches}
             className="right-4"
           />
         </>
