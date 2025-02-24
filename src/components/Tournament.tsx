@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Player, Match as MatchType, Tournament as TournamentType } from "../types/tournament";
 import { generateRandomPlayers } from "@/utils/playerGenerator";
@@ -9,73 +10,21 @@ import { Match } from "./tournament/Match";
 import { TournamentBracket } from "./tournament/TournamentBracket";
 
 const createInitialMatches = (players: Player[]): MatchType[] => {
-  const premiumPlayers = players.filter(p => p.group === "Premium");
-  const professionalPlayers = players.filter(p => p.group === "Professional");
-  
-  const shuffledPremium = [...premiumPlayers].sort(() => Math.random() - 0.5);
-  const shuffledProfessional = [...professionalPlayers].sort(() => Math.random() - 0.5);
-  
+  const shuffledPlayers = [...players].sort(() => Math.random() - 0.5);
   const matches: MatchType[] = [];
   
-  // Premium-Matches erstellen
-  for (let i = 0; i < shuffledPremium.length; i += 2) {
-    if (i + 1 < shuffledPremium.length) {
+  // Erste Runde Matches erstellen
+  for (let i = 0; i < shuffledPlayers.length; i += 2) {
+    if (i + 1 < shuffledPlayers.length) {
       matches.push({
-        id: `match-premium-${i/2}`,
-        player1: shuffledPremium[i],
-        player2: shuffledPremium[i + 1],
+        id: `match-${i/2}`,
+        player1: shuffledPlayers[i],
+        player2: shuffledPlayers[i + 1],
         scores: Array(3).fill({ player1Won: null, player2Won: null }),
         completed: false,
         round: 1
       });
     }
-  }
-  
-  // Professional-Matches erstellen
-  for (let i = 0; i < shuffledProfessional.length; i += 2) {
-    if (i + 1 < shuffledProfessional.length) {
-      matches.push({
-        id: `match-prof-${i/2}`,
-        player1: shuffledProfessional[i],
-        player2: shuffledProfessional[i + 1],
-        scores: Array(3).fill({ player1Won: null, player2Won: null }),
-        completed: false,
-        round: 1
-      });
-    }
-  }
-
-  const totalRounds = Math.ceil(Math.log2(Math.max(premiumPlayers.length, professionalPlayers.length)));
-  let premiumMatchesInRound = Math.floor(premiumPlayers.length / 4);
-  let professionalMatchesInRound = Math.floor(professionalPlayers.length / 4);
-
-  for (let round = 2; round <= totalRounds; round++) {
-    // Premium-Gruppe zukünftige Matches
-    for (let i = 0; i < premiumMatchesInRound; i++) {
-      matches.push({
-        id: `match-premium-r${round}-${i}`,
-        player1: { id: "tbd", firstName: "TBD", lastName: "", winPercentage: 0 },
-        player2: { id: "tbd", firstName: "TBD", lastName: "", winPercentage: 0 },
-        scores: Array(3).fill({ player1Won: null, player2Won: null }),
-        completed: false,
-        round: round
-      });
-    }
-    
-    // Professional-Gruppe zukünftige Matches
-    for (let i = 0; i < professionalMatchesInRound; i++) {
-      matches.push({
-        id: `match-prof-r${round}-${i}`,
-        player1: { id: "tbd", firstName: "TBD", lastName: "", winPercentage: 0 },
-        player2: { id: "tbd", firstName: "TBD", lastName: "", winPercentage: 0 },
-        scores: Array(3).fill({ player1Won: null, player2Won: null }),
-        completed: false,
-        round: round
-      });
-    }
-    
-    premiumMatchesInRound = Math.floor(premiumMatchesInRound / 2);
-    professionalMatchesInRound = Math.floor(professionalMatchesInRound / 2);
   }
   
   return matches;
@@ -95,36 +44,127 @@ export const Tournament = () => {
   const [premiumPlayers, setPremiumPlayers] = useState<Player[]>([]);
   const [professionalPlayers, setProfessionalPlayers] = useState<Player[]>([]);
 
-  const updatePlayerStats = (
-    players: Player[],
-    setPlayers: React.Dispatch<React.SetStateAction<Player[]>>,
-    playerId: string,
-    won: boolean
-  ) => {
-    setPlayers(prev => {
-      const player = prev.find(p => p.id === playerId);
-      if (!player) return prev;
+  const calculateWinPercentage = (playerId: string): number => {
+    const playerMatches = tournament.matches.filter(m => 
+      (m.player1.id === playerId || m.player2.id === playerId) && m.completed
+    );
+    
+    if (playerMatches.length === 0) return 0;
+    
+    const wonMatches = playerMatches.filter(m => {
+      const player1Wins = m.scores.filter(s => s.player1Won).length;
+      if (m.player1.id === playerId) return player1Wins > 1;
+      if (m.player2.id === playerId) return player1Wins < 2;
+      return false;
+    }).length;
+    
+    return (wonMatches / playerMatches.length) * 100;
+  };
 
-      const totalMatches = tournament.matches.filter(m => 
-        (m.player1.id === playerId || m.player2.id === playerId) &&
-        m.completed
-      ).length;
+  const updatePlayerStats = (playerId: string, isWinner: boolean) => {
+    const winPercentage = calculateWinPercentage(playerId);
+    
+    setPremiumPlayers(prev => 
+      prev.map(p => p.id === playerId ? { ...p, winPercentage } : p)
+    );
+    
+    setProfessionalPlayers(prev => 
+      prev.map(p => p.id === playerId ? { ...p, winPercentage } : p)
+    );
+  };
 
-      const wonMatches = tournament.matches.filter(m => {
-        if (!m.completed) return false;
-        const player1Wins = m.scores.filter(s => s.player1Won).length;
-        if (m.player1.id === playerId) return player1Wins > 1;
-        if (m.player2.id === playerId) return player1Wins < 2;
-        return false;
-      }).length;
+  const createNextRoundMatches = (winners: Player[], round: number, group: "Premium" | "Professional") => {
+    const matches: MatchType[] = [];
+    for (let i = 0; i < winners.length; i += 2) {
+      if (i + 1 < winners.length) {
+        matches.push({
+          id: `match-${group}-${round}-${i/2}`,
+          player1: winners[i],
+          player2: winners[i + 1],
+          scores: Array(3).fill({ player1Won: null, player2Won: null }),
+          completed: false,
+          round
+        });
+      }
+    }
+    return matches;
+  };
 
-      const winPercentage = (wonMatches / totalMatches) * 100;
+  const handleScoreUpdate = (matchId: string, gameIndex: number, player1Won: boolean) => {
+    setTournament(prev => {
+      const matchIndex = prev.matches.findIndex(m => m.id === matchId);
+      if (matchIndex === -1) return prev;
 
-      return prev.map(p =>
-        p.id === playerId
-          ? { ...p, winPercentage }
-          : p
-      );
+      const newMatches = [...prev.matches];
+      const match = { ...newMatches[matchIndex] };
+      
+      match.scores[gameIndex] = {
+        player1Won: player1Won,
+        player2Won: !player1Won
+      };
+
+      const player1Wins = match.scores.filter(s => s.player1Won).length;
+      const player2Wins = match.scores.filter(s => s.player2Won).length;
+
+      if (player1Wins === 2 || player2Wins === 2) {
+        match.completed = true;
+        const winner = player1Wins > player2Wins ? match.player1 : match.player2;
+        const loser = player1Wins > player2Wins ? match.player2 : match.player1;
+
+        // Erste Runde: Gruppeneinteilung
+        if (match.round === 1) {
+          if (!premiumPlayers.find(p => p.id === winner.id) && 
+              !professionalPlayers.find(p => p.id === winner.id)) {
+            setPremiumPlayers(prev => [...prev, {...winner, group: "Premium"}]);
+          }
+          if (!premiumPlayers.find(p => p.id === loser.id) && 
+              !professionalPlayers.find(p => p.id === loser.id)) {
+            setProfessionalPlayers(prev => [...prev, {...loser, group: "Professional"}]);
+          }
+        }
+
+        updatePlayerStats(winner.id, true);
+        updatePlayerStats(loser.id, false);
+
+        // Prüfen, ob alle Matches der aktuellen Runde beendet sind
+        const currentRoundMatches = newMatches.filter(m => m.round === match.round);
+        const allMatchesCompleted = currentRoundMatches.every(m => m.completed);
+
+        if (allMatchesCompleted) {
+          // Premium Gruppe
+          const premiumWinners = currentRoundMatches
+            .filter(m => m.player1.group === "Premium" || m.player2.group === "Premium")
+            .map(m => {
+              const wins1 = m.scores.filter(s => s.player1Won).length;
+              return wins1 > 1 ? m.player1 : m.player2;
+            });
+
+          // Professional Gruppe
+          const professionalWinners = currentRoundMatches
+            .filter(m => m.player1.group === "Professional" || m.player2.group === "Professional")
+            .map(m => {
+              const wins1 = m.scores.filter(s => s.player1Won).length;
+              return wins1 > 1 ? m.player1 : m.player2;
+            });
+
+          if (premiumWinners.length > 1) {
+            const nextRoundPremium = createNextRoundMatches(premiumWinners, match.round + 1, "Premium");
+            newMatches.push(...nextRoundPremium);
+          }
+
+          if (professionalWinners.length > 1) {
+            const nextRoundProfessional = createNextRoundMatches(professionalWinners, match.round + 1, "Professional");
+            newMatches.push(...nextRoundProfessional);
+          }
+        }
+      }
+
+      newMatches[matchIndex] = match;
+      
+      return {
+        ...prev,
+        matches: newMatches
+      };
     });
   };
 
@@ -161,22 +201,7 @@ export const Tournament = () => {
       return;
     }
 
-    const shuffledPlayers = [...tournament.players].sort(() => Math.random() - 0.5);
-    const initialMatches: MatchType[] = [];
-    
-    for (let i = 0; i < shuffledPlayers.length; i += 2) {
-      if (i + 1 < shuffledPlayers.length) {
-        initialMatches.push({
-          id: `match-${i/2}`,
-          player1: shuffledPlayers[i],
-          player2: shuffledPlayers[i + 1],
-          scores: Array(3).fill({ player1Won: null, player2Won: null }),
-          completed: false,
-          round: 1
-        });
-      }
-    }
-
+    const initialMatches = createInitialMatches(tournament.players);
     setTournament(prev => ({
       ...prev,
       started: true,
@@ -190,83 +215,21 @@ export const Tournament = () => {
     });
   };
 
-  const handleScoreUpdate = (matchId: string, gameIndex: number, player1Won: boolean) => {
-    setTournament(prev => {
-      const matchIndex = prev.matches.findIndex(m => m.id === matchId);
-      if (matchIndex === -1) return prev;
-
-      const newMatches = [...prev.matches];
-      const match = { ...newMatches[matchIndex] };
-      
-      match.scores[gameIndex] = {
-        player1Won: player1Won,
-        player2Won: !player1Won
-      };
-
-      const gamesPlayed = match.scores.filter(s => s.player1Won !== null).length;
-      if (gamesPlayed === 3) {
-        match.completed = true;
-
-        const player1Wins = match.scores.filter(s => s.player1Won).length;
-        const winner = player1Wins > 1 ? match.player1 : match.player2;
-        const loser = player1Wins > 1 ? match.player2 : match.player1;
-
-        if (!premiumPlayers.find(p => p.id === winner.id) && 
-            !professionalPlayers.find(p => p.id === winner.id)) {
-          setPremiumPlayers(prev => [...prev, {...winner, group: "Premium", winPercentage: 0}]);
-        } else {
-          updatePlayerStats(premiumPlayers, setPremiumPlayers, winner.id, true);
-          updatePlayerStats(premiumPlayers, setPremiumPlayers, loser.id, false);
-        }
-
-        if (!premiumPlayers.find(p => p.id === loser.id) && 
-            !professionalPlayers.find(p => p.id === loser.id)) {
-          setProfessionalPlayers(prev => [...prev, {...loser, group: "Professional", winPercentage: 0}]);
-        } else {
-          updatePlayerStats(professionalPlayers, setProfessionalPlayers, winner.id, true);
-          updatePlayerStats(professionalPlayers, setProfessionalPlayers, loser.id, false);
-        }
-      }
-
-      newMatches[matchIndex] = match;
-      
-      return {
-        ...prev,
-        matches: newMatches
-      };
-    });
-  };
-
   const premiumMatches = tournament.matches.filter(m => 
-    m.player1.group === "Premium" || m.player2.group === "Premium"
+    (m.player1.group === "Premium" || m.player2.group === "Premium") &&
+    m.round > 1
   );
 
   const professionalMatches = tournament.matches.filter(m => 
-    m.player1.group === "Professional" || m.player2.group === "Professional"
+    (m.player1.group === "Professional" || m.player2.group === "Professional") &&
+    m.round > 1
   );
+
+  const firstRoundMatches = tournament.matches.filter(m => m.round === 1);
 
   return (
     <div className="container mx-auto p-4 max-w-4xl animate-fade-in pb-[400px]">
       <h1 className="text-3xl font-bold text-center mb-8">Dart Tournament</h1>
-      
-      {tournament.started ? (
-        <>
-          <TournamentBracket 
-            title="Premium Gruppe" 
-            matches={premiumMatches}
-            className="left-4"
-          />
-          <TournamentBracket 
-            title="Professional Gruppe" 
-            matches={professionalMatches}
-            className="right-4"
-          />
-        </>
-      ) : (
-        <>
-          <PlayersList players={tournament.players} />
-        </>
-      )}
       
       <TournamentControls
         onGeneratePlayers={generatePlayers}
@@ -276,15 +239,36 @@ export const Tournament = () => {
         matches={tournament.matches}
       />
 
-      <div className="mt-8">
-        {tournament.matches.map(match => (
-          <Match
-            key={match.id}
-            match={match}
-            onScoreUpdate={handleScoreUpdate}
-          />
-        ))}
-      </div>
+      {!tournament.started ? (
+        <PlayersList players={tournament.players} />
+      ) : (
+        <>
+          <div className="mt-8">
+            {firstRoundMatches.map(match => (
+              <Match
+                key={match.id}
+                match={match}
+                onScoreUpdate={handleScoreUpdate}
+              />
+            ))}
+          </div>
+
+          {(premiumMatches.length > 0 || professionalMatches.length > 0) && (
+            <>
+              <TournamentBracket 
+                title="Premium Gruppe" 
+                matches={premiumMatches}
+                className="left-4"
+              />
+              <TournamentBracket 
+                title="Professional Gruppe" 
+                matches={professionalMatches}
+                className="right-4"
+              />
+            </>
+          )}
+        </>
+      )}
 
       <MatchesTable matches={tournament.matches} />
     </div>
