@@ -1,7 +1,7 @@
 
 import { toast } from "@/components/ui/use-toast";
 import { Match as MatchType, Player, Tournament as TournamentType } from "@/types/tournament";
-import { createInitialMatches } from "@/utils/tournamentUtils";
+import { createInitialMatches, createNextRoundMatches } from "@/utils/tournamentUtils";
 import { isRoundComplete } from "@/utils/matchUtils";
 import { createFinalMatch } from "@/utils/bracketUtils";
 
