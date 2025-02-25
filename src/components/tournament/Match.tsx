@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Check } from "lucide-react";
 
 interface MatchProps {
   match: MatchType;
@@ -14,11 +15,16 @@ interface MatchProps {
 export const Match = ({ match, onScoreUpdate }: MatchProps) => {
   const [isVisible, setIsVisible] = useState(true);
   const [countdown, setCountdown] = useState<number | null>(null);
+  const [showConfirmation, setShowConfirmation] = useState(false);
   const [selectedGame, setSelectedGame] = useState<{index: number, player1Won: boolean} | null>(null);
+
+  const isMatchCompleteWithoutConfirmation = (match: MatchType) => {
+    return match.scores.every(score => score.player1Won !== null && score.player2Won !== null) && !match.completed;
+  };
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
-    if (isMatchComplete(match) && !match.completed && !match.countdownStarted) {
+    if (match.countdownStarted) {
       setCountdown(10);
       timer = setInterval(() => {
         setCountdown(prev => {
@@ -35,13 +41,15 @@ export const Match = ({ match, onScoreUpdate }: MatchProps) => {
     return () => {
       if (timer) clearInterval(timer);
     };
-  }, [match.scores, match.completed, match.countdownStarted]);
+  }, [match.countdownStarted]);
+
+  useEffect(() => {
+    if (isMatchCompleteWithoutConfirmation(match)) {
+      setShowConfirmation(true);
+    }
+  }, [match.scores]);
 
   if (!isVisible) return null;
-
-  const isMatchComplete = (match: MatchType) => {
-    return match.scores.every(score => score.player1Won !== null && score.player2Won !== null);
-  };
 
   const getButtonStyle = (won: boolean | null) => {
     if (won === null) return "bg-gray-300 hover:bg-gray-400";
@@ -54,7 +62,7 @@ export const Match = ({ match, onScoreUpdate }: MatchProps) => {
   };
 
   const getMatchStatus = () => {
-    if (isMatchComplete(match) && !match.completed) {
+    if (match.countdownStarted) {
       return countdown !== null ? `Änderungen noch ${countdown}s möglich` : "";
     }
     if (match.completed) {
@@ -64,14 +72,13 @@ export const Match = ({ match, onScoreUpdate }: MatchProps) => {
   };
 
   const handleScoreUpdate = (gameIndex: number, player1Won: boolean) => {
-    setSelectedGame({ index: gameIndex, player1Won });
+    onScoreUpdate(match.id, gameIndex, player1Won);
   };
 
-  const confirmScoreUpdate = () => {
-    if (selectedGame) {
-      onScoreUpdate(match.id, selectedGame.index, selectedGame.player1Won);
-      setSelectedGame(null);
-    }
+  const confirmMatchResult = () => {
+    setShowConfirmation(false);
+    // Trigger countdown start
+    onScoreUpdate(match.id, 0, match.scores[0].player1Won!);
   };
 
   const getPlayerStats = (player: typeof match.player1) => {
@@ -99,46 +106,30 @@ export const Match = ({ match, onScoreUpdate }: MatchProps) => {
         
         <div className="flex justify-center gap-2 my-2">
           {match.scores.map((score, index) => (
-            <AlertDialog key={index}>
-              <AlertDialogTrigger asChild>
-                <div className="flex flex-col gap-1">
-                  <button
-                    onClick={() => !match.completed && handleScoreUpdate(index, true)}
-                    disabled={match.completed}
-                    className={cn(
-                      "w-8 h-8 rounded-full transition-all duration-200 flex items-center justify-center",
-                      getButtonStyle(score.player1Won),
-                      "animate-scale-in"
-                    )}
-                  >
-                    {getButtonContent(score.player1Won)}
-                  </button>
-                  <button
-                    onClick={() => !match.completed && handleScoreUpdate(index, false)}
-                    disabled={match.completed}
-                    className={cn(
-                      "w-8 h-8 rounded-full transition-all duration-200 flex items-center justify-center",
-                      getButtonStyle(score.player2Won),
-                      "animate-scale-in"
-                    )}
-                  >
-                    {getButtonContent(score.player2Won)}
-                  </button>
-                </div>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Ergebnis bestätigen</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Sind Sie sicher, dass Sie dieses Ergebnis speichern möchten?
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel onClick={() => setSelectedGame(null)}>Abbrechen</AlertDialogCancel>
-                  <AlertDialogAction onClick={confirmScoreUpdate}>Bestätigen</AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+            <div key={index} className="flex flex-col gap-1">
+              <button
+                onClick={() => !match.completed && handleScoreUpdate(index, true)}
+                disabled={match.completed || match.countdownStarted}
+                className={cn(
+                  "w-8 h-8 rounded-full transition-all duration-200 flex items-center justify-center",
+                  getButtonStyle(score.player1Won),
+                  "animate-scale-in"
+                )}
+              >
+                {getButtonContent(score.player1Won)}
+              </button>
+              <button
+                onClick={() => !match.completed && handleScoreUpdate(index, false)}
+                disabled={match.completed || match.countdownStarted}
+                className={cn(
+                  "w-8 h-8 rounded-full transition-all duration-200 flex items-center justify-center",
+                  getButtonStyle(score.player2Won),
+                  "animate-scale-in"
+                )}
+              >
+                {getButtonContent(score.player2Won)}
+              </button>
+            </div>
           ))}
         </div>
 
@@ -154,6 +145,32 @@ export const Match = ({ match, onScoreUpdate }: MatchProps) => {
           </Tooltip>
           <div className="text-sm text-gray-500">{match.player2.team}</div>
         </div>
+
+        {showConfirmation && !match.countdownStarted && (
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button 
+                className="w-full mt-4 bg-green-500 hover:bg-green-600 text-white"
+                size="lg"
+              >
+                <Check className="mr-2 h-4 w-4" />
+                Ergebnis bestätigen
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Ergebnis bestätigen</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Sind Sie sicher, dass Sie dieses Ergebnis speichern möchten?
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+                <AlertDialogAction onClick={confirmMatchResult}>Bestätigen</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        )}
 
         {getMatchStatus() && (
           <div className={cn(
