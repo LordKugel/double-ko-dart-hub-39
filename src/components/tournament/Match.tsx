@@ -14,7 +14,6 @@ interface MatchProps {
 
 export const Match = ({ match, onScoreUpdate }: MatchProps) => {
   const [isVisible, setIsVisible] = useState(true);
-  const [countdown, setCountdown] = useState<number | null>(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
 
   const isMatchComplete = (match: MatchType) => {
@@ -28,28 +27,6 @@ export const Match = ({ match, onScoreUpdate }: MatchProps) => {
     }
   }, [match.scores, match.completed, match.countdownStarted]);
 
-  useEffect(() => {
-    let timer: NodeJS.Timeout;
-    // Starte Countdown nur wenn das Match bestätigt wurde
-    if (match.countdownStarted) {
-      setCountdown(10);
-      timer = setInterval(() => {
-        setCountdown(prev => {
-          if (prev === null) return null;
-          if (prev <= 1) {
-            clearInterval(timer);
-            setCountdown(null);
-            return null;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    }
-    return () => {
-      if (timer) clearInterval(timer);
-    };
-  }, [match.countdownStarted]);
-
   if (!isVisible) return null;
 
   const getButtonStyle = (won: boolean | null) => {
@@ -60,16 +37,6 @@ export const Match = ({ match, onScoreUpdate }: MatchProps) => {
   const getButtonContent = (won: boolean | null) => {
     if (won === null) return "-";
     return won ? "✓" : "×";
-  };
-
-  const getMatchStatus = () => {
-    if (match.countdownStarted && countdown !== null) {
-      return `Änderungen noch ${countdown}s möglich`;
-    }
-    if (match.completed) {
-      return "Match abgeschlossen";
-    }
-    return "";
   };
 
   const handleScoreUpdate = (gameIndex: number, player1Won: boolean) => {
@@ -112,7 +79,7 @@ export const Match = ({ match, onScoreUpdate }: MatchProps) => {
             <div key={index} className="flex flex-col gap-1">
               <button
                 onClick={() => handleScoreUpdate(index, true)}
-                disabled={match.completed || (match.countdownStarted && countdown === null)}
+                disabled={match.completed}
                 className={cn(
                   "w-8 h-8 rounded-full transition-all duration-200 flex items-center justify-center",
                   getButtonStyle(score.player1Won),
@@ -123,7 +90,7 @@ export const Match = ({ match, onScoreUpdate }: MatchProps) => {
               </button>
               <button
                 onClick={() => handleScoreUpdate(index, false)}
-                disabled={match.completed || (match.countdownStarted && countdown === null)}
+                disabled={match.completed}
                 className={cn(
                   "w-8 h-8 rounded-full transition-all duration-200 flex items-center justify-center",
                   getButtonStyle(score.player2Won),
@@ -173,15 +140,6 @@ export const Match = ({ match, onScoreUpdate }: MatchProps) => {
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
-        )}
-
-        {getMatchStatus() && (
-          <div className={cn(
-            "mt-2 text-center text-xl font-extrabold italic p-2 rounded animate-pulse",
-            countdown !== null ? "bg-yellow-100 text-yellow-800" : "text-gray-500"
-          )}>
-            {getMatchStatus()}
-          </div>
         )}
       </TooltipProvider>
     </div>
