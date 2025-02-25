@@ -1,7 +1,6 @@
-
 import { useState } from "react";
 import { Player, Match as MatchType, Tournament as TournamentType } from "../types/tournament";
-import { createInitialMatches, calculateWinPercentage } from "../utils/tournamentUtils";
+import { createInitialMatches, calculateWinPercentage, createNextRoundMatches } from "../utils/tournamentUtils";
 import { generateRandomPlayers } from "@/utils/playerGenerator";
 import { toast } from "@/components/ui/use-toast";
 import { updateMatchScores, updatePlayersAfterMatch, isMatchComplete, isRoundComplete } from "@/utils/matchUtils";
@@ -30,7 +29,6 @@ export const useTournament = () => {
       const newMatches = [...prev.matches];
       const match = updateMatchScores({ ...newMatches[matchIndex] }, gameIndex, player1Won);
       
-      // Aktualisiere die Spieler nach jedem gespielten Spiel
       const updatedPlayers = updatePlayersAfterMatch(match, prev.players, newMatches);
       
       if (isMatchComplete(match)) {
@@ -47,7 +45,6 @@ export const useTournament = () => {
 
       newMatches[matchIndex] = match;
 
-      // Prüfe, ob die Runde komplett ist
       const roundComplete = isRoundComplete(newMatches, prev.currentRound);
       
       return {
@@ -57,7 +54,7 @@ export const useTournament = () => {
         winnersBracketMatches: newMatches.filter(m => m.bracket === "winners"),
         losersBracketMatches: newMatches.filter(m => m.bracket === "losers"),
         finalMatches: newMatches.filter(m => m.bracket === "final"),
-        roundStarted: !roundComplete // Setze roundStarted auf false, wenn die Runde komplett ist
+        roundStarted: !roundComplete
       };
     });
   };
@@ -83,6 +80,38 @@ export const useTournament = () => {
       title: "Spieler generiert",
       description: "8 zufällige Spieler wurden generiert"
     });
+  };
+
+  const createNextRound = (currentRound: number, players: Player[], allMatches: MatchType[]) => {
+    const winnersPlayers = players.filter(p => p.bracket === "winners" && !p.eliminated);
+    const losersPlayers = players.filter(p => p.bracket === "losers" && !p.eliminated);
+
+    console.log("Winners für nächste Runde:", winnersPlayers);
+    console.log("Losers für nächste Runde:", losersPlayers);
+
+    let newMatches: MatchType[] = [];
+
+    if (winnersPlayers.length >= 2) {
+      const winnerMatches = createNextRoundMatches(
+        winnersPlayers,
+        [],
+        currentRound,
+        "winners"
+      );
+      newMatches = [...newMatches, ...winnerMatches];
+    }
+
+    if (losersPlayers.length >= 2) {
+      const loserMatches = createNextRoundMatches(
+        losersPlayers,
+        [],
+        currentRound,
+        "losers"
+      );
+      newMatches = [...newMatches, ...loserMatches];
+    }
+
+    return newMatches;
   };
 
   const startTournament = () => {
@@ -122,7 +151,6 @@ export const useTournament = () => {
         description: "Die erste Runde wurde gestartet"
       });
     } else {
-      // Prüfen ob aktuelle Runde abgeschlossen ist
       if (!isRoundComplete(tournament.matches, tournament.currentRound)) {
         toast({
           title: "Runde nicht abgeschlossen",
@@ -132,11 +160,28 @@ export const useTournament = () => {
         return;
       }
 
-      // Starte nächste Runde
+      const nextRoundMatches = createNextRound(
+        tournament.currentRound + 1,
+        tournament.players,
+        tournament.matches
+      );
+
+      if (nextRoundMatches.length === 0) {
+        toast({
+          title: "Turnier beendet",
+          description: "Alle Runden wurden gespielt",
+          variant: "default"
+        });
+        return;
+      }
+
       setTournament(prev => ({
         ...prev,
         currentRound: prev.currentRound + 1,
-        roundStarted: true
+        roundStarted: true,
+        matches: [...prev.matches, ...nextRoundMatches],
+        winnersBracketMatches: nextRoundMatches.filter(m => m.bracket === "winners"),
+        losersBracketMatches: nextRoundMatches.filter(m => m.bracket === "losers")
       }));
 
       toast({
