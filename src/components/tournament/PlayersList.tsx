@@ -31,11 +31,9 @@ export const PlayersList = ({ players, title }: PlayersListProps) => {
                 )}>
                   {player.winPercentage.toFixed(1)}%
                 </span>
-                {player.losses > 0 && (
-                  <span className="ml-2 text-gray-500">
-                    ({player.losses === 1 ? "1 Loss" : "2 Losses"})
-                  </span>
-                )}
+                <span className="ml-2 text-gray-500">
+                  ({player.winPercentage < 100 ? `${Math.round((100 - player.winPercentage) / 100 * 3)} Verloren` : "Perfekt!"})
+                </span>
               </div>
             </div>
           </div>
