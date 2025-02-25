@@ -6,7 +6,7 @@ import { Match } from "./tournament/Match";
 import { useTournament } from "@/hooks/useTournament";
 
 export const Tournament = () => {
-  const { tournament, handleScoreUpdate, generatePlayers, startTournament } = useTournament();
+  const { tournament, handleScoreUpdate, generatePlayers, startTournament, exportTournamentData } = useTournament();
 
   const currentMatches = tournament.matches.filter(m => 
     !m.completed && 
@@ -21,6 +21,7 @@ export const Tournament = () => {
       <TournamentControls
         onGeneratePlayers={generatePlayers}
         onStartTournament={startTournament}
+        onExportData={exportTournamentData}
         isStarted={tournament.started}
         hasPlayers={tournament.players.length > 0}
         matches={tournament.matches}

@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Upload, Download } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
@@ -7,6 +8,7 @@ import { Match } from "@/types/tournament";
 interface TournamentControlsProps {
   onGeneratePlayers: () => void;
   onStartTournament: () => void;
+  onExportData: () => void;
   isStarted: boolean;
   hasPlayers: boolean;
   matches: Match[];
@@ -17,6 +19,7 @@ interface TournamentControlsProps {
 export const TournamentControls = ({
   onGeneratePlayers,
   onStartTournament,
+  onExportData,
   isStarted,
   hasPlayers,
   matches,
@@ -52,33 +55,6 @@ export const TournamentControls = ({
     });
   };
 
-  const importFromExcel = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const data = new Uint8Array(e.target?.result as ArrayBuffer);
-        const workbook = XLSX.read(data, { type: 'array' });
-        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-        const jsonData = XLSX.utils.sheet_to_json(worksheet);
-
-        toast({
-          title: "Import erfolgreich",
-          description: "Die Turnierdaten wurden erfolgreich importiert"
-        });
-      } catch (error) {
-        toast({
-          title: "Import fehlgeschlagen",
-          description: "Fehler beim Importieren der Datei",
-          variant: "destructive"
-        });
-      }
-    };
-    reader.readAsArrayBuffer(file);
-  };
-
   return (
     <div className="flex justify-center gap-4 mb-8">
       <Button 
@@ -104,20 +80,13 @@ export const TournamentControls = ({
         Export Excel
       </Button>
       <Button
-        onClick={() => document.getElementById('excel-upload')?.click()}
+        onClick={onExportData}
         className="transition-all duration-200 hover:scale-105"
         variant="outline"
       >
-        <Upload className="mr-2 h-4 w-4" />
-        Import Excel
+        <Download className="mr-2 h-4 w-4" />
+        Export JSON
       </Button>
-      <input
-        id="excel-upload"
-        type="file"
-        accept=".xlsx,.xls"
-        className="hidden"
-        onChange={importFromExcel}
-      />
     </div>
   );
 };

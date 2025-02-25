@@ -1,24 +1,46 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Tournament as TournamentType } from "../types/tournament";
 import { useMatchHandling } from "./useMatchHandling";
 import { usePlayerManagement } from "./usePlayerManagement";
 import { useTournamentFlow } from "./useTournamentFlow";
+import { toast } from "@/components/ui/use-toast";
+
+const STORAGE_KEY = "dart-tournament-state";
 
 export const useTournament = () => {
-  const [tournament, setTournament] = useState<TournamentType>({
-    id: "1",
-    name: "Dart Tournament",
-    players: [],
-    matches: [],
-    started: false,
-    completed: false,
-    currentRound: 0,
-    roundStarted: false,
-    winnersBracketMatches: [],
-    losersBracketMatches: [],
-    finalMatches: []
+  const [tournament, setTournament] = useState<TournamentType>(() => {
+    const savedState = localStorage.getItem(STORAGE_KEY);
+    if (savedState) {
+      try {
+        const parsedState = JSON.parse(savedState);
+        toast({
+          title: "Turnier geladen",
+          description: "Der vorherige Turnierstand wurde wiederhergestellt"
+        });
+        return parsedState;
+      } catch (e) {
+        console.error("Error loading saved state:", e);
+      }
+    }
+    return {
+      id: "1",
+      name: "Dart Tournament",
+      players: [],
+      matches: [],
+      started: false,
+      completed: false,
+      currentRound: 0,
+      roundStarted: false,
+      winnersBracketMatches: [],
+      losersBracketMatches: [],
+      finalMatches: []
+    };
   });
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(tournament));
+  }, [tournament]);
 
   const { handleScoreUpdate } = useMatchHandling(
     tournament.matches,
@@ -36,10 +58,29 @@ export const useTournament = () => {
     setTournament
   );
 
+  const exportTournamentData = () => {
+    const dataStr = JSON.stringify(tournament, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `tournament-${new Date().toISOString()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    toast({
+      title: "Export erfolgreich",
+      description: "Die Turnierdaten wurden erfolgreich exportiert"
+    });
+  };
+
   return {
     tournament,
     handleScoreUpdate,
     generatePlayers,
-    startTournament
+    startTournament,
+    exportTournamentData
   };
 };
