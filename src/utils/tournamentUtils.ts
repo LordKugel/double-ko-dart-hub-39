@@ -47,23 +47,24 @@ export const createNextRoundMatches = (
 };
 
 export const calculateWinPercentage = (matches: Match[], playerId: string): number => {
-  const playerMatches = matches.filter(
-    match => (match.player1.id === playerId || match.player2.id === playerId) && match.completed
-  );
-  
-  if (playerMatches.length === 0) return 0;
+  let totalWins = 0;
+  let totalGames = 0;
 
-  const wins = playerMatches.reduce((acc, match) => {
+  matches.forEach(match => {
     const isPlayer1 = match.player1.id === playerId;
-    const playerWins = match.scores.filter(score => 
-      isPlayer1 ? score.player1Won : score.player2Won
-    ).length;
-    return acc + playerWins;
-  }, 0);
+    const isPlayer2 = match.player2.id === playerId;
 
-  const totalGames = playerMatches.reduce((acc, match) => 
-    acc + match.scores.filter(score => score.player1Won !== null).length, 0
-  );
+    if (!isPlayer1 && !isPlayer2) return;
 
-  return totalGames > 0 ? (wins / totalGames) * 100 : 0;
+    match.scores.forEach(score => {
+      if (score.player1Won === null) return;
+
+      if (isPlayer1 && score.player1Won) totalWins++;
+      if (isPlayer2 && score.player2Won) totalWins++;
+      totalGames++;
+    });
+  });
+
+  if (totalGames === 0) return 0;
+  return (totalWins / totalGames) * 100;
 };
