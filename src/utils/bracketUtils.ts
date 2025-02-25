@@ -13,7 +13,6 @@ export const processWinnersBracket = (players: Player[], round: number): Match[]
         player2: activePlayers[i + 1],
         scores: Array(3).fill({ player1Won: null, player2Won: null }),
         completed: false,
-        countdownStarted: false,
         round,
         bracket: "winners",
         matchNumber: i/2 + 1
@@ -36,7 +35,6 @@ export const processLosersBracket = (players: Player[], round: number): Match[] 
         player2: activePlayers[i + 1],
         scores: Array(3).fill({ player1Won: null, player2Won: null }),
         completed: false,
-        countdownStarted: false,
         round,
         bracket: "losers",
         matchNumber: i/2 + 1
@@ -54,7 +52,6 @@ export const createFinalMatch = (winner1: Player, winner2: Player, round: number
     player2: { ...winner2, bracket: "losers" },
     scores: Array(3).fill({ player1Won: null, player2Won: null }),
     completed: false,
-    countdownStarted: false,
     round,
     bracket: "final",
     matchNumber: 1

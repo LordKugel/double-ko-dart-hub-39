@@ -1,41 +1,30 @@
 
-import { Match as MatchType } from "@/types/tournament";
 import { Match } from "./Match";
+import { Match as MatchType } from "@/types/tournament";
 
 interface TournamentGroupProps {
-  title: string;
-  titleColor: string;
   matches: MatchType[];
+  title: string;
   onScoreUpdate: (matchId: string, gameIndex: number, player1Won: boolean) => void;
+  onMatchComplete: (matchId: string) => void;
 }
 
-export const TournamentGroup = ({
-  title,
-  titleColor,
-  matches,
-  onScoreUpdate
-}: TournamentGroupProps) => {
-  const rounds = Array.from(new Set(matches.map(m => m.round)));
+export const TournamentGroup = ({ matches, title, onScoreUpdate, onMatchComplete }: TournamentGroupProps) => {
+  if (matches.length === 0) return null;
 
   return (
-    <div className="mb-12">
-      <h2 className={`text-2xl font-bold mb-6 ${titleColor}`}>{title}</h2>
-      {rounds.map(round => (
-        <div key={round} className="mb-8">
-          <h3 className="text-xl font-semibold mb-4">Runde {round}</h3>
-          <div className="grid gap-6">
-            {matches
-              .filter(match => match.round === round)
-              .map(match => (
-                <Match
-                  key={match.id}
-                  match={match}
-                  onScoreUpdate={onScoreUpdate}
-                />
-              ))}
-          </div>
-        </div>
-      ))}
+    <div className="mb-8">
+      <h3 className="text-xl font-bold mb-4">{title}</h3>
+      <div className="space-y-4">
+        {matches.map((match) => (
+          <Match
+            key={match.id}
+            match={match}
+            onScoreUpdate={onScoreUpdate}
+            onMatchComplete={onMatchComplete}
+          />
+        ))}
+      </div>
     </div>
   );
 };
