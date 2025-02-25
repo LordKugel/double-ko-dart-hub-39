@@ -8,35 +8,22 @@ import { toast } from "@/components/ui/use-toast";
 
 const STORAGE_KEY = "dart-tournament-state";
 
+const initialTournamentState: TournamentType = {
+  id: "1",
+  name: "Dart Tournament",
+  players: [],
+  matches: [],
+  started: false,
+  completed: false,
+  currentRound: 0,
+  roundStarted: false,
+  winnersBracketMatches: [],
+  losersBracketMatches: [],
+  finalMatches: []
+};
+
 export const useTournament = () => {
-  const [tournament, setTournament] = useState<TournamentType>(() => {
-    const savedState = localStorage.getItem(STORAGE_KEY);
-    if (savedState) {
-      try {
-        const parsedState = JSON.parse(savedState);
-        toast({
-          title: "Turnier geladen",
-          description: "Der vorherige Turnierstand wurde wiederhergestellt"
-        });
-        return parsedState;
-      } catch (e) {
-        console.error("Error loading saved state:", e);
-      }
-    }
-    return {
-      id: "1",
-      name: "Dart Tournament",
-      players: [],
-      matches: [],
-      started: false,
-      completed: false,
-      currentRound: 0,
-      roundStarted: false,
-      winnersBracketMatches: [],
-      losersBracketMatches: [],
-      finalMatches: []
-    };
-  });
+  const [tournament, setTournament] = useState<TournamentType>(initialTournamentState);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(tournament));

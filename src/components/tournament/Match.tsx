@@ -16,14 +16,21 @@ export const Match = ({ match, onScoreUpdate }: MatchProps) => {
   const [isVisible, setIsVisible] = useState(true);
   const [countdown, setCountdown] = useState<number | null>(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [selectedGame, setSelectedGame] = useState<{index: number, player1Won: boolean} | null>(null);
 
-  const isMatchCompleteWithoutConfirmation = (match: MatchType) => {
-    return match.scores.every(score => score.player1Won !== null && score.player2Won !== null) && !match.completed;
+  const isMatchComplete = (match: MatchType) => {
+    return match.scores.every(score => score.player1Won !== null && score.player2Won !== null);
   };
 
   useEffect(() => {
+    // Zeige Bestätigungsbutton wenn alle 3 Spiele gespielt sind
+    if (isMatchComplete(match) && !match.completed && !match.countdownStarted) {
+      setShowConfirmation(true);
+    }
+  }, [match.scores, match.completed, match.countdownStarted]);
+
+  useEffect(() => {
     let timer: NodeJS.Timeout;
+    // Starte Countdown nur wenn das Match bestätigt wurde
     if (match.countdownStarted) {
       setCountdown(10);
       timer = setInterval(() => {
@@ -43,12 +50,6 @@ export const Match = ({ match, onScoreUpdate }: MatchProps) => {
     };
   }, [match.countdownStarted]);
 
-  useEffect(() => {
-    if (isMatchCompleteWithoutConfirmation(match)) {
-      setShowConfirmation(true);
-    }
-  }, [match.scores]);
-
   if (!isVisible) return null;
 
   const getButtonStyle = (won: boolean | null) => {
@@ -62,8 +63,8 @@ export const Match = ({ match, onScoreUpdate }: MatchProps) => {
   };
 
   const getMatchStatus = () => {
-    if (match.countdownStarted) {
-      return countdown !== null ? `Änderungen noch ${countdown}s möglich` : "";
+    if (match.countdownStarted && countdown !== null) {
+      return `Änderungen noch ${countdown}s möglich`;
     }
     if (match.completed) {
       return "Match abgeschlossen";
@@ -72,7 +73,9 @@ export const Match = ({ match, onScoreUpdate }: MatchProps) => {
   };
 
   const handleScoreUpdate = (gameIndex: number, player1Won: boolean) => {
-    onScoreUpdate(match.id, gameIndex, player1Won);
+    if (!match.completed) {
+      onScoreUpdate(match.id, gameIndex, player1Won);
+    }
   };
 
   const confirmMatchResult = () => {
@@ -108,8 +111,8 @@ export const Match = ({ match, onScoreUpdate }: MatchProps) => {
           {match.scores.map((score, index) => (
             <div key={index} className="flex flex-col gap-1">
               <button
-                onClick={() => !match.completed && handleScoreUpdate(index, true)}
-                disabled={match.completed || match.countdownStarted}
+                onClick={() => handleScoreUpdate(index, true)}
+                disabled={match.completed || (match.countdownStarted && countdown === null)}
                 className={cn(
                   "w-8 h-8 rounded-full transition-all duration-200 flex items-center justify-center",
                   getButtonStyle(score.player1Won),
@@ -119,8 +122,8 @@ export const Match = ({ match, onScoreUpdate }: MatchProps) => {
                 {getButtonContent(score.player1Won)}
               </button>
               <button
-                onClick={() => !match.completed && handleScoreUpdate(index, false)}
-                disabled={match.completed || match.countdownStarted}
+                onClick={() => handleScoreUpdate(index, false)}
+                disabled={match.completed || (match.countdownStarted && countdown === null)}
                 className={cn(
                   "w-8 h-8 rounded-full transition-all duration-200 flex items-center justify-center",
                   getButtonStyle(score.player2Won),
