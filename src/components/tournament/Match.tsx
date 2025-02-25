@@ -14,13 +14,14 @@ export const Match = ({ match, onScoreUpdate }: MatchProps) => {
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
-    if (isMatchComplete(match) && !match.completed) {
+    if (isMatchComplete(match) && !match.completed && !match.countdownStarted) {
       setCountdown(10);
       timer = setInterval(() => {
         setCountdown(prev => {
           if (prev === null) return null;
           if (prev <= 1) {
             clearInterval(timer);
+            setCountdown(null);
             return null;
           }
           return prev - 1;
@@ -30,7 +31,7 @@ export const Match = ({ match, onScoreUpdate }: MatchProps) => {
     return () => {
       if (timer) clearInterval(timer);
     };
-  }, [match.scores, match.completed]);
+  }, [match.scores, match.completed, match.countdownStarted]);
 
   if (!isVisible) return null;
 
@@ -50,7 +51,7 @@ export const Match = ({ match, onScoreUpdate }: MatchProps) => {
 
   const getMatchStatus = () => {
     if (isMatchComplete(match) && !match.completed) {
-      return countdown ? `Änderungen noch ${countdown}s möglich` : "";
+      return countdown !== null ? `Änderungen noch ${countdown}s möglich` : "";
     }
     if (match.completed) {
       return "Match abgeschlossen";
@@ -99,8 +100,8 @@ export const Match = ({ match, onScoreUpdate }: MatchProps) => {
 
       {getMatchStatus() && (
         <div className={cn(
-          "mt-2 text-center text-xl font-bold italic p-2 rounded",
-          countdown ? "bg-yellow-100 text-yellow-800" : "text-gray-500"
+          "mt-2 text-center text-xl font-extrabold italic p-2 rounded animate-pulse",
+          countdown !== null ? "bg-yellow-100 text-yellow-800" : "text-gray-500"
         )}>
           {getMatchStatus()}
         </div>
