@@ -29,7 +29,7 @@ export const useTournament = () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(tournament));
   }, [tournament]);
 
-  const { handleScoreUpdate, handleMatchComplete } = useMatchHandling(
+  const { handleScoreUpdate } = useMatchHandling(
     tournament.matches,
     tournament.players,
     setTournament
@@ -66,7 +66,6 @@ export const useTournament = () => {
   return {
     tournament,
     handleScoreUpdate,
-    handleMatchComplete,
     generatePlayers,
     startTournament,
     exportTournamentData
