@@ -25,6 +25,7 @@ export function generateRandomPlayers(count: number): Player[] {
     winPercentage: 0,
     losses: 0,
     eliminated: false,
-    bracket: null
+    bracket: null,
+    matches: [] // Initialisiere das matches Array als leeres Array
   }));
 }
