@@ -37,18 +37,30 @@ export const updatePlayersAfterMatch = (
         const newLosses = p.losses + 1;
         const isEliminated = p.bracket === "losers" || newLosses >= 2;
         
+        // Sammle alle Matches des Spielers
+        const playerMatches = updatedMatches.filter(m => 
+          m.player1.id === p.id || m.player2.id === p.id
+        );
+        
         return {
           ...p,
           losses: newLosses,
           eliminated: isEliminated,
           bracket: isEliminated ? null : "losers",
-          winPercentage: calculateWinPercentage(updatedMatches, p.id)
+          winPercentage: calculateWinPercentage(updatedMatches, p.id),
+          matches: playerMatches // Speichere die Matches des Spielers
         };
       }
       if (p.id === winner.id) {
+        // Sammle alle Matches des Spielers
+        const playerMatches = updatedMatches.filter(m => 
+          m.player1.id === p.id || m.player2.id === p.id
+        );
+        
         return {
           ...p,
-          winPercentage: calculateWinPercentage(updatedMatches, p.id)
+          winPercentage: calculateWinPercentage(updatedMatches, p.id),
+          matches: playerMatches // Speichere die Matches des Spielers
         };
       }
       return p;

@@ -8,6 +8,7 @@ export interface Player {
   losses: number;
   eliminated: boolean;
   bracket: "winners" | "losers" | null;
+  matches: Match[]; // Neue Property für die Matches des Spielers
 }
 
 export interface Match {
