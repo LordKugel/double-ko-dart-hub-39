@@ -50,7 +50,7 @@ export const Match = ({ match, onScoreUpdate }: MatchProps) => {
 
   const getMatchStatus = () => {
     if (isMatchComplete(match) && !match.completed) {
-      return `Änderungen noch ${countdown}s möglich`;
+      return countdown !== null ? `Änderungen noch ${countdown}s möglich` : "";
     }
     if (match.completed) {
       return "Match abgeschlossen";
@@ -99,7 +99,7 @@ export const Match = ({ match, onScoreUpdate }: MatchProps) => {
 
       {getMatchStatus() && (
         <div className={cn(
-          "mt-2 text-center text-lg font-bold p-2 rounded",
+          "mt-2 text-center text-xl font-bold italic p-2 rounded",
           countdown ? "bg-yellow-100 text-yellow-800" : "text-gray-500"
         )}>
           {getMatchStatus()}
