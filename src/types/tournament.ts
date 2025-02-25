@@ -19,7 +19,6 @@ export interface Match {
     player2Won: boolean | null;
   }>;
   completed: boolean;
-  countdownStarted: boolean;
   round: number;
   bracket: "winners" | "losers" | "final";
   matchNumber: number;

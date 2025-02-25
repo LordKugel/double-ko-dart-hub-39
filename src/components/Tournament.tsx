@@ -6,7 +6,7 @@ import { Match } from "./tournament/Match";
 import { useTournament } from "@/hooks/useTournament";
 
 export const Tournament = () => {
-  const { tournament, handleScoreUpdate, generatePlayers, startTournament, exportTournamentData } = useTournament();
+  const { tournament, handleScoreUpdate, handleMatchComplete, generatePlayers, startTournament, exportTournamentData } = useTournament();
 
   const currentMatches = tournament.matches.filter(m => 
     !m.completed && 
@@ -68,6 +68,7 @@ export const Tournament = () => {
                     key={match.id}
                     match={match}
                     onScoreUpdate={handleScoreUpdate}
+                    onMatchComplete={handleMatchComplete}
                   />
               ))}
             </div>
@@ -79,6 +80,7 @@ export const Tournament = () => {
                   key={match.id}
                   match={match}
                   onScoreUpdate={handleScoreUpdate}
+                  onMatchComplete={handleMatchComplete}
                 />
               ))}
             </div>
@@ -96,6 +98,7 @@ export const Tournament = () => {
                     key={match.id}
                     match={match}
                     onScoreUpdate={handleScoreUpdate}
+                    onMatchComplete={handleMatchComplete}
                   />
               ))}
             </div>
@@ -117,6 +120,7 @@ export const Tournament = () => {
                   key={match.id}
                   match={match}
                   onScoreUpdate={handleScoreUpdate}
+                  onMatchComplete={handleMatchComplete}
                 />
               ))}
             </div>
