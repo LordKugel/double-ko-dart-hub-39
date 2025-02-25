@@ -14,9 +14,27 @@ export const Tournament = () => {
     !tournament.losersBracketMatches.some(lm => lm.id === m.id)
   );
 
+  const winner = tournament.completed ? tournament.players.find(p => !p.eliminated) : null;
+
   return (
     <div className="container mx-auto p-4 max-w-7xl animate-fade-in pb-[400px]">
       <h1 className="text-3xl font-bold text-center mb-8">Dart Tournament</h1>
+      
+      {winner && (
+        <div className="mb-12 text-center animate-fade-in">
+          <h2 className="text-6xl font-extrabold text-gradient bg-clip-text text-transparent bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 mb-4">
+            🏆 Turniersieger 🏆
+          </h2>
+          <div className="text-4xl font-bold">
+            {winner.firstName} {winner.lastName}
+          </div>
+          {winner.team && (
+            <div className="text-2xl text-gray-600 mt-2">
+              Team: {winner.team}
+            </div>
+          )}
+        </div>
+      )}
       
       <TournamentControls
         onGeneratePlayers={generatePlayers}
