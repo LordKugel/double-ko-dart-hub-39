@@ -79,10 +79,24 @@ export const useTournamentFlow = (tournament: TournamentType, setTournament: (va
         description: "Die erste Runde wurde gestartet"
       });
     } else {
+      // Prüfe, ob die aktuelle Runde abgeschlossen ist
       if (!isRoundComplete(tournament.matches, tournament.currentRound)) {
         toast({
           title: "Runde nicht abgeschlossen",
           description: "Bitte spielen Sie erst alle Matches der aktuellen Runde zu Ende",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Prüfe, ob noch Timer laufen
+      const currentRoundMatches = tournament.matches.filter(m => m.round === tournament.currentRound);
+      const hasRunningTimers = currentRoundMatches.some(m => m.countdownStarted && !m.completed);
+      
+      if (hasRunningTimers) {
+        toast({
+          title: "Timer noch aktiv",
+          description: "Bitte warten Sie, bis alle Timer der aktuellen Runde abgelaufen sind",
           variant: "destructive"
         });
         return;
