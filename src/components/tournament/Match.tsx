@@ -28,21 +28,9 @@ export const Match = ({ match, onScoreUpdate }: MatchProps) => {
       }, 1000);
     }
     return () => {
-      if (timer) clearTimeout(timer);
+      if (timer) clearInterval(timer);
     };
-  }, [match.scores, match.completed]);
-
-  useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (match.completed) {
-      timer = setTimeout(() => {
-        setIsVisible(false);
-      }, 10000); // 10 Sekunden
-    }
-    return () => {
-      if (timer) clearTimeout(timer);
-    };
-  }, [match.completed]);
+  }, [match.scores]);
 
   if (!isVisible) return null;
 

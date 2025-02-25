@@ -23,7 +23,7 @@ export const updatePlayersAfterMatch = (
   const player1Wins = match.scores.filter(s => s.player1Won).length;
   const player2Wins = match.scores.filter(s => s.player2Won).length;
   
-  if (player1Wins + player2Wins === 3) {
+  if (player1Wins + player2Wins === 3) { // Nur wenn alle 3 Spiele gespielt wurden
     const winner = player1Wins > player2Wins ? match.player1 : match.player2;
     const loser = player1Wins > player2Wins ? match.player2 : match.player1;
     
@@ -36,7 +36,7 @@ export const updatePlayersAfterMatch = (
           ...p,
           losses: newLosses,
           eliminated: isEliminated,
-          bracket: newLosses >= 2 ? "losers" : p.bracket,
+          bracket: isEliminated ? null : "losers", // Setze bracket auf null wenn eliminiert
           winPercentage: calculateWinPercentage(matches, p.id)
         };
       }
