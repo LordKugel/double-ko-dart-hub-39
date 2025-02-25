@@ -11,6 +11,7 @@ export const createInitialMatches = (players: Player[]): Match[] => {
         player2: players[i + 1],
         scores: Array(3).fill({ player1Won: null, player2Won: null }),
         completed: false,
+        countdownStarted: false,
         round: 1,
         bracket: "winners",
         matchNumber: i/2 + 1
@@ -35,6 +36,7 @@ export const createNextRoundMatches = (
         player2: players[i + 1],
         scores: Array(3).fill({ player1Won: null, player2Won: null }),
         completed: false,
+        countdownStarted: false,
         round,
         bracket,
         matchNumber: i/2 + 1

@@ -16,13 +16,35 @@ interface MatchProps {
 export const Match = ({ match, onScoreUpdate, onMatchComplete }: MatchProps) => {
   const [isVisible, setIsVisible] = useState(true);
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [countdown, setCountdown] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (match.countdownStarted && countdown === null) {
+      setCountdown(180); // 3 minutes in seconds
+    }
+  }, [match.countdownStarted]);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (countdown !== null && countdown > 0) {
+      timer = setInterval(() => {
+        setCountdown(prev => (prev !== null ? prev - 1 : null));
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [countdown]);
+
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+  };
 
   const isMatchComplete = (match: MatchType) => {
     return match.scores.every(score => score.player1Won !== null && score.player2Won !== null);
   };
 
   useEffect(() => {
-    // Zeige Bestätigungsbutton wenn alle 3 Spiele gespielt sind
     if (isMatchComplete(match) && !match.completed) {
       setShowConfirmation(true);
     }
@@ -61,6 +83,12 @@ export const Match = ({ match, onScoreUpdate, onMatchComplete }: MatchProps) => 
   return (
     <div className="bg-white rounded-lg shadow-md p-4 mb-4 animate-fade-in relative hover:shadow-lg transition-shadow">
       <TooltipProvider>
+        {countdown !== null && (
+          <div className="absolute top-2 right-2 font-mono text-lg">
+            {formatTime(countdown)}
+          </div>
+        )}
+        
         <div className="flex items-center justify-between mb-2">
           <Tooltip>
             <TooltipTrigger>
