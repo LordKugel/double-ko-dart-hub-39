@@ -14,7 +14,7 @@ export const Match = ({ match, onScoreUpdate }: MatchProps) => {
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
-    if (isMatchComplete(match) && !match.completed && !match.countdownStarted) {
+    if (isMatchComplete(match) && !match.completed) {
       setCountdown(10);
       timer = setInterval(() => {
         setCountdown(prev => {
@@ -30,7 +30,7 @@ export const Match = ({ match, onScoreUpdate }: MatchProps) => {
     return () => {
       if (timer) clearInterval(timer);
     };
-  }, [match.scores, match.completed, match.countdownStarted]);
+  }, [match.scores, match.completed]);
 
   if (!isVisible) return null;
 
@@ -50,7 +50,7 @@ export const Match = ({ match, onScoreUpdate }: MatchProps) => {
 
   const getMatchStatus = () => {
     if (isMatchComplete(match) && !match.completed) {
-      return countdown !== null ? `Änderungen noch ${countdown}s möglich` : "";
+      return countdown ? `Änderungen noch ${countdown}s möglich` : "";
     }
     if (match.completed) {
       return "Match abgeschlossen";

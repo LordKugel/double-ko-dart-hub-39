@@ -5,7 +5,7 @@ import { createInitialMatches, calculateWinPercentage, createNextRoundMatches } 
 import { generateRandomPlayers } from "@/utils/playerGenerator";
 import { toast } from "@/components/ui/use-toast";
 import { updateMatchScores, updatePlayersAfterMatch, isMatchComplete, isRoundComplete } from "@/utils/matchUtils";
-import { processWinnersBracket, processLosersBracket } from "@/utils/bracketUtils";
+import { processWinnersBracket, processLosersBracket, createFinalMatch } from "@/utils/bracketUtils";
 
 export const useTournament = () => {
   const [tournament, setTournament] = useState<TournamentType>({
@@ -92,10 +92,14 @@ export const useTournament = () => {
     const winnersPlayers = players.filter(p => p.bracket === "winners" && !p.eliminated);
     const losersPlayers = players.filter(p => p.bracket === "losers" && !p.eliminated);
 
-    console.log("Winners für nächste Runde:", winnersPlayers);
-    console.log("Losers für nächste Runde:", losersPlayers);
-
     let newMatches: MatchType[] = [];
+
+    // Prüfe, ob wir ein Finale erstellen müssen
+    if (winnersPlayers.length === 1 && losersPlayers.length === 1) {
+      const finalMatch = createFinalMatch(winnersPlayers[0], losersPlayers[0], currentRound);
+      newMatches = [finalMatch];
+      return newMatches;
+    }
 
     // Erstelle Winner's Bracket Matches
     if (winnersPlayers.length >= 2) {
@@ -189,7 +193,8 @@ export const useTournament = () => {
         roundStarted: true,
         matches: [...prev.matches, ...nextRoundMatches],
         winnersBracketMatches: nextRoundMatches.filter(m => m.bracket === "winners"),
-        losersBracketMatches: nextRoundMatches.filter(m => m.bracket === "losers")
+        losersBracketMatches: nextRoundMatches.filter(m => m.bracket === "losers"),
+        finalMatches: nextRoundMatches.filter(m => m.bracket === "final")
       }));
 
       toast({
