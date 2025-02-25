@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Upload, Download } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
@@ -11,6 +10,8 @@ interface TournamentControlsProps {
   isStarted: boolean;
   hasPlayers: boolean;
   matches: Match[];
+  currentRound: number;
+  roundStarted: boolean;
 }
 
 export const TournamentControls = ({
@@ -18,8 +19,16 @@ export const TournamentControls = ({
   onStartTournament,
   isStarted,
   hasPlayers,
-  matches
+  matches,
+  currentRound,
+  roundStarted
 }: TournamentControlsProps) => {
+  const getButtonLabel = () => {
+    if (!isStarted) return "Start Tournament";
+    if (!roundStarted) return `Start Runde ${currentRound}`;
+    return `Runde ${currentRound} läuft...`;
+  };
+
   const exportToExcel = () => {
     const matchData = matches.map(match => ({
       'Player 1': `${match.player1.firstName} ${match.player1.lastName}`,
@@ -81,10 +90,10 @@ export const TournamentControls = ({
       </Button>
       <Button 
         onClick={onStartTournament}
-        disabled={isStarted || !hasPlayers}
+        disabled={(isStarted && roundStarted) || (!isStarted && !hasPlayers)}
         className="transition-all duration-200 hover:scale-105"
       >
-        Start Tournament
+        {getButtonLabel()}
       </Button>
       <Button
         onClick={exportToExcel}
