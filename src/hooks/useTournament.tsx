@@ -30,11 +30,14 @@ export const useTournament = () => {
       const newMatches = [...prev.matches];
       const match = updateMatchScores({ ...newMatches[matchIndex] }, gameIndex, player1Won);
       
-      if (isMatchComplete(match) && !match.completed) {
-        // Warte 10 Sekunden bevor das Match als abgeschlossen markiert wird
+      if (isMatchComplete(match) && !match.completed && !match.countdownStarted) {
+        // Markiere, dass der Countdown gestartet wurde
+        match.countdownStarted = true;
+        
+        // Starte den Countdown und aktualisiere erst danach
         setTimeout(() => {
           setTournament(prevState => {
-            const updatedMatch = { ...match, completed: true };
+            const updatedMatch = { ...match, completed: true, countdownStarted: false };
             const updatedMatches = [...prevState.matches];
             updatedMatches[matchIndex] = updatedMatch;
             

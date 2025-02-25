@@ -14,7 +14,7 @@ export const Match = ({ match, onScoreUpdate }: MatchProps) => {
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
-    if (isMatchComplete(match) && !match.completed) {
+    if (isMatchComplete(match) && !match.completed && !match.countdownStarted) {
       setCountdown(10);
       timer = setInterval(() => {
         setCountdown(prev => {
@@ -30,7 +30,7 @@ export const Match = ({ match, onScoreUpdate }: MatchProps) => {
     return () => {
       if (timer) clearInterval(timer);
     };
-  }, [match.scores]);
+  }, [match.scores, match.completed, match.countdownStarted]);
 
   if (!isVisible) return null;
 
@@ -48,15 +48,18 @@ export const Match = ({ match, onScoreUpdate }: MatchProps) => {
     return won ? "✓" : "×";
   };
 
+  const getMatchStatus = () => {
+    if (isMatchComplete(match) && !match.completed) {
+      return `Änderungen noch ${countdown}s möglich`;
+    }
+    if (match.completed) {
+      return "Match abgeschlossen";
+    }
+    return "";
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-md p-4 mb-4 animate-fade-in relative">
-      {countdown !== null && (
-        <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-lg">
-          <div className="text-white text-2xl font-bold">
-            Änderungen möglich: {countdown}s
-          </div>
-        </div>
-      )}
       <div className="flex items-center justify-between mb-2">
         <div className="font-medium">{match.player1.firstName} {match.player1.lastName}</div>
         <div className="text-sm text-gray-500">{match.player1.team}</div>
@@ -94,9 +97,12 @@ export const Match = ({ match, onScoreUpdate }: MatchProps) => {
         <div className="text-sm text-gray-500">{match.player2.team}</div>
       </div>
 
-      {match.completed && (
-        <div className="mt-2 text-center text-sm text-gray-500">
-          Match completed
+      {getMatchStatus() && (
+        <div className={cn(
+          "mt-2 text-center text-lg font-bold p-2 rounded",
+          countdown ? "bg-yellow-100 text-yellow-800" : "text-gray-500"
+        )}>
+          {getMatchStatus()}
         </div>
       )}
     </div>
