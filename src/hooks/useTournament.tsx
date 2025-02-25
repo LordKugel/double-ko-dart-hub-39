@@ -4,7 +4,7 @@ import { Player, Match as MatchType, Tournament as TournamentType } from "../typ
 import { createInitialMatches, calculateWinPercentage } from "../utils/tournamentUtils";
 import { generateRandomPlayers } from "@/utils/playerGenerator";
 import { toast } from "@/components/ui/use-toast";
-import { updateMatchScores, updatePlayersAfterMatch } from "@/utils/matchUtils";
+import { updateMatchScores, updatePlayersAfterMatch, isMatchComplete, isRoundComplete } from "@/utils/matchUtils";
 import { processWinnersBracket, processLosersBracket } from "@/utils/bracketUtils";
 
 export const useTournament = () => {
@@ -30,12 +30,11 @@ export const useTournament = () => {
       const newMatches = [...prev.matches];
       const match = updateMatchScores({ ...newMatches[matchIndex] }, gameIndex, player1Won);
       
-      const gamesPlayed = match.scores.filter(s => s.player1Won !== null).length;
+      // Aktualisiere die Spieler nach jedem gespielten Spiel
+      const updatedPlayers = updatePlayersAfterMatch(match, prev.players, newMatches);
       
-      if (gamesPlayed === 3) {
+      if (isMatchComplete(match)) {
         match.completed = true;
-        
-        const updatedPlayers = updatePlayersAfterMatch(match, prev.players, newMatches);
         
         const updatedPlayer1 = updatedPlayers.find(p => p.id === match.player1.id);
         const updatedPlayer2 = updatedPlayers.find(p => p.id === match.player2.id);
@@ -44,29 +43,23 @@ export const useTournament = () => {
           match.player1 = updatedPlayer1;
           match.player2 = updatedPlayer2;
         }
-
-        newMatches[matchIndex] = match;
       }
 
       newMatches[matchIndex] = match;
+
+      // Prüfe, ob die Runde komplett ist
+      const roundComplete = isRoundComplete(newMatches, prev.currentRound);
       
       return {
         ...prev,
         matches: newMatches,
+        players: updatedPlayers,
         winnersBracketMatches: newMatches.filter(m => m.bracket === "winners"),
         losersBracketMatches: newMatches.filter(m => m.bracket === "losers"),
-        finalMatches: newMatches.filter(m => m.bracket === "final")
+        finalMatches: newMatches.filter(m => m.bracket === "final"),
+        roundStarted: !roundComplete // Setze roundStarted auf false, wenn die Runde komplett ist
       };
     });
-  };
-
-  const isRoundComplete = () => {
-    const currentRoundMatches = tournament.matches.filter(
-      m => m.round === tournament.currentRound
-    );
-    return currentRoundMatches.every(
-      m => m.scores.every(s => s.player1Won !== null)
-    );
   };
 
   const generatePlayers = () => {
@@ -130,7 +123,7 @@ export const useTournament = () => {
       });
     } else {
       // Prüfen ob aktuelle Runde abgeschlossen ist
-      if (!isRoundComplete()) {
+      if (!isRoundComplete(tournament.matches, tournament.currentRound)) {
         toast({
           title: "Runde nicht abgeschlossen",
           description: "Bitte spielen Sie erst alle Matches der aktuellen Runde zu Ende",
