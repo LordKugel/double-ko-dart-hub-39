@@ -32,7 +32,7 @@ export const PlayersList = ({ players, title }: PlayersListProps) => {
                   {player.winPercentage.toFixed(1)}%
                 </span>
                 <span className="ml-2 text-gray-500">
-                  ({player.winPercentage < 100 ? `${Math.round((100 - player.winPercentage) / 100 * 3)} Verloren` : "Perfekt!"})
+                  ({Math.round(player.winPercentage / 100 * 3)} Gewonnen)
                 </span>
               </div>
             </div>
