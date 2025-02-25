@@ -50,19 +50,40 @@ export const calculateWinPercentage = (matches: Match[], playerId: string): numb
   let totalWins = 0;
   let totalGames = 0;
 
-  matches.forEach(match => {
+  // Zuerst alle completed matches sammeln
+  const playerMatches = matches.filter(match => 
+    (match.player1.id === playerId || match.player2.id === playerId) && 
+    match.completed
+  );
+
+  playerMatches.forEach(match => {
     const isPlayer1 = match.player1.id === playerId;
-    const isPlayer2 = match.player2.id === playerId;
-
-    if (!isPlayer1 && !isPlayer2) return;
-
+    
+    // Nur abgeschlossene Spiele zählen
     match.scores.forEach(score => {
       if (score.player1Won === null) return;
-
-      if (isPlayer1 && score.player1Won) totalWins++;
-      if (isPlayer2 && score.player2Won) totalWins++;
+      
+      // Gewinne zählen
+      if (isPlayer1) {
+        if (score.player1Won) totalWins++;
+      } else {
+        if (score.player2Won) totalWins++;
+      }
+      
+      // Gespielte Spiele zählen
       totalGames++;
     });
+  });
+
+  // Füge debug logs hinzu
+  console.log(`Player ${playerId} stats:`, {
+    totalWins,
+    totalGames,
+    matches: playerMatches.map(m => ({
+      id: m.id,
+      bracket: m.bracket,
+      scores: m.scores
+    }))
   });
 
   if (totalGames === 0) return 0;
