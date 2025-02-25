@@ -33,26 +33,67 @@ export const TournamentControls = ({
   };
 
   const exportToExcel = () => {
-    const matchData = matches.map(match => ({
+    const wb = XLSX.utils.book_new();
+
+    // Gruppiere Matches nach Runden
+    const matchesByRound = matches.reduce((acc, match) => {
+      if (!acc[match.round]) {
+        acc[match.round] = [];
+      }
+      acc[match.round].push(match);
+      return acc;
+    }, {} as Record<number, Match[]>);
+
+    // Erstelle für jede Runde ein eigenes Worksheet
+    Object.entries(matchesByRound).forEach(([round, roundMatches]) => {
+      const matchData = roundMatches.map(match => ({
+        'Runde': round,
+        'Bracket': match.bracket,
+        'Player 1': `${match.player1.firstName} ${match.player1.lastName}`,
+        'Team 1': match.player1.team || '-',
+        'Game 1': match.scores[0].player1Won === null ? '-' : match.scores[0].player1Won ? 'Win' : 'Loss',
+        'Game 2': match.scores[1].player1Won === null ? '-' : match.scores[1].player1Won ? 'Win' : 'Loss',
+        'Game 3': match.scores[2].player1Won === null ? '-' : match.scores[2].player1Won ? 'Win' : 'Loss',
+        'Player 2': `${match.player2.firstName} ${match.player2.lastName}`,
+        'Team 2': match.player2.team || '-',
+        'Status': match.completed ? 'Completed' : 'In Progress',
+        'Match #': match.matchNumber
+      }));
+
+      const ws = XLSX.utils.json_to_sheet(matchData);
+      XLSX.utils.book_append_sheet(wb, ws, `Runde ${round}`);
+    });
+
+    // Erstelle ein Übersichtsblatt
+    const summaryData = matches.map(match => ({
+      'Runde': match.round,
+      'Bracket': match.bracket,
+      'Match #': match.matchNumber,
       'Player 1': `${match.player1.firstName} ${match.player1.lastName}`,
       'Team 1': match.player1.team || '-',
-      'Game 1': match.scores[0].player1Won === null ? '-' : match.scores[0].player1Won ? 'Win' : 'Loss',
-      'Game 2': match.scores[1].player1Won === null ? '-' : match.scores[1].player1Won ? 'Win' : 'Loss',
-      'Game 3': match.scores[2].player1Won === null ? '-' : match.scores[2].player1Won ? 'Win' : 'Loss',
+      'Ergebnis': `${match.scores.filter(s => s.player1Won).length}:${match.scores.filter(s => s.player2Won).length}`,
       'Player 2': `${match.player2.firstName} ${match.player2.lastName}`,
       'Team 2': match.player2.team || '-',
       'Status': match.completed ? 'Completed' : 'In Progress'
     }));
 
-    const ws = XLSX.utils.json_to_sheet(matchData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Matches");
-    XLSX.writeFile(wb, "tournament_matches.xlsx");
+    const ws = XLSX.utils.json_to_sheet(summaryData);
+    XLSX.utils.book_append_sheet(wb, ws, "Übersicht");
+
+    XLSX.writeFile(wb, `tournament_matches_bis_runde_${currentRound}.xlsx`);
     
     toast({
       title: "Export erfolgreich",
       description: "Die Turnierdaten wurden als Excel-Datei exportiert"
     });
+  };
+
+  const handleStartTournament = () => {
+    if (isStarted && roundStarted) {
+      // Wenn eine neue Runde startet, exportiere automatisch den aktuellen Stand
+      exportToExcel();
+    }
+    onStartTournament();
   };
 
   return (
@@ -65,7 +106,7 @@ export const TournamentControls = ({
         Generate Players
       </Button>
       <Button 
-        onClick={onStartTournament}
+        onClick={handleStartTournament}
         disabled={(isStarted && roundStarted) || (!isStarted && !hasPlayers)}
         className="transition-all duration-200 hover:scale-105"
       >
