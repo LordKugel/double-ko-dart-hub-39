@@ -10,9 +10,10 @@ import { Check } from "lucide-react";
 interface MatchProps {
   match: MatchType;
   onScoreUpdate: (matchId: string, gameIndex: number, player1Won: boolean) => void;
+  onMatchComplete: (matchId: string) => void;
 }
 
-export const Match = ({ match, onScoreUpdate }: MatchProps) => {
+export const Match = ({ match, onScoreUpdate, onMatchComplete }: MatchProps) => {
   const [isVisible, setIsVisible] = useState(true);
   const [showConfirmation, setShowConfirmation] = useState(false);
 
@@ -22,10 +23,10 @@ export const Match = ({ match, onScoreUpdate }: MatchProps) => {
 
   useEffect(() => {
     // Zeige Bestätigungsbutton wenn alle 3 Spiele gespielt sind
-    if (isMatchComplete(match) && !match.completed && !match.countdownStarted) {
+    if (isMatchComplete(match) && !match.completed) {
       setShowConfirmation(true);
     }
-  }, [match.scores, match.completed, match.countdownStarted]);
+  }, [match.scores, match.completed]);
 
   if (!isVisible) return null;
 
@@ -47,8 +48,7 @@ export const Match = ({ match, onScoreUpdate }: MatchProps) => {
 
   const confirmMatchResult = () => {
     setShowConfirmation(false);
-    // Trigger countdown start
-    onScoreUpdate(match.id, 0, match.scores[0].player1Won!);
+    onMatchComplete(match.id);
   };
 
   const getPlayerStats = (player: typeof match.player1) => {
@@ -116,7 +116,7 @@ export const Match = ({ match, onScoreUpdate }: MatchProps) => {
           <div className="text-sm text-gray-500">{match.player2.team}</div>
         </div>
 
-        {showConfirmation && !match.countdownStarted && (
+        {showConfirmation && !match.completed && (
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button 
