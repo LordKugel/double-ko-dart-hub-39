@@ -23,25 +23,26 @@ export const updatePlayersAfterMatch = (
   const player1Wins = match.scores.filter(s => s.player1Won).length;
   const player2Wins = match.scores.filter(s => s.player2Won).length;
   
-  if (player1Wins + player2Wins === 3) { // Nur wenn alle 3 Spiele gespielt wurden
+  if (player1Wins + player2Wins === 3) {
     const winner = player1Wins > player2Wins ? match.player1 : match.player2;
     const loser = player1Wins > player2Wins ? match.player2 : match.player1;
     
     return players.map(p => {
       if (p.id === loser.id) {
         const newLosses = p.losses + 1;
+        const isEliminated = p.bracket === "losers" || newLosses >= 2;
+        
         return {
           ...p,
           losses: newLosses,
-          eliminated: newLosses >= 2,
-          bracket: "losers" as const, // Sofort ins Loser's Bracket verschieben
+          eliminated: isEliminated,
+          bracket: newLosses >= 2 ? "losers" : p.bracket,
           winPercentage: calculateWinPercentage(matches, p.id)
         };
       }
       if (p.id === winner.id) {
         return {
           ...p,
-          bracket: "winners" as const,
           winPercentage: calculateWinPercentage(matches, p.id)
         };
       }

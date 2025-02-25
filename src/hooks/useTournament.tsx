@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Player, Match as MatchType, Tournament as TournamentType } from "../types/tournament";
 import { createInitialMatches, calculateWinPercentage, createNextRoundMatches } from "../utils/tournamentUtils";
@@ -29,32 +30,34 @@ export const useTournament = () => {
       const newMatches = [...prev.matches];
       const match = updateMatchScores({ ...newMatches[matchIndex] }, gameIndex, player1Won);
       
-      const updatedPlayers = updatePlayersAfterMatch(match, prev.players, newMatches);
-      
-      if (isMatchComplete(match)) {
-        match.completed = true;
-        
-        const updatedPlayer1 = updatedPlayers.find(p => p.id === match.player1.id);
-        const updatedPlayer2 = updatedPlayers.find(p => p.id === match.player2.id);
-        
-        if (updatedPlayer1 && updatedPlayer2) {
-          match.player1 = updatedPlayer1;
-          match.player2 = updatedPlayer2;
-        }
+      if (isMatchComplete(match) && !match.completed) {
+        // Warte 10 Sekunden bevor das Match als abgeschlossen markiert wird
+        setTimeout(() => {
+          setTournament(prevState => {
+            const updatedMatch = { ...match, completed: true };
+            const updatedMatches = [...prevState.matches];
+            updatedMatches[matchIndex] = updatedMatch;
+            
+            const updatedPlayers = updatePlayersAfterMatch(updatedMatch, prevState.players, updatedMatches);
+            
+            return {
+              ...prevState,
+              matches: updatedMatches,
+              players: updatedPlayers,
+              winnersBracketMatches: updatedMatches.filter(m => m.bracket === "winners"),
+              losersBracketMatches: updatedMatches.filter(m => m.bracket === "losers"),
+              finalMatches: updatedMatches.filter(m => m.bracket === "final"),
+              roundStarted: !isRoundComplete(updatedMatches, prevState.currentRound)
+            };
+          });
+        }, 10000);
       }
 
       newMatches[matchIndex] = match;
-
-      const roundComplete = isRoundComplete(newMatches, prev.currentRound);
       
       return {
         ...prev,
-        matches: newMatches,
-        players: updatedPlayers,
-        winnersBracketMatches: newMatches.filter(m => m.bracket === "winners"),
-        losersBracketMatches: newMatches.filter(m => m.bracket === "losers"),
-        finalMatches: newMatches.filter(m => m.bracket === "final"),
-        roundStarted: !roundComplete
+        matches: newMatches
       };
     });
   };
@@ -91,6 +94,7 @@ export const useTournament = () => {
 
     let newMatches: MatchType[] = [];
 
+    // Erstelle Winner's Bracket Matches
     if (winnersPlayers.length >= 2) {
       const winnerMatches = createNextRoundMatches(
         winnersPlayers,
@@ -101,6 +105,7 @@ export const useTournament = () => {
       newMatches = [...newMatches, ...winnerMatches];
     }
 
+    // Erstelle Loser's Bracket Matches
     if (losersPlayers.length >= 2) {
       const loserMatches = createNextRoundMatches(
         losersPlayers,

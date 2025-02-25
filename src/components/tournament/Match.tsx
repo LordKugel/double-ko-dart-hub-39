@@ -10,6 +10,27 @@ interface MatchProps {
 
 export const Match = ({ match, onScoreUpdate }: MatchProps) => {
   const [isVisible, setIsVisible] = useState(true);
+  const [countdown, setCountdown] = useState<number | null>(null);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (isMatchComplete(match) && !match.completed) {
+      setCountdown(10);
+      timer = setInterval(() => {
+        setCountdown(prev => {
+          if (prev === null) return null;
+          if (prev <= 1) {
+            clearInterval(timer);
+            return null;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [match.scores, match.completed]);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -25,6 +46,10 @@ export const Match = ({ match, onScoreUpdate }: MatchProps) => {
 
   if (!isVisible) return null;
 
+  const isMatchComplete = (match: MatchType) => {
+    return match.scores.every(score => score.player1Won !== null && score.player2Won !== null);
+  };
+
   const getButtonStyle = (won: boolean | null) => {
     if (won === null) return "bg-gray-300";
     return won ? "bg-green-500 text-white" : "bg-red-500 text-white";
@@ -35,12 +60,15 @@ export const Match = ({ match, onScoreUpdate }: MatchProps) => {
     return won ? "✓" : "×";
   };
 
-  // Entferne die Prüfung auf bereits entschiedene Matches
-  const player1Wins = match.scores.filter(s => s.player1Won).length;
-  const player2Wins = match.scores.filter(s => s.player2Won).length;
-
   return (
-    <div className="bg-white rounded-lg shadow-md p-4 mb-4 animate-fade-in">
+    <div className="bg-white rounded-lg shadow-md p-4 mb-4 animate-fade-in relative">
+      {countdown !== null && (
+        <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-lg">
+          <div className="text-white text-2xl font-bold">
+            Änderungen möglich: {countdown}s
+          </div>
+        </div>
+      )}
       <div className="flex items-center justify-between mb-2">
         <div className="font-medium">{match.player1.firstName} {match.player1.lastName}</div>
         <div className="text-sm text-gray-500">{match.player1.team}</div>
