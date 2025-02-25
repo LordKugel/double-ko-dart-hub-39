@@ -27,10 +27,11 @@ export const updatePlayersAfterMatch = (
     const winner = player1Wins > player2Wins ? match.player1 : match.player2;
     const loser = player1Wins > player2Wins ? match.player2 : match.player1;
     
-    // Aktualisiere die winPercentage für alle Spieler
-    const updatedMatches = [...matches, { ...match, completed: true }];
+    // Füge das aktuelle Match zu den Matches hinzu, BEVOR wir die winPercentage berechnen
+    const allMatches = [...matches, { ...match, completed: true }];
     
     return players.map(p => {
+      // Wenn es der Verlierer ist
       if (p.id === loser.id) {
         const newLosses = p.losses + 1;
         const isEliminated = p.bracket === "losers" || newLosses >= 2;
@@ -40,14 +41,14 @@ export const updatePlayersAfterMatch = (
           losses: newLosses,
           eliminated: isEliminated,
           bracket: isEliminated ? null : "losers", // Setze bracket auf null wenn eliminiert
-          winPercentage: calculateWinPercentage(updatedMatches, p.id)
+          winPercentage: calculateWinPercentage(allMatches, p.id)
         };
       }
-      // Aktualisiere auch die winPercentage des Gewinners
+      // Wenn es der Gewinner ist
       if (p.id === winner.id) {
         return {
           ...p,
-          winPercentage: calculateWinPercentage(updatedMatches, p.id)
+          winPercentage: calculateWinPercentage(allMatches, p.id)
         };
       }
       return p;
