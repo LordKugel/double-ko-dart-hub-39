@@ -8,6 +8,14 @@ import { toast } from "@/components/ui/use-toast";
 
 const STORAGE_KEY = "dart-tournament-state";
 
+const createMachine = (id: number): Machine => ({
+  id,
+  quality: 3 as 1 | 2 | 3 | 4 | 5,
+  isFavorite: false,
+  isOutOfOrder: false,
+  currentMatchId: null
+});
+
 const initialTournamentState: TournamentType = {
   id: "1",
   name: "Dart Tournament",
@@ -21,13 +29,7 @@ const initialTournamentState: TournamentType = {
   losersBracketMatches: [],
   finalMatches: [],
   numberOfMachines: 3,
-  machines: Array.from({ length: 3 }, (_, i) => ({
-    id: i + 1,
-    quality: 3 as 1 | 2 | 3 | 4 | 5, // Explizit als Union Type definieren
-    isFavorite: false,
-    isOutOfOrder: false,
-    currentMatchId: null
-  }))
+  machines: Array.from({ length: 3 }, (_, i) => createMachine(i + 1))
 };
 
 export const useTournament = () => {
@@ -71,20 +73,12 @@ export const useTournament = () => {
       let newMachines: Machine[];
 
       if (number > currentMachines.length) {
-        // Füge neue Automaten hinzu
         const additionalMachines = Array.from(
           { length: number - currentMachines.length },
-          (_, i) => ({
-            id: currentMachines.length + i + 1,
-            quality: 3,
-            isFavorite: false,
-            isOutOfOrder: false,
-            currentMatchId: null
-          })
+          (_, i) => createMachine(currentMachines.length + i + 1)
         );
         newMachines = [...currentMachines, ...additionalMachines];
       } else {
-        // Reduziere die Anzahl der Automaten
         newMachines = currentMachines.slice(0, number);
       }
 
