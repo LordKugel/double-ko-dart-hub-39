@@ -21,26 +21,31 @@ export const Tournament = () => {
     updateMachine,
     assignMatchToMachine
   } = useTournament();
+
   const [showMatchesTable, setShowMatchesTable] = useState(false);
   const [editingMachines, setEditingMachines] = useState(false);
-  const [tempMachines, setTempMachines] = useState(tournament.numberOfMachines || 3);
+  const [tempMachines, setTempMachines] = useState(tournament?.numberOfMachines || 3);
 
-  const winner = tournament.completed ? tournament.players.find(p => !p.eliminated) : null;
+  const winner = tournament?.completed ? tournament.players.find(p => !p.eliminated) : null;
 
   // Verfügbare Matches für die Zuweisung
-  const availableMatches = tournament.matches.filter(match => 
+  const availableMatches = tournament?.matches?.filter(match => 
     match.round === tournament.currentRound && 
     !match.completed &&
     (!match.machineNumber || match.machineNumber === null)
-  );
+  ) || [];
 
   // Active matches are those with a machine assignment
-  const activeMatches = tournament.matches.filter(match => 
+  const activeMatches = tournament?.matches?.filter(match => 
     match.round === tournament.currentRound && 
     !match.completed &&
     match.machineNumber !== null &&
     match.machineNumber !== undefined
-  );
+  ) || [];
+
+  if (!tournament) {
+    return <div>Lade Turnier...</div>;
+  }
 
   const handleMachineNumberUpdate = () => {
     updateNumberOfMachines(tempMachines);
