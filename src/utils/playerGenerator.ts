@@ -3,12 +3,12 @@ import { Player } from "../types/tournament";
 
 const firstNames = [
   "Max", "Tom", "Felix", "Lars", "Tim", "Jan", "Paul", "Lukas", "David", "Simon",
-  "Anna", "Lisa"
+  "Anna", "Lisa", "Kai", "Nina", "Sarah", "Mark"
 ];
 
 const lastNames = [
   "Schmidt", "Müller", "Weber", "Wagner", "Becker", "Schulz", "Hoffmann", "Koch",
-  "Richter", "Wolf", "Schröder", "Klein"
+  "Richter", "Wolf", "Schröder", "Klein", "Meyer", "Fischer", "Peters", "Berg"
 ];
 
 const teams = [
@@ -16,7 +16,10 @@ const teams = [
   "Golden Lions", "Silver Wolves", "Bronze Bears", "Purple Phoenix"
 ];
 
-export function generateRandomPlayers(count: number): Player[] {
+export function generateRandomPlayers(count: number = 8): Player[] {
+  if (count < 2) count = 2; // Mindestens 2 Spieler
+  if (count > 16) count = 16; // Maximal 16 Spieler
+  
   return Array.from({ length: count }, () => ({
     id: Math.random().toString(36).substr(2, 9),
     firstName: firstNames[Math.floor(Math.random() * firstNames.length)],
@@ -26,6 +29,6 @@ export function generateRandomPlayers(count: number): Player[] {
     losses: 0,
     eliminated: false,
     bracket: null,
-    matches: [] // Initialisiere das matches Array als leeres Array
+    matches: []
   }));
 }

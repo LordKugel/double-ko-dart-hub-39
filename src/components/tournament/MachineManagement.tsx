@@ -18,7 +18,7 @@ export const MachineManagement = ({
   onAssignMatch,
   availableMatches
 }: MachineManagementProps) => {
-  const handleQualityChange = (machine: Machine, newQuality: 1 | 2 | 3 | 4 | 5) => {
+  const handleQualityChange = (machine: Machine, newQuality: 1 | 2 | 3) => {
     onUpdateMachine({
       ...machine,
       quality: newQuality
@@ -44,7 +44,7 @@ export const MachineManagement = ({
     onUpdateMachine({
       ...machine,
       isOutOfOrder: !machine.isOutOfOrder,
-      currentMatchId: null // Reset current match if machine goes out of order
+      currentMatchId: null
     });
     toast({
       title: machine.isOutOfOrder ? "Automat verfügbar" : "Automat außer Betrieb",
@@ -53,33 +53,34 @@ export const MachineManagement = ({
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
       {machines.map((machine) => (
         <div
           key={machine.id}
           className={cn(
-            "p-4 rounded-lg border",
+            "p-3 rounded-lg border",
             machine.isOutOfOrder 
               ? "bg-red-50 border-red-200" 
               : machine.isFavorite 
                 ? "bg-yellow-50 border-yellow-200"
-                : "bg-white border-gray-200"
+                : "bg-white border-gray-200",
+            "w-[75%]"
           )}
         >
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="font-semibold">Automat {machine.id}</h3>
-            <div className="flex gap-2">
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="font-semibold text-sm">Automat {machine.id}</h3>
+            <div className="flex gap-1">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => handleToggleFavorite(machine)}
                 className={cn(
-                  "hover:text-yellow-500",
+                  "hover:text-yellow-500 p-1",
                   machine.isFavorite && "text-yellow-500"
                 )}
               >
                 <Star className={cn(
-                  "h-4 w-4",
+                  "h-3 w-3",
                   machine.isFavorite && "fill-current"
                 )} />
               </Button>
@@ -88,29 +89,29 @@ export const MachineManagement = ({
                 size="sm"
                 onClick={() => handleToggleOutOfOrder(machine)}
                 className={cn(
-                  "hover:text-red-500",
+                  "hover:text-red-500 p-1",
                   machine.isOutOfOrder && "text-red-500"
                 )}
               >
-                <AlertTriangle className="h-4 w-4" />
+                <AlertTriangle className="h-3 w-3" />
               </Button>
             </div>
           </div>
 
-          <div className="flex items-center gap-1 mb-4">
-            {Array.from({ length: 5 }).map((_, index) => (
+          <div className="flex items-center gap-1 mb-2">
+            {Array.from({ length: 3 }).map((_, index) => (
               <Button
                 key={index}
                 variant="ghost"
                 size="sm"
-                onClick={() => handleQualityChange(machine, (index + 1) as 1 | 2 | 3 | 4 | 5)}
+                onClick={() => handleQualityChange(machine, (index + 1) as 1 | 2 | 3)}
                 className={cn(
                   "p-1",
                   index < machine.quality ? "text-yellow-500" : "text-gray-300"
                 )}
               >
                 <Star className={cn(
-                  "h-4 w-4",
+                  "h-3 w-3",
                   index < machine.quality && "fill-current"
                 )} />
               </Button>
@@ -118,21 +119,19 @@ export const MachineManagement = ({
           </div>
 
           {!machine.isOutOfOrder && (
-            <div className="space-y-2">
-              <select
-                className="w-full p-2 rounded border border-gray-200"
-                value={machine.currentMatchId || ""}
-                onChange={(e) => onAssignMatch(machine.id, e.target.value || null)}
-                disabled={machine.isOutOfOrder}
-              >
-                <option value="">Kein Match zugewiesen</option>
-                {availableMatches.map((match) => (
-                  <option key={match.id} value={match.id}>
-                    {match.player1.firstName} vs {match.player2.firstName} (Runde {match.round})
-                  </option>
-                ))}
-              </select>
-            </div>
+            <select
+              className="w-full p-1 text-sm rounded border border-gray-200"
+              value={machine.currentMatchId || ""}
+              onChange={(e) => onAssignMatch(machine.id, e.target.value || null)}
+              disabled={machine.isOutOfOrder}
+            >
+              <option value="">Kein Match</option>
+              {availableMatches.map((match) => (
+                <option key={match.id} value={match.id}>
+                  {match.player1.firstName} vs {match.player2.firstName}
+                </option>
+              ))}
+            </select>
           )}
         </div>
       ))}

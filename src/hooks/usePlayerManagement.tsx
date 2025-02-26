@@ -7,7 +7,7 @@ export const usePlayerManagement = (
   isStarted: boolean,
   setTournament: (value: any) => void
 ) => {
-  const generatePlayers = () => {
+  const generatePlayers = (count?: number) => {
     if (isStarted) {
       toast({
         title: "Turnier bereits gestartet",
@@ -17,7 +17,7 @@ export const usePlayerManagement = (
       return;
     }
     
-    const players = generateRandomPlayers(8);
+    const players = generateRandomPlayers(count);
     setTournament(prev => ({
       ...prev,
       players,
@@ -26,7 +26,7 @@ export const usePlayerManagement = (
     
     toast({
       title: "Spieler generiert",
-      description: "8 zufällige Spieler wurden generiert"
+      description: `${players.length} zufällige Spieler wurden generiert`
     });
   };
 

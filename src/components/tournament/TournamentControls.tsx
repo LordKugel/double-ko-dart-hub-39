@@ -1,13 +1,13 @@
-
 import { Button } from "@/components/ui/button";
 import { Upload, Download, Table2 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import * as XLSX from "xlsx";
 import { Match } from "@/types/tournament";
 import { useState } from "react";
+import { Input } from "@/components/ui/input";
 
 interface TournamentControlsProps {
-  onGeneratePlayers: () => void;
+  onGeneratePlayers: (count?: number) => void;
   onStartTournament: () => void;
   onExportData: () => void;
   isStarted: boolean;
@@ -31,10 +31,16 @@ export const TournamentControls = ({
   onToggleMatchesTable,
   showMatchesTable
 }: TournamentControlsProps) => {
+  const [playerCount, setPlayerCount] = useState<number>(8);
+  
   const getButtonLabel = () => {
     if (!isStarted) return "Start Tournament";
     if (!roundStarted) return `Start Runde ${currentRound}`;
     return `Runde ${currentRound} läuft...`;
+  };
+
+  const handleGeneratePlayers = () => {
+    onGeneratePlayers(playerCount);
   };
 
   const exportToExcel = () => {
@@ -103,13 +109,24 @@ export const TournamentControls = ({
 
   return (
     <div className="flex justify-center gap-4 mb-8">
-      <Button 
-        onClick={onGeneratePlayers}
-        disabled={isStarted}
-        className="transition-all duration-200 hover:scale-105"
-      >
-        Generate Players
-      </Button>
+      <div className="flex items-center gap-2">
+        <Input
+          type="number"
+          min="2"
+          max="16"
+          value={playerCount}
+          onChange={(e) => setPlayerCount(Number(e.target.value))}
+          className="w-20"
+          disabled={isStarted}
+        />
+        <Button 
+          onClick={handleGeneratePlayers}
+          disabled={isStarted}
+          className="transition-all duration-200 hover:scale-105"
+        >
+          Generate Players
+        </Button>
+      </div>
       <Button 
         onClick={handleStartTournament}
         disabled={(isStarted && roundStarted) || (!isStarted && !hasPlayers)}
