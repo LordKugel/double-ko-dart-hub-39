@@ -95,6 +95,7 @@ export const Tournament = () => {
       {!tournament.started ? (
         <PlayersList 
           players={tournament.players}
+          matches={tournament.matches}
           title="Alle Spieler"
         />
       ) : (
@@ -109,6 +110,7 @@ export const Tournament = () => {
             <h2 className="text-xl font-bold mb-4">Ausgeschiedene Spieler</h2>
             <PlayersList 
               players={tournament.players.filter(p => p.eliminated)}
+              matches={tournament.matches}
               title="Eliminierte Spieler"
             />
           </div>

@@ -5,41 +5,45 @@ import { cn } from "@/lib/utils";
 interface PlayersListProps {
   players: Player[];
   title?: string;
+  matches: Match[]; // Add matches as a prop
 }
 
 const countPlayerWins = (player: Player, matches: Match[]): number => {
   let totalWins = 0;
   
-  // Alle Matches des Spielers durchgehen
+  // Go through all matches for this player
   matches.forEach(match => {
     const isPlayer1 = match.player1.id === player.id;
-    // Zähle die Siege für jeden gespielten Satz
+    const isPlayer2 = match.player2.id === player.id;
+    
+    if (!isPlayer1 && !isPlayer2) return; // Skip if player not in this match
+    
+    // Count wins for each played set
     match.scores.forEach(score => {
-      if (score.player1Won === null) return; // Überspringe nicht gespielte Sätze
-      if (isPlayer1) {
-        if (score.player1Won) totalWins++;
-      } else {
-        if (score.player2Won) totalWins++;
-      }
+      if (score.player1Won === null) return; // Skip unplayed sets
+      if (isPlayer1 && score.player1Won) totalWins++;
+      if (isPlayer2 && score.player2Won) totalWins++;
     });
   });
   
   return totalWins;
 };
 
-const countTotalGames = (player: Player): number => {
+const countTotalGames = (player: Player, matches: Match[]): number => {
   let total = 0;
-  player.matches.forEach(match => {
-    match.scores.forEach(score => {
-      if (score.player1Won !== null || score.player2Won !== null) {
-        total++;
-      }
-    });
+  matches.forEach(match => {
+    if (match.player1.id === player.id || match.player2.id === player.id) {
+      match.scores.forEach(score => {
+        if (score.player1Won !== null || score.player2Won !== null) {
+          total++;
+        }
+      });
+    }
   });
   return total;
 };
 
-export const PlayersList = ({ players, title }: PlayersListProps) => {
+export const PlayersList = ({ players, title, matches }: PlayersListProps) => {
   if (players.length === 0) return null;
 
   return (
@@ -61,7 +65,7 @@ export const PlayersList = ({ players, title }: PlayersListProps) => {
                   "font-medium",
                   player.winPercentage >= 50 ? "text-green-600" : "text-red-600"
                 )}>
-                  {countPlayerWins(player, player.matches)} / {countTotalGames(player)}
+                  {countPlayerWins(player, matches)} / {countTotalGames(player, matches)}
                 </span>
                 <span className="ml-2 text-gray-500">
                   ({player.winPercentage.toFixed(1)}%)
