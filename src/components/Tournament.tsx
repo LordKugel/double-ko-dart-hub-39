@@ -1,4 +1,3 @@
-
 import { TournamentControls } from "./tournament/TournamentControls";
 import { PlayersList } from "./tournament/PlayersList";
 import { MatchesTable } from "./tournament/MatchesTable";
@@ -28,20 +27,28 @@ export const Tournament = () => {
 
   const winner = tournament?.completed ? tournament.players.find(p => !p.eliminated) : null;
 
-  // Verfügbare Matches für die Zuweisung
   const availableMatches = tournament?.matches?.filter(match => 
     match.round === tournament.currentRound && 
     !match.completed &&
     (!match.machineNumber || match.machineNumber === null)
   ) || [];
 
-  // Active matches are those with a machine assignment
   const activeMatches = tournament?.matches?.filter(match => 
     match.round === tournament.currentRound && 
     !match.completed &&
     match.machineNumber !== null &&
     match.machineNumber !== undefined
   ) || [];
+
+  const handleMatchClick = (matchId: string) => {
+    const availableMachine = tournament.machines.find(machine => 
+      !machine.isOutOfOrder && !machine.currentMatchId
+    );
+
+    if (availableMachine) {
+      assignMatchToMachine(availableMachine.id, matchId);
+    }
+  };
 
   if (!tournament) {
     return <div>Lade Turnier...</div>;
@@ -138,6 +145,7 @@ export const Tournament = () => {
             matches={tournament.matches}
             currentRound={tournament.currentRound}
             onScoreUpdate={handleScoreUpdate}
+            onMatchClick={handleMatchClick}
           />
 
           <div className="mt-8">

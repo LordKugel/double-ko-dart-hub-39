@@ -8,9 +8,10 @@ interface TournamentBracketProps {
   matches: MatchType[];
   currentRound: number;
   onScoreUpdate?: (matchId: string, gameIndex: number, player1Won: boolean) => void;
+  onMatchClick?: (matchId: string) => void;
 }
 
-export const TournamentBracket = ({ matches, currentRound, onScoreUpdate }: TournamentBracketProps) => {
+export const TournamentBracket = ({ matches, currentRound, onScoreUpdate, onMatchClick }: TournamentBracketProps) => {
   const maxRound = Math.max(...matches.map(m => m.round));
   const winnersRef = useRef<HTMLDivElement>(null);
   const losersRef = useRef<HTMLDivElement>(null);
@@ -43,11 +44,16 @@ export const TournamentBracket = ({ matches, currentRound, onScoreUpdate }: Tour
       <div 
         key={match.id}
         className={cn(
-          "relative bg-[#221F26] border-[#403E43] border rounded-lg p-3 mb-3 shadow-md transition-all duration-200 hover:shadow-lg",
+          "relative bg-[#221F26] border-[#403E43] border rounded-lg p-3 mb-3 shadow-md transition-all duration-200 hover:shadow-lg cursor-pointer",
           isCurrentRound && "ring-2 ring-[#0FA0CE] bg-[#2A2731]",
           match.completed && "opacity-90"
         )}
         style={{ maxWidth: '280px' }}
+        onClick={() => {
+          if (isCurrentRound && !match.completed && onMatchClick) {
+            onMatchClick(match.id);
+          }
+        }}
       >
         {/* Verbindungslinie nach rechts für den Gewinner */}
         {match.round < maxRound && match.completed && winner && (
@@ -82,7 +88,10 @@ export const TournamentBracket = ({ matches, currentRound, onScoreUpdate }: Tour
                       score.player1Won && "bg-[#0FA0CE] hover:bg-[#0FA0CE]/80",
                       score.player1Won === false && "bg-red-500 hover:bg-red-600"
                     )}
-                    onClick={() => onScoreUpdate?.(match.id, index, true)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onScoreUpdate?.(match.id, index, true);
+                    }}
                   >
                     {score.player1Won === null ? "-" : score.player1Won ? "W" : "L"}
                   </Button>
@@ -120,7 +129,10 @@ export const TournamentBracket = ({ matches, currentRound, onScoreUpdate }: Tour
                       score.player2Won && "bg-[#0FA0CE] hover:bg-[#0FA0CE]/80",
                       score.player2Won === false && "bg-red-500 hover:bg-red-600"
                     )}
-                    onClick={() => onScoreUpdate?.(match.id, index, false)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onScoreUpdate?.(match.id, index, false);
+                    }}
                   >
                     {score.player2Won === null ? "-" : score.player2Won ? "W" : "L"}
                   </Button>
