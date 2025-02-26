@@ -34,12 +34,28 @@ const initialTournamentState: TournamentType = {
 
 export const useTournament = () => {
   const [tournament, setTournament] = useState<TournamentType>(() => {
-    const savedState = localStorage.getItem(STORAGE_KEY);
-    return savedState ? JSON.parse(savedState) : initialTournamentState;
+    try {
+      const savedState = localStorage.getItem(STORAGE_KEY);
+      if (!savedState) {
+        console.log("No saved state found, using initial state");
+        return initialTournamentState;
+      }
+      const parsedState = JSON.parse(savedState);
+      console.log("Loaded saved state:", parsedState);
+      return parsedState;
+    } catch (error) {
+      console.error("Error loading saved state:", error);
+      return initialTournamentState;
+    }
   });
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(tournament));
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(tournament));
+      console.log("Saved state to localStorage:", tournament);
+    } catch (error) {
+      console.error("Error saving state:", error);
+    }
   }, [tournament]);
 
   const { handleScoreUpdate } = useMatchHandling(
