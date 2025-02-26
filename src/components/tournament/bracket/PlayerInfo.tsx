@@ -1,6 +1,7 @@
 
 import { cn } from "@/lib/utils";
 import { Match } from "@/types/tournament";
+import { MatchScore } from "./MatchScore"; // Füge den Import hinzu
 
 interface PlayerInfoProps {
   player: Match["player1"] | Match["player2"];
