@@ -8,7 +8,6 @@ export interface Player {
   losses: number;
   eliminated: boolean;
   bracket: "winners" | "losers" | null;
-  matches: Match[]; // Neue Property für die Matches des Spielers
 }
 
 export interface Match {
@@ -20,10 +19,11 @@ export interface Match {
     player2Won: boolean | null;
   }>;
   completed: boolean;
-  countdownStarted: boolean;
+  countdownStarted?: boolean;
   round: number;
   bracket: "winners" | "losers" | "final";
   matchNumber: number;
+  machineNumber?: number | null; // New field for machine assignment
 }
 
 export interface Tournament {
@@ -38,4 +38,5 @@ export interface Tournament {
   winnersBracketMatches: Match[];
   losersBracketMatches: Match[];
   finalMatches: Match[];
+  numberOfMachines: number; // New field for configuring number of machines
 }

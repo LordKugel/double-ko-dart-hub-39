@@ -6,19 +6,29 @@ import { TournamentBracket } from "./tournament/TournamentBracket";
 import { MachineOverview } from "./tournament/MachineOverview";
 import { useTournament } from "@/hooks/useTournament";
 import { useState } from "react";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
 
 export const Tournament = () => {
-  const { tournament, handleScoreUpdate, generatePlayers, startTournament, exportTournamentData } = useTournament();
+  const { tournament, handleScoreUpdate, generatePlayers, startTournament, exportTournamentData, updateNumberOfMachines } = useTournament();
   const [showMatchesTable, setShowMatchesTable] = useState(false);
+  const [editingMachines, setEditingMachines] = useState(false);
+  const [tempMachines, setTempMachines] = useState(tournament.numberOfMachines || 3);
 
   const winner = tournament.completed ? tournament.players.find(p => !p.eliminated) : null;
 
-  // Aktive Matches sind solche, die in der aktuellen Runde sind und mindestens einen Punkt haben
+  // Active matches are those with a machine assignment
   const activeMatches = tournament.matches.filter(match => 
     match.round === tournament.currentRound && 
     !match.completed &&
-    match.scores.some(score => score.player1Won !== null || score.player2Won !== null)
+    match.machineNumber !== null &&
+    match.machineNumber !== undefined
   );
+
+  const handleMachineNumberUpdate = () => {
+    updateNumberOfMachines(tempMachines);
+    setEditingMachines(false);
+  };
 
   return (
     <div className="container mx-auto p-4 max-w-7xl animate-fade-in pb-[400px]">
@@ -39,6 +49,35 @@ export const Tournament = () => {
           )}
         </div>
       )}
+
+      <div className="flex justify-center gap-4 mb-4">
+        {editingMachines ? (
+          <div className="flex items-center gap-2">
+            <Input
+              type="number"
+              min="1"
+              max="10"
+              value={tempMachines}
+              onChange={(e) => setTempMachines(Number(e.target.value))}
+              className="w-20"
+            />
+            <Button onClick={handleMachineNumberUpdate} variant="outline">
+              Speichern
+            </Button>
+            <Button onClick={() => setEditingMachines(false)} variant="ghost">
+              Abbrechen
+            </Button>
+          </div>
+        ) : (
+          <Button
+            onClick={() => setEditingMachines(true)}
+            variant="outline"
+            className="mb-4"
+          >
+            Automaten Anzahl: {tournament.numberOfMachines || 3}
+          </Button>
+        )}
+      </div>
       
       <TournamentControls
         onGeneratePlayers={generatePlayers}
@@ -81,7 +120,7 @@ export const Tournament = () => {
       {tournament.started && (
         <MachineOverview 
           activeMatches={activeMatches}
-          maxMachines={3}
+          maxMachines={tournament.numberOfMachines || 3}
         />
       )}
     </div>
