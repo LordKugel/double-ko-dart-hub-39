@@ -1,94 +1,106 @@
 
+import React from 'react';
 import { Match as MatchType, Player } from "@/types/tournament";
+import { cn } from "@/lib/utils";
 
 interface TournamentBracketProps {
   matches: MatchType[];
-  title: string;
-  className?: string;
+  currentRound: number;
 }
 
-export const TournamentBracket = ({ matches, title, className = "" }: TournamentBracketProps) => {
-  const rounds = Array.from(new Set(matches.map(m => m.round))).sort((a, b) => a - b);
+export const TournamentBracket = ({ matches, currentRound }: TournamentBracketProps) => {
+  const maxRound = Math.max(...matches.map(m => m.round));
   
-  const getWinPercentageDisplay = (player: Player) => {
-    if (!player.winPercentage) return "0%";
-    return `${Math.round(player.winPercentage)}%`;
+  const getMatchesByBracketAndRound = (bracket: "winners" | "losers", round: number) => {
+    return matches
+      .filter(m => m.bracket === bracket && m.round === round)
+      .sort((a, b) => a.matchNumber - b.matchNumber);
+  };
+
+  const renderMatch = (match: MatchType) => {
+    const isCurrentRound = match.round === currentRound;
+    const player1Score = match.scores.filter(s => s.player1Won).length;
+    const player2Score = match.scores.filter(s => s.player2Won).length;
+    
+    return (
+      <div 
+        key={match.id}
+        className={cn(
+          "bg-card border rounded-lg p-4 mb-4 shadow-md transition-all duration-200",
+          isCurrentRound && "ring-2 ring-primary",
+          match.completed && "opacity-75"
+        )}
+      >
+        <div className={cn(
+          "flex justify-between items-center mb-2 pb-2 border-b",
+          player1Score > player2Score && "text-win-foreground"
+        )}>
+          <span className="font-medium">{match.player1.firstName} {match.player1.lastName}</span>
+          <span className="text-sm bg-card px-2 py-1 rounded">
+            {player1Score}
+          </span>
+        </div>
+        <div className={cn(
+          "flex justify-between items-center",
+          player2Score > player1Score && "text-win-foreground"
+        )}>
+          <span className="font-medium">{match.player2.firstName} {match.player2.lastName}</span>
+          <span className="text-sm bg-card px-2 py-1 rounded">
+            {player2Score}
+          </span>
+        </div>
+      </div>
+    );
   };
 
   return (
-    <div className={`fixed top-4 w-64 bg-white rounded-lg shadow-md p-4 ${className}`}>
-      <h3 className="text-lg font-bold mb-3">{title}</h3>
-      <div className="space-y-4">
-        {rounds.map((round, roundIndex) => (
-          <div key={round} className="relative">
-            <div className="text-sm font-semibold mb-2">Runde {round}</div>
-            <div className="relative">
-              {matches
-                .filter(match => match.round === round)
-                .map((match, matchIndex) => (
-                  <div 
-                    key={match.id} 
-                    className={`
-                      bg-white border rounded p-3 mb-4 relative
-                      ${matchIndex % 2 === 0 ? 'mr-2' : 'ml-2'}
-                    `}
-                    style={{
-                      marginLeft: `${(round - 1) * 20}px`
-                    }}
-                  >
-                    <div className="flex flex-col gap-2">
-                      <div className="flex items-center justify-between border-b pb-1">
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium">
-                            {match.player1.firstName} {match.player1.lastName}
-                          </span>
-                          <span className="text-xs text-gray-500">
-                            ({getWinPercentageDisplay(match.player1)})
-                          </span>
-                        </div>
-                        {match.completed && match.scores.filter(s => s.player1Won).length > 1 && (
-                          <span className="text-green-500">✓</span>
-                        )}
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium">
-                            {match.player2.firstName} {match.player2.lastName}
-                          </span>
-                          <span className="text-xs text-gray-500">
-                            ({getWinPercentageDisplay(match.player2)})
-                          </span>
-                        </div>
-                        {match.completed && match.scores.filter(s => s.player2Won).length > 1 && (
-                          <span className="text-green-500">✓</span>
-                        )}
-                      </div>
-                      {match.completed && (
-                        <div className="flex gap-1 mt-1 justify-center">
-                          {match.scores.map((score, index) => (
-                            <div 
-                              key={index}
-                              className={`w-4 h-4 rounded-full ${
-                                score.player1Won 
-                                  ? 'bg-green-500' 
-                                  : score.player2Won 
-                                    ? 'bg-red-500'
-                                    : 'bg-gray-200'
-                              }`}
-                            />
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                    {roundIndex < rounds.length - 1 && (
-                      <div className="absolute right-0 top-1/2 w-4 border-t border-gray-300" />
-                    )}
-                  </div>
-                ))}
+    <div className="w-full mt-8 flex flex-col gap-8">
+      <div className="winners-bracket">
+        <h2 className="text-2xl font-bold mb-4 text-center">Winner's Bracket</h2>
+        <div className="flex gap-8">
+          {Array.from({ length: maxRound }, (_, i) => i + 1).map(round => (
+            <div 
+              key={`winners-${round}`} 
+              className="flex-1"
+              style={{ minWidth: '250px' }}
+            >
+              <h3 className="text-lg font-semibold mb-4 text-center">
+                Runde {round}
+              </h3>
+              {getMatchesByBracketAndRound("winners", round).map(renderMatch)}
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
+
+      <div className="losers-bracket mt-8 pt-8 border-t">
+        <h2 className="text-2xl font-bold mb-4 text-center">Loser's Bracket</h2>
+        <div className="flex gap-8">
+          {Array.from({ length: maxRound }, (_, i) => i + 1).map(round => (
+            <div 
+              key={`losers-${round}`} 
+              className="flex-1"
+              style={{ minWidth: '250px' }}
+            >
+              <h3 className="text-lg font-semibold mb-4 text-center">
+                Runde {round}
+              </h3>
+              {getMatchesByBracketAndRound("losers", round).map(renderMatch)}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {matches.some(m => m.bracket === "final") && (
+        <div className="finals mt-8 pt-8 border-t">
+          <h2 className="text-2xl font-bold mb-4 text-center">Finale</h2>
+          <div className="max-w-md mx-auto">
+            {matches
+              .filter(m => m.bracket === "final")
+              .map(renderMatch)}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

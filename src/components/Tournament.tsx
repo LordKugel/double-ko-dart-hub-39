@@ -3,6 +3,7 @@ import { TournamentControls } from "./tournament/TournamentControls";
 import { PlayersList } from "./tournament/PlayersList";
 import { MatchesTable } from "./tournament/MatchesTable";
 import { Match } from "./tournament/Match";
+import { TournamentBracket } from "./tournament/TournamentBracket";
 import { useTournament } from "@/hooks/useTournament";
 import { useState } from "react";
 
@@ -57,53 +58,11 @@ export const Tournament = () => {
           title="Alle Spieler"
         />
       ) : (
-        <div className="mt-8">
-          <div className="flex justify-between relative space-x-4">
-            <div className="w-1/6">
-              <h2 className="text-xl font-bold mb-4">Winner's Bracket (Runde {tournament.currentRound})</h2>
-              <PlayersList 
-                players={tournament.players.filter(p => p.bracket === "winners")}
-                title="Aktive Spieler"
-              />
-              {tournament.winnersBracketMatches
-                .filter(m => !m.completed && m.round === tournament.currentRound)
-                .map(match => (
-                  <Match
-                    key={match.id}
-                    match={match}
-                    onScoreUpdate={handleScoreUpdate}
-                  />
-              ))}
-            </div>
-
-            <div className="w-2/3">
-              <h2 className="text-xl font-bold mb-4">Aktuelle Matches</h2>
-              {currentMatches.map(match => (
-                <Match
-                  key={match.id}
-                  match={match}
-                  onScoreUpdate={handleScoreUpdate}
-                />
-              ))}
-            </div>
-
-            <div className="w-1/6">
-              <h2 className="text-xl font-bold mb-4">Loser's Bracket (Runde {tournament.currentRound})</h2>
-              <PlayersList 
-                players={tournament.players.filter(p => p.bracket === "losers")}
-                title="Aktive Spieler"
-              />
-              {tournament.losersBracketMatches
-                .filter(m => !m.completed && m.round === tournament.currentRound)
-                .map(match => (
-                  <Match
-                    key={match.id}
-                    match={match}
-                    onScoreUpdate={handleScoreUpdate}
-                  />
-              ))}
-            </div>
-          </div>
+        <>
+          <TournamentBracket 
+            matches={tournament.matches}
+            currentRound={tournament.currentRound}
+          />
 
           <div className="mt-8">
             <h2 className="text-xl font-bold mb-4">Ausgeschiedene Spieler</h2>
@@ -112,20 +71,7 @@ export const Tournament = () => {
               title="Eliminierte Spieler"
             />
           </div>
-
-          {tournament.finalMatches.length > 0 && (
-            <div className="mt-8">
-              <h2 className="text-xl font-bold mb-4">Finals</h2>
-              {tournament.finalMatches.map(match => (
-                <Match
-                  key={match.id}
-                  match={match}
-                  onScoreUpdate={handleScoreUpdate}
-                />
-              ))}
-            </div>
-          )}
-        </div>
+        </>
       )}
 
       {showMatchesTable && <MatchesTable matches={tournament.matches} />}
