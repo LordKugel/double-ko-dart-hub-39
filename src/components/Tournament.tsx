@@ -17,15 +17,15 @@ export const Tournament = () => {
       <h1 className="text-3xl font-bold text-center mb-8">Dart Tournament</h1>
       
       {winner && (
-        <div className="mb-12 text-center animate-fade-in">
-          <h2 className="text-6xl font-extrabold text-gradient bg-clip-text text-transparent bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 mb-4">
+        <div className="mb-12 text-center animate-fade-in bg-gradient-to-r from-yellow-50 via-yellow-100 to-yellow-50 p-8 rounded-xl border border-yellow-200 shadow-lg">
+          <h2 className="text-5xl font-extrabold mb-4 bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 bg-clip-text text-transparent">
             🏆 Turniersieger 🏆
           </h2>
-          <div className="text-4xl font-bold">
+          <div className="text-3xl font-bold text-yellow-700">
             {winner.firstName} {winner.lastName}
           </div>
           {winner.team && (
-            <div className="text-2xl text-gray-600 mt-2">
+            <div className="text-xl text-yellow-600 mt-2">
               Team: {winner.team}
             </div>
           )}

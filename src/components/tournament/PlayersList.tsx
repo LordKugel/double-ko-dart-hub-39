@@ -27,6 +27,18 @@ const countPlayerWins = (player: Player, matches: Match[]): number => {
   return totalWins;
 };
 
+const countTotalGames = (player: Player): number => {
+  let total = 0;
+  player.matches.forEach(match => {
+    match.scores.forEach(score => {
+      if (score.player1Won !== null || score.player2Won !== null) {
+        total++;
+      }
+    });
+  });
+  return total;
+};
+
 export const PlayersList = ({ players, title }: PlayersListProps) => {
   if (players.length === 0) return null;
 
@@ -49,10 +61,10 @@ export const PlayersList = ({ players, title }: PlayersListProps) => {
                   "font-medium",
                   player.winPercentage >= 50 ? "text-green-600" : "text-red-600"
                 )}>
-                  {player.winPercentage.toFixed(1)}%
+                  {countPlayerWins(player, player.matches)} / {countTotalGames(player)}
                 </span>
                 <span className="ml-2 text-gray-500">
-                  ({countPlayerWins(player, player.matches)} Gewonnen)
+                  ({player.winPercentage.toFixed(1)}%)
                 </span>
               </div>
             </div>
