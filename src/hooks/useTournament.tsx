@@ -23,7 +23,7 @@ const initialTournamentState: TournamentType = {
   numberOfMachines: 3,
   machines: Array.from({ length: 3 }, (_, i) => ({
     id: i + 1,
-    quality: 3,
+    quality: 3 as 1 | 2 | 3 | 4 | 5, // Explizit als Union Type definieren
     isFavorite: false,
     isOutOfOrder: false,
     currentMatchId: null
