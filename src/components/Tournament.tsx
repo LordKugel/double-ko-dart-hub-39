@@ -3,6 +3,7 @@ import { TournamentControls } from "./tournament/TournamentControls";
 import { PlayersList } from "./tournament/PlayersList";
 import { MatchesTable } from "./tournament/MatchesTable";
 import { TournamentBracket } from "./tournament/TournamentBracket";
+import { MachineOverview } from "./tournament/MachineOverview";
 import { useTournament } from "@/hooks/useTournament";
 import { useState } from "react";
 
@@ -11,6 +12,13 @@ export const Tournament = () => {
   const [showMatchesTable, setShowMatchesTable] = useState(false);
 
   const winner = tournament.completed ? tournament.players.find(p => !p.eliminated) : null;
+
+  // Aktive Matches sind solche, die in der aktuellen Runde sind und mindestens einen Punkt haben
+  const activeMatches = tournament.matches.filter(match => 
+    match.round === tournament.currentRound && 
+    !match.completed &&
+    match.scores.some(score => score.player1Won !== null || score.player2Won !== null)
+  );
 
   return (
     <div className="container mx-auto p-4 max-w-7xl animate-fade-in pb-[400px]">
@@ -69,6 +77,13 @@ export const Tournament = () => {
       )}
 
       {showMatchesTable && <MatchesTable matches={tournament.matches} />}
+      
+      {tournament.started && (
+        <MachineOverview 
+          activeMatches={activeMatches}
+          maxMachines={3}
+        />
+      )}
     </div>
   );
 };
