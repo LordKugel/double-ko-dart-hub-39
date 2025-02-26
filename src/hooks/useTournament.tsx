@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Tournament as TournamentType, Machine, Match } from "../types/tournament";
 import { useMatchHandling } from "./useMatchHandling";
@@ -34,27 +33,55 @@ const initialTournamentState: TournamentType = {
 
 export const useTournament = () => {
   const [tournament, setTournament] = useState<TournamentType>(() => {
+    const savedState = localStorage.getItem(STORAGE_KEY);
+    console.log("Loading state from localStorage:", savedState);
+    
+    if (!savedState) {
+      console.log("No saved state found, using initial state");
+      return initialTournamentState;
+    }
+
     try {
-      const savedState = localStorage.getItem(STORAGE_KEY);
-      if (!savedState) {
-        console.log("No saved state found, using initial state");
+      const parsedState = JSON.parse(savedState);
+      console.log("Successfully parsed saved state:", parsedState);
+      
+      // Validate that all required properties exist
+      if (!parsedState?.matches || !parsedState?.players || !parsedState?.machines) {
+        console.error("Invalid saved state structure, using initial state");
+        localStorage.removeItem(STORAGE_KEY); // Clear invalid state
         return initialTournamentState;
       }
-      const parsedState = JSON.parse(savedState);
-      console.log("Loaded saved state:", parsedState);
-      return parsedState;
+
+      // Ensure arrays are initialized
+      return {
+        ...initialTournamentState,
+        ...parsedState,
+        matches: Array.isArray(parsedState.matches) ? parsedState.matches : [],
+        players: Array.isArray(parsedState.players) ? parsedState.players : [],
+        machines: Array.isArray(parsedState.machines) ? parsedState.machines : initialTournamentState.machines,
+        winnersBracketMatches: Array.isArray(parsedState.winnersBracketMatches) ? parsedState.winnersBracketMatches : [],
+        losersBracketMatches: Array.isArray(parsedState.losersBracketMatches) ? parsedState.losersBracketMatches : [],
+        finalMatches: Array.isArray(parsedState.finalMatches) ? parsedState.finalMatches : []
+      };
     } catch (error) {
-      console.error("Error loading saved state:", error);
+      console.error("Error parsing saved state:", error);
+      localStorage.removeItem(STORAGE_KEY); // Clear invalid state
       return initialTournamentState;
     }
   });
 
   useEffect(() => {
+    if (!tournament) {
+      console.error("Tournament state is undefined, resetting to initial state");
+      setTournament(initialTournamentState);
+      return;
+    }
+
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(tournament));
-      console.log("Saved state to localStorage:", tournament);
+      console.log("Saved tournament state:", tournament);
     } catch (error) {
-      console.error("Error saving state:", error);
+      console.error("Error saving tournament state:", error);
     }
   }, [tournament]);
 
