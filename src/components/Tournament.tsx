@@ -2,7 +2,6 @@
 import { TournamentControls } from "./tournament/TournamentControls";
 import { PlayersList } from "./tournament/PlayersList";
 import { MatchesTable } from "./tournament/MatchesTable";
-import { Match } from "./tournament/Match";
 import { TournamentBracket } from "./tournament/TournamentBracket";
 import { useTournament } from "@/hooks/useTournament";
 import { useState } from "react";
@@ -10,12 +9,6 @@ import { useState } from "react";
 export const Tournament = () => {
   const { tournament, handleScoreUpdate, generatePlayers, startTournament, exportTournamentData } = useTournament();
   const [showMatchesTable, setShowMatchesTable] = useState(false);
-
-  const currentMatches = tournament.matches.filter(m => 
-    !m.completed && 
-    !tournament.winnersBracketMatches.some(wm => wm.id === m.id) &&
-    !tournament.losersBracketMatches.some(lm => lm.id === m.id)
-  );
 
   const winner = tournament.completed ? tournament.players.find(p => !p.eliminated) : null;
 
@@ -62,6 +55,7 @@ export const Tournament = () => {
           <TournamentBracket 
             matches={tournament.matches}
             currentRound={tournament.currentRound}
+            onScoreUpdate={handleScoreUpdate}
           />
 
           <div className="mt-8">

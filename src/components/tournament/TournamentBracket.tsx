@@ -1,14 +1,16 @@
 
 import React from 'react';
-import { Match as MatchType, Player } from "@/types/tournament";
+import { Match as MatchType } from "@/types/tournament";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 interface TournamentBracketProps {
   matches: MatchType[];
   currentRound: number;
+  onScoreUpdate?: (matchId: string, gameIndex: number, player1Won: boolean) => void;
 }
 
-export const TournamentBracket = ({ matches, currentRound }: TournamentBracketProps) => {
+export const TournamentBracket = ({ matches, currentRound, onScoreUpdate }: TournamentBracketProps) => {
   const maxRound = Math.max(...matches.map(m => m.round));
   
   const getMatchesByBracketAndRound = (bracket: "winners" | "losers", round: number) => {
@@ -41,12 +43,33 @@ export const TournamentBracket = ({ matches, currentRound }: TournamentBracketPr
               <span className="text-xs text-muted-foreground">{match.player1.team}</span>
             )}
           </div>
-          <span className={cn(
-            "text-sm px-2 py-1 rounded font-semibold",
-            player1Score > player2Score ? "bg-green-100 text-green-700" : "bg-card"
-          )}>
-            {player1Score}
-          </span>
+          <div className="flex items-center gap-2">
+            {!match.completed && isCurrentRound && (
+              <div className="flex gap-1">
+                {match.scores.map((score, index) => (
+                  <Button
+                    key={`p1-${index}`}
+                    size="sm"
+                    variant={score.player1Won === null ? "outline" : score.player1Won ? "default" : "ghost"}
+                    className={cn(
+                      "w-8 h-8 p-0",
+                      score.player1Won && "bg-green-500 hover:bg-green-600",
+                      score.player1Won === false && "bg-red-500 hover:bg-red-600"
+                    )}
+                    onClick={() => onScoreUpdate?.(match.id, index, true)}
+                  >
+                    {score.player1Won === null ? "-" : score.player1Won ? "W" : "L"}
+                  </Button>
+                ))}
+              </div>
+            )}
+            <span className={cn(
+              "text-sm px-2 py-1 rounded font-semibold",
+              player1Score > player2Score ? "bg-green-100 text-green-700" : "bg-card"
+            )}>
+              {player1Score}
+            </span>
+          </div>
         </div>
         <div className={cn(
           "flex justify-between items-center",
@@ -58,12 +81,33 @@ export const TournamentBracket = ({ matches, currentRound }: TournamentBracketPr
               <span className="text-xs text-muted-foreground">{match.player2.team}</span>
             )}
           </div>
-          <span className={cn(
-            "text-sm px-2 py-1 rounded font-semibold",
-            player2Score > player1Score ? "bg-green-100 text-green-700" : "bg-card"
-          )}>
-            {player2Score}
-          </span>
+          <div className="flex items-center gap-2">
+            {!match.completed && isCurrentRound && (
+              <div className="flex gap-1">
+                {match.scores.map((score, index) => (
+                  <Button
+                    key={`p2-${index}`}
+                    size="sm"
+                    variant={score.player2Won === null ? "outline" : score.player2Won ? "default" : "ghost"}
+                    className={cn(
+                      "w-8 h-8 p-0",
+                      score.player2Won && "bg-green-500 hover:bg-green-600",
+                      score.player2Won === false && "bg-red-500 hover:bg-red-600"
+                    )}
+                    onClick={() => onScoreUpdate?.(match.id, index, false)}
+                  >
+                    {score.player2Won === null ? "-" : score.player2Won ? "W" : "L"}
+                  </Button>
+                ))}
+              </div>
+            )}
+            <span className={cn(
+              "text-sm px-2 py-1 rounded font-semibold",
+              player2Score > player1Score ? "bg-green-100 text-green-700" : "bg-card"
+            )}>
+              {player2Score}
+            </span>
+          </div>
         </div>
         {match.completed && (
           <div className="mt-2 pt-2 border-t text-xs text-muted-foreground text-center">
