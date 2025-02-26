@@ -16,10 +16,9 @@ export const TournamentBracket = ({ matches, currentRound, onScoreUpdate }: Tour
   const losersRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Automatisches Scrollen zur aktuellen Runde
     const scrollToCurrentRound = (containerRef: React.RefObject<HTMLDivElement>) => {
       if (containerRef.current) {
-        const scrollAmount = (currentRound - 1) * (280 + 24); // Kartenbreite + Abstand
+        const scrollAmount = (currentRound - 1) * (280 + 24);
         containerRef.current.scrollLeft = scrollAmount;
       }
     };
@@ -38,6 +37,7 @@ export const TournamentBracket = ({ matches, currentRound, onScoreUpdate }: Tour
     const isCurrentRound = match.round === currentRound;
     const player1Score = match.scores.filter(s => s.player1Won).length;
     const player2Score = match.scores.filter(s => s.player2Won).length;
+    const winner = player1Score > player2Score ? match.player1 : player2Score > player1Score ? match.player2 : null;
     
     return (
       <div 
@@ -49,10 +49,16 @@ export const TournamentBracket = ({ matches, currentRound, onScoreUpdate }: Tour
         )}
         style={{ maxWidth: '280px' }}
       >
-        {/* Verbindungslinie nach rechts */}
-        {match.round < maxRound && (
-          <div className="absolute right-0 top-1/2 w-6 h-[2px] bg-[#403E43] transform translate-x-full" />
+        {/* Verbindungslinie nach rechts für den Gewinner */}
+        {match.round < maxRound && match.completed && winner && (
+          <div className="absolute right-0 top-1/2 transform -translate-y-1/2">
+            <div className="flex items-center">
+              <div className="w-6 h-[2px] bg-[#0FA0CE]" />
+              <div className="w-2 h-2 rounded-full bg-[#0FA0CE]" />
+            </div>
+          </div>
         )}
+        
         <div className={cn(
           "flex justify-between items-center mb-2 pb-2 border-b border-[#403E43]",
           player1Score > player2Score && "text-[#0FA0CE] font-semibold"
@@ -140,6 +146,19 @@ export const TournamentBracket = ({ matches, currentRound, onScoreUpdate }: Tour
 
   return (
     <div className="w-full mt-8 flex flex-col gap-6 animate-fade-in">
+      {matches.some(m => m.bracket === "final") && (
+        <div className="finals bg-[#1A1721] p-4 rounded-lg border border-[#403E43] shadow-lg">
+          <h2 className="text-xl font-bold mb-4 text-center text-[#8B5CF6]">
+            Finale
+          </h2>
+          <div className="max-w-md mx-auto">
+            {matches
+              .filter(m => m.bracket === "final")
+              .map(renderMatch)}
+          </div>
+        </div>
+      )}
+
       <div className="winners-bracket bg-[#1A1721] p-4 rounded-lg border border-[#403E43] shadow-lg">
         <h2 className="text-xl font-bold mb-4 text-center text-[#0FA0CE]">
           Winner's Bracket
@@ -179,19 +198,6 @@ export const TournamentBracket = ({ matches, currentRound, onScoreUpdate }: Tour
           ))}
         </div>
       </div>
-
-      {matches.some(m => m.bracket === "final") && (
-        <div className="finals bg-[#1A1721] p-4 rounded-lg border border-[#403E43] shadow-lg">
-          <h2 className="text-xl font-bold mb-4 text-center text-[#8B5CF6]">
-            Finale
-          </h2>
-          <div className="max-w-md mx-auto">
-            {matches
-              .filter(m => m.bracket === "final")
-              .map(renderMatch)}
-          </div>
-        </div>
-      )}
     </div>
   );
 };
