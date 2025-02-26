@@ -1,9 +1,10 @@
 
 import { Button } from "@/components/ui/button";
-import { Upload, Download } from "lucide-react";
+import { Upload, Download, Table2 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import * as XLSX from "xlsx";
 import { Match } from "@/types/tournament";
+import { useState } from "react";
 
 interface TournamentControlsProps {
   onGeneratePlayers: () => void;
@@ -14,6 +15,8 @@ interface TournamentControlsProps {
   matches: Match[];
   currentRound: number;
   roundStarted: boolean;
+  onToggleMatchesTable: () => void;
+  showMatchesTable: boolean;
 }
 
 export const TournamentControls = ({
@@ -24,7 +27,9 @@ export const TournamentControls = ({
   hasPlayers,
   matches,
   currentRound,
-  roundStarted
+  roundStarted,
+  onToggleMatchesTable,
+  showMatchesTable
 }: TournamentControlsProps) => {
   const getButtonLabel = () => {
     if (!isStarted) return "Start Tournament";
@@ -127,6 +132,14 @@ export const TournamentControls = ({
       >
         <Download className="mr-2 h-4 w-4" />
         Export JSON
+      </Button>
+      <Button
+        onClick={onToggleMatchesTable}
+        className="transition-all duration-200 hover:scale-105"
+        variant={showMatchesTable ? "default" : "outline"}
+      >
+        <Table2 className="mr-2 h-4 w-4" />
+        {showMatchesTable ? "Tabelle ausblenden" : "Tabelle anzeigen"}
       </Button>
     </div>
   );

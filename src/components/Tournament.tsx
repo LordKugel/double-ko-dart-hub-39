@@ -4,9 +4,11 @@ import { PlayersList } from "./tournament/PlayersList";
 import { MatchesTable } from "./tournament/MatchesTable";
 import { Match } from "./tournament/Match";
 import { useTournament } from "@/hooks/useTournament";
+import { useState } from "react";
 
 export const Tournament = () => {
   const { tournament, handleScoreUpdate, generatePlayers, startTournament, exportTournamentData } = useTournament();
+  const [showMatchesTable, setShowMatchesTable] = useState(false);
 
   const currentMatches = tournament.matches.filter(m => 
     !m.completed && 
@@ -45,6 +47,8 @@ export const Tournament = () => {
         matches={tournament.matches}
         currentRound={tournament.currentRound}
         roundStarted={tournament.roundStarted}
+        onToggleMatchesTable={() => setShowMatchesTable(!showMatchesTable)}
+        showMatchesTable={showMatchesTable}
       />
 
       {!tournament.started ? (
@@ -124,7 +128,7 @@ export const Tournament = () => {
         </div>
       )}
 
-      <MatchesTable matches={tournament.matches} />
+      {showMatchesTable && <MatchesTable matches={tournament.matches} />}
     </div>
   );
 };
