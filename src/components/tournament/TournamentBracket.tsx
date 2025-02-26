@@ -34,36 +34,73 @@ export const TournamentBracket = ({ matches, currentRound, onScoreUpdate, onMatc
       .sort((a, b) => a.matchNumber - b.matchNumber);
   };
 
-  const renderMatch = (match: MatchType) => {
+  const findPreviousMatches = (match: MatchType) => {
+    return matches.filter(m => 
+      m.round === match.round - 1 && 
+      (m.player1.id === match.player1.id || 
+       m.player1.id === match.player2.id ||
+       m.player2.id === match.player1.id ||
+       m.player2.id === match.player2.id)
+    );
+  };
+
+  const renderMatch = (match: MatchType, roundMatches: MatchType[]) => {
     const isCurrentRound = match.round === currentRound;
     const player1Score = match.scores.filter(s => s.player1Won).length;
     const player2Score = match.scores.filter(s => s.player2Won).length;
     const winner = player1Score > player2Score ? match.player1 : player2Score > player1Score ? match.player2 : null;
     
+    // Berechne die vertikale Position basierend auf der Position im aktuellen Round
+    const currentIndex = roundMatches.findIndex(m => m.id === match.id);
+    const totalMatches = roundMatches.length;
+    const verticalSpacing = totalMatches > 1 ? (100 / (totalMatches - 1)) : 0;
+    const verticalPosition = totalMatches > 1 ? currentIndex * verticalSpacing : 50;
+
+    // Finde die vorherigen Matches für die Verbindungslinien
+    const previousMatches = findPreviousMatches(match);
+    
     return (
       <div 
         key={match.id}
         className={cn(
-          "relative bg-[#221F26] border-[#403E43] border rounded-lg p-3 mb-3 shadow-md transition-all duration-200 hover:shadow-lg cursor-pointer",
+          "relative bg-[#221F26] border-[#403E43] border rounded-lg p-3 shadow-md transition-all duration-200 hover:shadow-lg cursor-pointer",
           isCurrentRound && "ring-2 ring-[#0FA0CE] bg-[#2A2731]",
           match.completed && "opacity-90"
         )}
-        style={{ maxWidth: '280px' }}
+        style={{ 
+          maxWidth: '280px',
+          marginTop: `${verticalPosition}%`,
+          transform: 'translateY(-50%)',
+        }}
         onClick={() => {
           if (isCurrentRound && !match.completed && onMatchClick) {
             onMatchClick(match.id);
           }
         }}
       >
-        {/* Verbindungslinie nach rechts für den Gewinner */}
-        {match.round < maxRound && match.completed && winner && (
-          <div className="absolute right-0 top-1/2 transform -translate-y-1/2">
-            <div className="flex items-center">
-              <div className="w-6 h-[2px] bg-[#0FA0CE]" />
-              <div className="w-2 h-2 rounded-full bg-[#0FA0CE]" />
-            </div>
-          </div>
-        )}
+        {/* Verbindungslinien zu vorherigen Matches */}
+        {previousMatches.map((prevMatch, index) => {
+          const isPlayer1FromPrevMatch = 
+            prevMatch.player1.id === match.player1.id || 
+            prevMatch.player1.id === match.player2.id;
+          
+          const isWinnerFromPrevMatch = 
+            (prevMatch.scores.filter(s => s.player1Won).length > prevMatch.scores.filter(s => s.player2Won).length && isPlayer1FromPrevMatch) ||
+            (prevMatch.scores.filter(s => s.player2Won).length > prevMatch.scores.filter(s => s.player1Won).length && !isPlayer1FromPrevMatch);
+
+          return (
+            <div
+              key={`line-${match.id}-${prevMatch.id}`}
+              className={cn(
+                "absolute w-6 h-[2px] left-[-24px] top-1/2",
+                isWinnerFromPrevMatch ? "bg-[#0FA0CE]" : "bg-red-500"
+              )}
+              style={{
+                transform: 'translateY(-50%)',
+              }}
+            />
+          );
+        })}
         
         <div className={cn(
           "flex justify-between items-center mb-2 pb-2 border-b border-[#403E43]",
@@ -166,7 +203,7 @@ export const TournamentBracket = ({ matches, currentRound, onScoreUpdate, onMatc
           <div className="max-w-md mx-auto">
             {matches
               .filter(m => m.bracket === "final")
-              .map(renderMatch)}
+              .map(match => renderMatch(match, matches.filter(m => m.bracket === "final" && m.round === match.round)))}
           </div>
         </div>
       )}
@@ -176,18 +213,21 @@ export const TournamentBracket = ({ matches, currentRound, onScoreUpdate, onMatc
           Winner's Bracket
         </h2>
         <div ref={winnersRef} className="flex gap-6 overflow-x-auto pb-4 scroll-smooth">
-          {Array.from({ length: maxRound }, (_, i) => i + 1).map(round => (
-            <div 
-              key={`winners-${round}`} 
-              className="flex-none"
-              style={{ width: '280px' }}
-            >
-              <h3 className="text-sm font-semibold mb-3 text-center text-gray-400">
-                Runde {round}
-              </h3>
-              {getMatchesByBracketAndRound("winners", round).map(renderMatch)}
-            </div>
-          ))}
+          {Array.from({ length: maxRound }, (_, i) => i + 1).map(round => {
+            const roundMatches = getMatchesByBracketAndRound("winners", round);
+            return (
+              <div 
+                key={`winners-${round}`} 
+                className="flex-none relative"
+                style={{ width: '280px', minHeight: '400px' }}
+              >
+                <h3 className="text-sm font-semibold mb-3 text-center text-gray-400">
+                  Runde {round}
+                </h3>
+                {roundMatches.map(match => renderMatch(match, roundMatches))}
+              </div>
+            );
+          })}
         </div>
       </div>
 
@@ -196,18 +236,21 @@ export const TournamentBracket = ({ matches, currentRound, onScoreUpdate, onMatc
           Loser's Bracket
         </h2>
         <div ref={losersRef} className="flex gap-6 overflow-x-auto pb-4 scroll-smooth">
-          {Array.from({ length: maxRound }, (_, i) => i + 1).map(round => (
-            <div 
-              key={`losers-${round}`} 
-              className="flex-none"
-              style={{ width: '280px' }}
-            >
-              <h3 className="text-sm font-semibold mb-3 text-center text-gray-400">
-                Runde {round}
-              </h3>
-              {getMatchesByBracketAndRound("losers", round).map(renderMatch)}
-            </div>
-          ))}
+          {Array.from({ length: maxRound }, (_, i) => i + 1).map(round => {
+            const roundMatches = getMatchesByBracketAndRound("losers", round);
+            return (
+              <div 
+                key={`losers-${round}`} 
+                className="flex-none relative"
+                style={{ width: '280px', minHeight: '400px' }}
+              >
+                <h3 className="text-sm font-semibold mb-3 text-center text-gray-400">
+                  Runde {round}
+                </h3>
+                {roundMatches.map(match => renderMatch(match, roundMatches))}
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
