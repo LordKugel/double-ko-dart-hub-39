@@ -23,7 +23,15 @@ export interface Match {
   round: number;
   bracket: "winners" | "losers" | "final";
   matchNumber: number;
-  machineNumber?: number | null; // New field for machine assignment
+  machineNumber?: number | null;
+}
+
+export interface Machine {
+  id: number;
+  quality: 1 | 2 | 3 | 4 | 5;
+  isFavorite: boolean;
+  isOutOfOrder: boolean;
+  currentMatchId: string | null;
 }
 
 export interface Tournament {
@@ -38,5 +46,6 @@ export interface Tournament {
   winnersBracketMatches: Match[];
   losersBracketMatches: Match[];
   finalMatches: Match[];
-  numberOfMachines: number; // New field for configuring number of machines
+  numberOfMachines: number;
+  machines: Machine[];
 }

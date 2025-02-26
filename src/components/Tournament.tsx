@@ -4,18 +4,35 @@ import { PlayersList } from "./tournament/PlayersList";
 import { MatchesTable } from "./tournament/MatchesTable";
 import { TournamentBracket } from "./tournament/TournamentBracket";
 import { MachineOverview } from "./tournament/MachineOverview";
+import { MachineManagement } from "./tournament/MachineManagement";
 import { useTournament } from "@/hooks/useTournament";
 import { useState } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 
 export const Tournament = () => {
-  const { tournament, handleScoreUpdate, generatePlayers, startTournament, exportTournamentData, updateNumberOfMachines } = useTournament();
+  const { 
+    tournament, 
+    handleScoreUpdate, 
+    generatePlayers, 
+    startTournament, 
+    exportTournamentData, 
+    updateNumberOfMachines,
+    updateMachine,
+    assignMatchToMachine
+  } = useTournament();
   const [showMatchesTable, setShowMatchesTable] = useState(false);
   const [editingMachines, setEditingMachines] = useState(false);
   const [tempMachines, setTempMachines] = useState(tournament.numberOfMachines || 3);
 
   const winner = tournament.completed ? tournament.players.find(p => !p.eliminated) : null;
+
+  // Verfügbare Matches für die Zuweisung
+  const availableMatches = tournament.matches.filter(match => 
+    match.round === tournament.currentRound && 
+    !match.completed &&
+    (!match.machineNumber || match.machineNumber === null)
+  );
 
   // Active matches are those with a machine assignment
   const activeMatches = tournament.matches.filter(match => 
@@ -91,6 +108,18 @@ export const Tournament = () => {
         onToggleMatchesTable={() => setShowMatchesTable(!showMatchesTable)}
         showMatchesTable={showMatchesTable}
       />
+
+      {tournament.started && (
+        <div className="mb-8">
+          <h2 className="text-xl font-bold mb-4">Automaten-Verwaltung</h2>
+          <MachineManagement
+            machines={tournament.machines}
+            onUpdateMachine={updateMachine}
+            onAssignMatch={assignMatchToMachine}
+            availableMatches={availableMatches}
+          />
+        </div>
+      )}
 
       {!tournament.started ? (
         <PlayersList 
