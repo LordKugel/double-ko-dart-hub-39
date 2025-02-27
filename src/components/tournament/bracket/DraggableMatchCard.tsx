@@ -23,14 +23,24 @@ export const DraggableMatchCard = ({
 }) => {
   const ref = useRef<HTMLDivElement>(null);
   
-  // Hier ist die korrekte Verwendung von useDrag mit item als Funktion
+  // Verbesserte Implementation des useDrag-Hooks
   const [{ isDragging }, drag] = useDrag(() => ({
     type: 'MATCH',
     item: { matchId: match.id },
-    canDrag: isCurrentRound && !match.completed && !match.machineNumber,
+    canDrag: () => isCurrentRound && !match.completed && !match.machineNumber,
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
+    end: (item, monitor) => {
+      const dropResult = monitor.getDropResult<{ machineId: number }>();
+      
+      // Debug-Info
+      console.log("Drag ended", { item, dropResult, didDrop: monitor.didDrop() });
+      
+      if (!monitor.didDrop()) {
+        console.log("Match wurde nicht auf einem Automaten abgelegt");
+      }
+    }
   }), [match.id, isCurrentRound, match.completed, match.machineNumber]);
 
   drag(ref);

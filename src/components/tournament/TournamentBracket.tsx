@@ -59,9 +59,9 @@ export const TournamentBracket = ({
         <p className="text-sm text-gray-400">Runde {currentRound} von {roundsCount}</p>
       </div>
 
-      <div className="flex items-start space-x-3 overflow-x-auto min-w-full pb-8 pt-2">
+      <div className="flex items-start space-x-2 overflow-x-auto min-w-full pb-8 pt-2">
         {winnerRounds.map((roundMatches, index) => (
-          <div key={`winner-${index}`} className="flex-none w-[180px]">
+          <div key={`winner-${index}`} className="flex-none w-[160px]">
             <div className="text-xs font-semibold mb-2 text-center text-[#0FA0CE]">
               Winner-Runde {index + 1}
             </div>
@@ -84,7 +84,7 @@ export const TournamentBracket = ({
         ))}
 
         {finalMatches.length > 0 && (
-          <div className="flex-none w-[180px]">
+          <div className="flex-none w-[160px]">
             <div className="text-xs font-semibold mb-2 text-center text-[#8B5CF6]">
               Finale
             </div>
@@ -107,7 +107,7 @@ export const TournamentBracket = ({
         )}
 
         {loserRounds.map((roundMatches, index) => (
-          <div key={`loser-${index}`} className="flex-none w-[180px]">
+          <div key={`loser-${index}`} className="flex-none w-[160px]">
             <div className="text-xs font-semibold mb-2 text-center text-red-500">
               Loser-Runde {index + 1}
             </div>

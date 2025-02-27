@@ -29,6 +29,7 @@ export const DroppableMachineCard = ({
   currentMatch,
   canConfirm = false
 }: DroppableMachineCardProps) => {
+  // Verbesserte Drop-Implementierung
   const [{ isOver, canDrop }, drop] = useDrop({
     accept: 'MATCH',
     drop: (item: any) => {
