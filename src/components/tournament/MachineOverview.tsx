@@ -38,6 +38,7 @@ export const MachineOverview = ({
   onDecreaseMaxMachines
 }: MachineOverviewProps) => {
   const [machineHeight, setMachineHeight] = useState<number>(200);
+  const [containerHeight, setContainerHeight] = useState<number>(35); // vh units
   
   const handleToggleFavorite = (machine: Machine) => {
     onUpdateMachine({
@@ -62,7 +63,8 @@ export const MachineOverview = ({
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-[#1A1721] border-t border-[#403E43] p-4 z-50">
+    <div className="fixed bottom-0 left-0 right-0 bg-[#1A1721] border-t border-[#403E43] p-4 z-50"
+         style={{ height: `${containerHeight}vh` }}>
       <div className="container mx-auto">
         <div className="flex justify-between items-center mb-2">
           <div className="flex items-center gap-2">
@@ -95,8 +97,8 @@ export const MachineOverview = ({
             
             {/* Höhensteuerung für Automaten */}
             <div className="ml-6 flex items-center gap-2">
-              <label className="text-xs text-gray-400">Höhe:</label>
-              <div className="w-32">
+              <label className="text-xs text-gray-400">Höhe Automaten:</label>
+              <div className="w-28">
                 <Slider 
                   defaultValue={[machineHeight]} 
                   min={150} 
@@ -107,13 +109,28 @@ export const MachineOverview = ({
               </div>
               <span className="text-xs text-gray-400">{machineHeight}px</span>
             </div>
+            
+            {/* Höhensteuerung für Container */}
+            <div className="ml-6 flex items-center gap-2">
+              <label className="text-xs text-gray-400">Höhe Container:</label>
+              <div className="w-28">
+                <Slider 
+                  defaultValue={[containerHeight]} 
+                  min={20} 
+                  max={60} 
+                  step={5}
+                  onValueChange={(values) => setContainerHeight(values[0])}
+                />
+              </div>
+              <span className="text-xs text-gray-400">{containerHeight}vh</span>
+            </div>
           </div>
           
           <span className="text-xs text-gray-400">
             {activeMatches.length} / {maxMachines} belegt
           </span>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
           {Array.from({ length: maxMachines }).map((_, index) => {
             const machineId = index + 1;
             const machine = machines.find(m => m.id === machineId) || {
@@ -146,6 +163,7 @@ export const MachineOverview = ({
                     <div className="flex justify-between items-center">
                       <span className="text-xs text-gray-400">
                         Automat {index + 1}
+                        {machine.isFavorite && " ★"}
                       </span>
                       <div className="flex items-center gap-1">
                         <TooltipProvider>
@@ -275,7 +293,9 @@ export const MachineOverview = ({
                 ) : (
                   <div className="flex flex-col items-center justify-center h-full text-gray-400">
                     <div className="flex justify-between w-full mb-2">
-                      <span className="text-sm">Automat {machineId}</span>
+                      <span className="text-sm">Automat {machineId}
+                        {machine.isFavorite && " ★"}
+                      </span>
                       <div className="flex items-center gap-1">
                         <TooltipProvider>
                           <Tooltip>

@@ -23,8 +23,10 @@ export const TournamentBracket = ({
   onAssignMatch,
   hideScoreControls = false
 }: TournamentBracketProps) => {
+  // Standardwerte als Prozentsätze und relative Einheiten
   const [bracketWidth, setBracketWidth] = useState<number>(160);
   const [bracketHeight, setBracketHeight] = useState<number>(600);
+  const [containerWidth, setContainerWidth] = useState<number>(90); // Prozent der verfügbaren Breite
   
   const roundsCount = Math.max(...matches.map(m => m.round), 1);
   const winnerMatches = matches.filter(m => m.bracket === "winners");
@@ -54,14 +56,21 @@ export const TournamentBracket = ({
   };
 
   return (
-    <div className="w-full h-full bg-[#121824] text-white p-4 rounded-lg overflow-auto" style={{ maxHeight: `${bracketHeight}px` }}>
+    <div 
+      className="w-full h-full bg-[#121824] text-white p-4 rounded-lg overflow-auto" 
+      style={{ 
+        maxHeight: `${bracketHeight}px`,
+        width: `${containerWidth}%`,
+        margin: '0 auto'
+      }}
+    >
       <div className="text-center mb-4">
         <h3 className="font-bold text-lg">Turnierbaum</h3>
         <p className="text-sm text-gray-400">Runde {currentRound} von {roundsCount}</p>
       </div>
       
-      {/* Controls for bracket size */}
-      <div className="mb-4 grid grid-cols-2 gap-6">
+      {/* Controls for bracket size and container width */}
+      <div className="mb-4 grid grid-cols-3 gap-4">
         <div>
           <label className="text-xs text-gray-400 mb-1 block">Breite der Brackets</label>
           <Slider 
@@ -83,6 +92,17 @@ export const TournamentBracket = ({
             onValueChange={(values) => setBracketHeight(values[0])}
           />
           <div className="text-xs text-gray-500 mt-1">{bracketHeight}px</div>
+        </div>
+        <div>
+          <label className="text-xs text-gray-400 mb-1 block">Breite des Turnierbaums</label>
+          <Slider 
+            defaultValue={[containerWidth]} 
+            min={60} 
+            max={100} 
+            step={5}
+            onValueChange={(values) => setContainerWidth(values[0])}
+          />
+          <div className="text-xs text-gray-500 mt-1">{containerWidth}%</div>
         </div>
       </div>
 

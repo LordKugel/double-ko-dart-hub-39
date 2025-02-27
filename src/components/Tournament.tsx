@@ -53,7 +53,13 @@ export const Tournament = () => {
   ) || [];
 
   const handleMatchClick = (matchId: string) => {
-    const availableMachine = tournament.machines.find(machine => 
+    // Erst Favoriten-Automaten durchsuchen, dann die anderen
+    const favoriteMachine = tournament.machines.find(machine => 
+      machine.isFavorite && !machine.isOutOfOrder && !machine.currentMatchId
+    );
+    
+    // Wenn kein Favorit verfügbar ist, suche nach einem anderen freien Automaten
+    const availableMachine = favoriteMachine || tournament.machines.find(machine => 
       !machine.isOutOfOrder && !machine.currentMatchId
     );
 
@@ -61,7 +67,7 @@ export const Tournament = () => {
       assignMatchToMachine(availableMachine.id, matchId);
       toast({
         title: "Match zugewiesen",
-        description: `Match wurde automatisch Automat ${availableMachine.id} zugewiesen`
+        description: `Match wurde ${favoriteMachine ? "Favoriten-" : ""}Automat ${availableMachine.id} zugewiesen`
       });
     } else {
       toast({
