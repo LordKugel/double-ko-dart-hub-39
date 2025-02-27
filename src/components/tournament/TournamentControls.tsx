@@ -53,8 +53,8 @@ export const TournamentControls = ({
     const nextRoundWillBeSemifinal = currentRound >= 2 && 
       matches.some(m => m.round === currentRound && m.bracket === "losers");
     const nextRoundWillBeFinal = 
-      matches.filter(m => !m.eliminated && m.bracket === "winners").length === 1 &&
-      matches.filter(m => !m.eliminated && m.bracket === "losers").length === 1;
+      matches.filter(m => m.bracket === "winners").length === 1 &&
+      matches.filter(m => m.bracket === "losers").length === 1;
     
     if (nextRoundWillBeFinal) return "Finale starten";
     if (nextRoundWillBeSemifinal) return "Halbfinale starten";
