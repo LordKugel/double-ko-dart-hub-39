@@ -19,6 +19,7 @@ interface MatchCardProps {
   onScoreUpdate?: (matchId: string, gameIndex: number, player1Won: boolean) => void;
   machines?: Machine[];
   onAssignMatch?: (machineId: number, matchId: string) => void;
+  hideScoreControls?: boolean;
 }
 
 export const MatchCard = ({ 
@@ -29,12 +30,16 @@ export const MatchCard = ({
   onMatchClick,
   onScoreUpdate,
   machines = [],
-  onAssignMatch 
+  onAssignMatch,
+  hideScoreControls = false
 }: MatchCardProps) => {
   const player1Score = match.scores.filter(s => s.player1Won).length;
   const player2Score = match.scores.filter(s => s.player2Won).length;
 
   const handleScoreUpdate = (index: number, player1Won: boolean) => {
+    // Wenn das Match einem Automaten zugewiesen ist oder die Steuerelemente ausgeblendet werden sollen, 
+    // erlauben wir keine Aktualisierung der Punktzahl über diese Komponente
+    if (match.machineNumber || hideScoreControls) return;
     onScoreUpdate?.(match.id, index, player1Won);
   };
 
@@ -71,7 +76,7 @@ export const MatchCard = ({
         "relative border rounded p-2 transition-colors",
         getBracketColors(),
         isCurrentRound && "ring-1 ring-blue-500",
-        "text-sm w-[150px]"  // Kleinere Breite
+        "text-sm w-[140px]"  // Kleinere Breite für die Darstellung im Bracket
       )}
       onClick={() => {
         if (isCurrentRound && !match.completed && onMatchClick) {
@@ -88,7 +93,7 @@ export const MatchCard = ({
         isPlayer1={true}
         onScoreUpdate={handleScoreUpdate}
         completed={match.completed}
-        showScoreControls={match.machineNumber !== null && match.machineNumber !== undefined}
+        showScoreControls={!hideScoreControls && !match.machineNumber}
       />
       <div className="my-1 border-t border-gray-700" />
       <PlayerInfo
@@ -100,7 +105,7 @@ export const MatchCard = ({
         isPlayer1={false}
         onScoreUpdate={handleScoreUpdate}
         completed={match.completed}
-        showScoreControls={match.machineNumber !== null && match.machineNumber !== undefined}
+        showScoreControls={!hideScoreControls && !match.machineNumber}
       />
       {match.completed && (
         <div className="mt-1 text-xs text-gray-500 text-center">

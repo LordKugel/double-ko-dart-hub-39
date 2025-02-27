@@ -10,6 +10,7 @@ interface TournamentBracketProps {
   onMatchClick?: (matchId: string) => void;
   machines?: Machine[];
   onAssignMatch?: (machineId: number, matchId: string) => void;
+  hideScoreControls?: boolean;
 }
 
 export const TournamentBracket = ({ 
@@ -18,7 +19,8 @@ export const TournamentBracket = ({
   onScoreUpdate, 
   onMatchClick,
   machines,
-  onAssignMatch
+  onAssignMatch,
+  hideScoreControls = false
 }: TournamentBracketProps) => {
   // Gruppieren der Matches nach Runden und Brackets
   const roundsCount = Math.max(...matches.map(m => m.round), 1);
@@ -61,7 +63,7 @@ export const TournamentBracket = ({
 
       <div className="flex items-start space-x-2 overflow-x-auto min-w-full pb-8 pt-2">
         {winnerRounds.map((roundMatches, index) => (
-          <div key={`winner-${index}`} className="flex-none w-[160px]">
+          <div key={`winner-${index}`} className="flex-none w-[140px]">
             <div className="text-xs font-semibold mb-2 text-center text-[#0FA0CE]">
               Winner-Runde {index + 1}
             </div>
@@ -76,6 +78,7 @@ export const TournamentBracket = ({
                     onScoreUpdate={onScoreUpdate}
                     machines={machines}
                     onAssignMatch={onAssignMatch}
+                    hideScoreControls={hideScoreControls}
                   />
                 </div>
               ))}
@@ -84,7 +87,7 @@ export const TournamentBracket = ({
         ))}
 
         {finalMatches.length > 0 && (
-          <div className="flex-none w-[160px]">
+          <div className="flex-none w-[140px]">
             <div className="text-xs font-semibold mb-2 text-center text-[#8B5CF6]">
               Finale
             </div>
@@ -99,6 +102,7 @@ export const TournamentBracket = ({
                     onScoreUpdate={onScoreUpdate}
                     machines={machines}
                     onAssignMatch={onAssignMatch}
+                    hideScoreControls={hideScoreControls}
                   />
                 </div>
               ))}
@@ -107,7 +111,7 @@ export const TournamentBracket = ({
         )}
 
         {loserRounds.map((roundMatches, index) => (
-          <div key={`loser-${index}`} className="flex-none w-[160px]">
+          <div key={`loser-${index}`} className="flex-none w-[140px]">
             <div className="text-xs font-semibold mb-2 text-center text-red-500">
               Loser-Runde {index + 1}
             </div>
@@ -122,6 +126,7 @@ export const TournamentBracket = ({
                     onScoreUpdate={onScoreUpdate}
                     machines={machines}
                     onAssignMatch={onAssignMatch}
+                    hideScoreControls={hideScoreControls}
                   />
                 </div>
               ))}

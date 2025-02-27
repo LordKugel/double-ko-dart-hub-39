@@ -11,7 +11,8 @@ export const DraggableMatchCard = ({
   previousMatches,
   onScoreUpdate,
   machines,
-  onAssignMatch
+  onAssignMatch,
+  hideScoreControls
 }: {
   match: MatchType;
   isCurrentRound: boolean;
@@ -20,6 +21,7 @@ export const DraggableMatchCard = ({
   onScoreUpdate?: (matchId: string, gameIndex: number, player1Won: boolean) => void;
   machines?: Machine[];
   onAssignMatch?: (machineId: number, matchId: string) => void;
+  hideScoreControls?: boolean;
 }) => {
   const ref = useRef<HTMLDivElement>(null);
   
@@ -84,6 +86,7 @@ export const DraggableMatchCard = ({
         onScoreUpdate={onScoreUpdate}
         machines={machines}
         onAssignMatch={onAssignMatch}
+        hideScoreControls={hideScoreControls}
       />
       
       {/* Debug Badge */}

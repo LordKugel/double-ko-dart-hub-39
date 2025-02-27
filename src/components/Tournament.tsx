@@ -4,7 +4,6 @@ import { PlayersList } from "./tournament/PlayersList";
 import { MatchesTable } from "./tournament/MatchesTable";
 import { TournamentBracket } from "./tournament/TournamentBracket";
 import { MachineOverview } from "./tournament/MachineOverview";
-import { MachineManagement } from "./tournament/MachineManagement";
 import { useTournament } from "@/hooks/useTournament";
 import { useState } from "react";
 import { Button } from "./ui/button";
@@ -32,7 +31,6 @@ export const Tournament = () => {
   } = useTournament();
 
   const [showMatchesTable, setShowMatchesTable] = useState(false);
-  const [showMachineManagement, setShowMachineManagement] = useState(false);
   const [editingMachines, setEditingMachines] = useState(false);
   const [tempMachines, setTempMachines] = useState(tournament?.numberOfMachines || 3);
 
@@ -76,9 +74,19 @@ export const Tournament = () => {
   };
 
   const getMatchForMachine = (machineId: number) => {
-    return tournament.matches.find(m => 
+    const match = tournament.matches.find(m => 
       m.machineNumber === machineId && !m.completed
-    ) || null;
+    );
+    
+    if (match) {
+      // Erweitere das Match-Objekt um die onScoreUpdate-Funktion
+      return {
+        ...match,
+        onScoreUpdate: handleScoreUpdate
+      };
+    }
+    
+    return null;
   };
 
   const canConfirmMatch = (machineId: number) => {
@@ -135,56 +143,36 @@ export const Tournament = () => {
 
           <div className="flex justify-center gap-4 mb-4">
             <Button
-              onClick={() => setShowMachineManagement(!showMachineManagement)}
+              onClick={() => setEditingMachines(!editingMachines)}
               variant="outline"
               className="mb-4 flex items-center gap-2 border-blue-700 text-blue-400 hover:bg-blue-900/20"
             >
               <Cog className="h-4 w-4" />
-              Automaten-Verwaltung {tournament.numberOfMachines || 3}
-              {showMachineManagement ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              Anzahl Automaten: {tournament.numberOfMachines || 3}
+              {editingMachines ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
             </Button>
           </div>
           
-          {showMachineManagement && (
+          {editingMachines && (
             <div className="mb-4 p-4 bg-[#121824] rounded-lg border border-blue-900/50 animate-fade-in">
               <div className="flex justify-center gap-4 mb-4">
-                {editingMachines ? (
-                  <div className="flex items-center gap-2">
-                    <Input
-                      type="number"
-                      min="1"
-                      max="10"
-                      value={tempMachines}
-                      onChange={(e) => setTempMachines(Number(e.target.value))}
-                      className="w-20 bg-[#1A2133] border-blue-900/50 text-white"
-                    />
-                    <Button onClick={handleMachineNumberUpdate} variant="outline" className="border-blue-700 text-blue-400">
-                      Speichern
-                    </Button>
-                    <Button onClick={() => setEditingMachines(false)} variant="ghost" className="text-gray-400">
-                      Abbrechen
-                    </Button>
-                  </div>
-                ) : (
-                  <Button
-                    onClick={() => setEditingMachines(true)}
-                    variant="outline"
-                    className="border-blue-700 text-blue-400"
-                  >
-                    Automaten Anzahl: {tournament.numberOfMachines || 3}
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="number"
+                    min="1"
+                    max="10"
+                    value={tempMachines}
+                    onChange={(e) => setTempMachines(Number(e.target.value))}
+                    className="w-20 bg-[#1A2133] border-blue-900/50 text-white"
+                  />
+                  <Button onClick={handleMachineNumberUpdate} variant="outline" className="border-blue-700 text-blue-400">
+                    Speichern
                   </Button>
-                )}
+                  <Button onClick={() => setEditingMachines(false)} variant="ghost" className="text-gray-400">
+                    Abbrechen
+                  </Button>
+                </div>
               </div>
-              
-              <MachineManagement
-                machines={tournament.machines}
-                onUpdateMachine={updateMachine}
-                onAssignMatch={assignMatchToMachine}
-                onConfirmMatch={confirmMatchResult}
-                getMatchForMachine={getMatchForMachine}
-                canConfirmMatch={canConfirmMatch}
-                availableMatches={availableMatches}
-              />
             </div>
           )}
           
@@ -232,10 +220,8 @@ export const Tournament = () => {
                   <TournamentBracket 
                     matches={tournament.matches}
                     currentRound={tournament.currentRound}
-                    onScoreUpdate={handleScoreUpdate}
                     onMatchClick={handleMatchClick}
-                    machines={tournament.machines}
-                    onAssignMatch={assignMatchToMachine}
+                    hideScoreControls={true}
                   />
                 </div>
                 
@@ -270,6 +256,13 @@ export const Tournament = () => {
             <MachineOverview 
               activeMatches={activeMatches}
               maxMachines={tournament.numberOfMachines || 3}
+              machines={tournament.machines}
+              availableMatches={availableMatches}
+              onUpdateMachine={updateMachine}
+              onAssignMatch={assignMatchToMachine}
+              onConfirmMatch={confirmMatchResult}
+              getMatchForMachine={getMatchForMachine}
+              canConfirmMatch={canConfirmMatch}
             />
           )}
         </div>
