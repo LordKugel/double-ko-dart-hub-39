@@ -79,11 +79,7 @@ export const Tournament = () => {
     );
     
     if (match) {
-      // Erweitere das Match-Objekt um die onScoreUpdate-Funktion
-      return {
-        ...match,
-        onScoreUpdate: handleScoreUpdate
-      };
+      return match;
     }
     
     return null;
@@ -263,6 +259,7 @@ export const Tournament = () => {
               onConfirmMatch={confirmMatchResult}
               getMatchForMachine={getMatchForMachine}
               canConfirmMatch={canConfirmMatch}
+              onScoreUpdate={handleScoreUpdate}
             />
           )}
         </div>

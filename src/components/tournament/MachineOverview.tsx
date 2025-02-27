@@ -16,6 +16,7 @@ interface MachineOverviewProps {
   onConfirmMatch?: (machineId: number) => void;
   getMatchForMachine?: (machineId: number) => Match | null;
   canConfirmMatch?: (machineId: number) => boolean;
+  onScoreUpdate?: (matchId: string, gameIndex: number, player1Won: boolean) => void;
 }
 
 export const MachineOverview = ({ 
@@ -27,7 +28,8 @@ export const MachineOverview = ({
   onAssignMatch,
   onConfirmMatch,
   getMatchForMachine,
-  canConfirmMatch
+  canConfirmMatch,
+  onScoreUpdate
 }: MachineOverviewProps) => {
   
   const handleToggleFavorite = (machine: Machine) => {
@@ -43,6 +45,13 @@ export const MachineOverview = ({
       isOutOfOrder: !machine.isOutOfOrder,
       currentMatchId: machine.isOutOfOrder ? machine.currentMatchId : null
     });
+  };
+
+  // Diese Funktion kümmert sich um die Aktualisierung des Matchstandes
+  const handleScoreUpdate = (matchId: string, gameIndex: number, player1Won: boolean) => {
+    if (onScoreUpdate) {
+      onScoreUpdate(matchId, gameIndex, player1Won);
+    }
   };
 
   return (
@@ -165,7 +174,7 @@ export const MachineOverview = ({
                                   ? "bg-[#0FA0CE] text-white" 
                                   : "bg-[#2A2631] border border-[#403E43]"
                               )}
-                              onClick={() => match.completed ? null : match.onScoreUpdate?.(match.id, idx, true)}
+                              onClick={() => match.completed ? null : handleScoreUpdate(match.id, idx, true)}
                               disabled={match.completed}
                             >
                               {score.player1Won ? 'W' : '-'}
@@ -177,7 +186,7 @@ export const MachineOverview = ({
                                   ? "bg-[#0FA0CE] text-white" 
                                   : "bg-[#2A2631] border border-[#403E43]"
                               )}
-                              onClick={() => match.completed ? null : match.onScoreUpdate?.(match.id, idx, false)}
+                              onClick={() => match.completed ? null : handleScoreUpdate(match.id, idx, false)}
                               disabled={match.completed}
                             >
                               {score.player2Won ? 'W' : '-'}
