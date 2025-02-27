@@ -10,9 +10,10 @@ export const MarqueeText = ({ children, speed = 30 }: MarqueeTextProps) => {
   return (
     <div className="relative w-full overflow-hidden bg-black py-2 text-white">
       <div
-        className="whitespace-nowrap inline-block animate-marquee"
+        className="whitespace-nowrap inline-block"
         style={{
           animationDuration: `${speed}s`,
+          animation: "marquee linear infinite",
         }}
       >
         {children}
@@ -21,20 +22,18 @@ export const MarqueeText = ({ children, speed = 30 }: MarqueeTextProps) => {
         <span className="mx-4">•</span>
       </div>
       
-      <style jsx global>{`
-        @keyframes marquee {
-          0% {
-            transform: translateX(0);
+      <style>
+        {`
+          @keyframes marquee {
+            0% {
+              transform: translateX(0);
+            }
+            100% {
+              transform: translateX(-50%);
+            }
           }
-          100% {
-            transform: translateX(-50%);
-          }
-        }
-        
-        .animate-marquee {
-          animation: marquee linear infinite;
-        }
-      `}</style>
+        `}
+      </style>
     </div>
   );
 };
