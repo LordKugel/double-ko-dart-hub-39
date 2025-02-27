@@ -30,13 +30,20 @@ export const MatchCard = ({
   return (
     <div 
       className={cn(
-        "relative bg-gray-800 border border-gray-700 rounded p-4 mb-4 hover:bg-gray-700 transition-colors",
-        isCurrentRound && "ring-2 ring-blue-500"
+        "relative bg-gray-800 border border-gray-700 rounded p-2 mb-2 hover:bg-gray-700 transition-colors",
+        isCurrentRound && "ring-1 ring-blue-500",
+        "text-sm"  // Kleinere Textgröße
       )}
       onClick={() => {
         if (isCurrentRound && !match.completed && onMatchClick) {
           onMatchClick(match.id);
         }
+      }}
+      style={{
+        // 50% Reduzierung der Größe
+        transform: "scale(0.85)",
+        transformOrigin: "top left",
+        maxWidth: "240px"
       }}
     >
       <PlayerInfo
@@ -48,8 +55,9 @@ export const MatchCard = ({
         isPlayer1={true}
         onScoreUpdate={handleScoreUpdate}
         completed={match.completed}
+        showScoreControls={match.machineNumber !== null && match.machineNumber !== undefined}
       />
-      <div className="my-2 border-t border-gray-700" />
+      <div className="my-1 border-t border-gray-700" />
       <PlayerInfo
         player={match.player2}
         score={player2Score}
@@ -59,10 +67,16 @@ export const MatchCard = ({
         isPlayer1={false}
         onScoreUpdate={handleScoreUpdate}
         completed={match.completed}
+        showScoreControls={match.machineNumber !== null && match.machineNumber !== undefined}
       />
       {match.completed && (
-        <div className="mt-2 text-xs text-gray-500 text-center">
+        <div className="mt-1 text-xs text-gray-500 text-center">
           Spiel beendet
+        </div>
+      )}
+      {match.machineNumber && !match.completed && (
+        <div className="mt-1 text-xs text-blue-500 text-center">
+          Automat {match.machineNumber}
         </div>
       )}
     </div>

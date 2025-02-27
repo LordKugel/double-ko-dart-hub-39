@@ -18,7 +18,7 @@ export const MatchScore = ({ score, index, isPlayer1, onScoreUpdate }: MatchScor
       size="sm"
       variant={isWinner === null ? "outline" : isWinner ? "default" : "ghost"}
       className={cn(
-        "w-6 h-6 p-0 text-xs",
+        "w-5 h-5 p-0 text-xs",
         isWinner && "bg-[#0FA0CE] hover:bg-[#0FA0CE]/80",
         isWinner === false && "bg-red-500 hover:bg-red-600"
       )}

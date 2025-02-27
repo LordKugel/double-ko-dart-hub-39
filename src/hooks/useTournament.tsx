@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Tournament as TournamentType, Machine, Match } from "../types/tournament";
 import { useMatchHandling } from "./useMatchHandling";
@@ -33,7 +34,15 @@ const initialTournamentState: TournamentType = {
 
 export const useTournament = () => {
   const [tournament, setTournament] = useState<TournamentType>(() => {
-    localStorage.removeItem(STORAGE_KEY);
+    const storedData = localStorage.getItem(STORAGE_KEY);
+    if (storedData) {
+      try {
+        return JSON.parse(storedData);
+      } catch (error) {
+        console.error("Error parsing stored tournament data:", error);
+        localStorage.removeItem(STORAGE_KEY);
+      }
+    }
     return initialTournamentState;
   });
 
@@ -119,19 +128,33 @@ export const useTournament = () => {
   };
 
   const assignMatchToMachine = (machineId: number, matchId: string | null) => {
-    setTournament(prev => ({
-      ...prev,
-      machines: prev.machines.map(machine => {
+    setTournament(prev => {
+      // Zuerst aktualisieren wir die Maschine
+      const updatedMachines = prev.machines.map(machine => {
         if (machine.id === machineId) {
           return { ...machine, currentMatchId: matchId };
         }
         return machine;
-      }),
-      matches: prev.matches.map(match => ({
-        ...match,
-        machineNumber: match.id === matchId ? machineId : match.machineNumber
-      }))
-    }));
+      });
+
+      // Dann aktualisieren wir das Match
+      const updatedMatches = prev.matches.map(match => {
+        if (match.id === matchId) {
+          return { ...match, machineNumber: machineId };
+        }
+        // Wenn ein anderes Match bereits dieser Maschine zugewiesen war, entfernen wir die Zuweisung
+        if (match.machineNumber === machineId && match.id !== matchId) {
+          return { ...match, machineNumber: null };
+        }
+        return match;
+      });
+
+      return {
+        ...prev,
+        machines: updatedMachines,
+        matches: updatedMatches
+      };
+    });
 
     if (matchId) {
       toast({
@@ -139,6 +162,88 @@ export const useTournament = () => {
         description: `Match wurde Automat ${machineId} zugewiesen`
       });
     }
+  };
+
+  const confirmMatchResult = (machineId: number) => {
+    setTournament(prev => {
+      const machine = prev.machines.find(m => m.id === machineId);
+      if (!machine || !machine.currentMatchId) return prev;
+
+      const matchIndex = prev.matches.findIndex(m => m.id === machine.currentMatchId);
+      if (matchIndex === -1) return prev;
+
+      const match = prev.matches[matchIndex];
+      
+      // Prüfen, ob alle drei Spiele gespielt wurden
+      const player1Wins = match.scores.filter(s => s.player1Won).length;
+      const player2Wins = match.scores.filter(s => s.player2Won).length;
+      
+      if (player1Wins + player2Wins !== 3) {
+        toast({
+          title: "Unvollständiges Match",
+          description: "Es müssen alle drei Spiele gespielt werden.",
+          variant: "destructive"
+        });
+        return prev;
+      }
+
+      // Match als abgeschlossen markieren
+      const updatedMatch = { ...match, completed: true, countdownStarted: false };
+      const updatedMatches = [...prev.matches];
+      updatedMatches[matchIndex] = updatedMatch;
+      
+      // Spieler aktualisieren
+      const updatedPlayers = prev.players.map(player => {
+        // Gewinner bestimmen
+        const isPlayer1 = player.id === match.player1.id;
+        const isPlayer2 = player.id === match.player2.id;
+        
+        if (!isPlayer1 && !isPlayer2) return player;
+        
+        const isWinner = isPlayer1 ? player1Wins > player2Wins : player2Wins > player1Wins;
+        const isLoser = !isWinner;
+        
+        if (isLoser) {
+          const newLosses = player.losses + 1;
+          // Eliminiert, wenn im Verlierer-Bracket oder 2 Niederlagen
+          const eliminated = player.bracket === "losers" || newLosses >= 2;
+          
+          return {
+            ...player,
+            losses: newLosses,
+            eliminated,
+            bracket: eliminated ? null : "losers"
+          };
+        }
+        
+        return player;
+      });
+      
+      // Maschine freigeben
+      const updatedMachines = prev.machines.map(m => {
+        if (m.id === machineId) {
+          return { ...m, currentMatchId: null };
+        }
+        return m;
+      });
+      
+      toast({
+        title: "Match bestätigt",
+        description: "Das Match wurde abgeschlossen und die Ergebnisse wurden gespeichert."
+      });
+      
+      // Turnier auf Abschluss prüfen
+      const remainingPlayers = updatedPlayers.filter(p => !p.eliminated);
+      const completed = remainingPlayers.length === 1;
+      
+      return {
+        ...prev,
+        matches: updatedMatches,
+        players: updatedPlayers,
+        machines: updatedMachines,
+        completed
+      };
+    });
   };
 
   const exportTournamentData = () => {
@@ -167,6 +272,7 @@ export const useTournament = () => {
     exportTournamentData,
     updateNumberOfMachines,
     updateMachine,
-    assignMatchToMachine
+    assignMatchToMachine,
+    confirmMatchResult
   };
 };

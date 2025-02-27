@@ -7,6 +7,9 @@ interface MachineManagementProps {
   machines: Machine[];
   onUpdateMachine: (machine: Machine) => void;
   onAssignMatch: (machineId: number, matchId: string | null) => void;
+  onConfirmMatch?: (machineId: number) => void;
+  getMatchForMachine?: (machineId: number) => Match | null;
+  canConfirmMatch?: (machineId: number) => boolean;
   availableMatches: Match[];
 }
 
@@ -14,6 +17,9 @@ export const MachineManagement = ({
   machines,
   onUpdateMachine,
   onAssignMatch,
+  onConfirmMatch,
+  getMatchForMachine,
+  canConfirmMatch,
   availableMatches
 }: MachineManagementProps) => {
   const handleQualityChange = (machine: Machine, newQuality: 1 | 2 | 3) => {
@@ -60,7 +66,10 @@ export const MachineManagement = ({
           onToggleOutOfOrder={handleToggleOutOfOrder}
           onQualityChange={handleQualityChange}
           onAssignMatch={onAssignMatch}
+          onConfirmMatch={onConfirmMatch}
           availableMatches={availableMatches}
+          currentMatch={getMatchForMachine ? getMatchForMachine(machine.id) : null}
+          canConfirm={canConfirmMatch ? canConfirmMatch(machine.id) : false}
         />
       ))}
     </div>

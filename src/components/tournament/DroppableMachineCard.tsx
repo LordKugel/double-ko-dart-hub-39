@@ -2,7 +2,7 @@
 import { useDrop } from 'react-dnd';
 import { Machine, Match } from "@/types/tournament";
 import { Button } from "../ui/button";
-import { Star, AlertTriangle } from "lucide-react";
+import { Star, AlertTriangle, CheckCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "../ui/use-toast";
 
@@ -12,7 +12,10 @@ interface DroppableMachineCardProps {
   onToggleOutOfOrder: (machine: Machine) => void;
   onQualityChange: (machine: Machine, quality: 1 | 2 | 3) => void;
   onAssignMatch: (machineId: number, matchId: string | null) => void;
+  onConfirmMatch?: (machineId: number) => void;
   availableMatches: Match[];
+  currentMatch?: Match | null;
+  canConfirm?: boolean;
 }
 
 export const DroppableMachineCard = ({
@@ -21,9 +24,12 @@ export const DroppableMachineCard = ({
   onToggleOutOfOrder,
   onQualityChange,
   onAssignMatch,
-  availableMatches
+  onConfirmMatch,
+  availableMatches,
+  currentMatch,
+  canConfirm = false
 }: DroppableMachineCardProps) => {
-  const [{ isOver, canDrop }, drop] = useDrop(() => ({
+  const [{ isOver, canDrop }, drop] = useDrop({
     accept: 'MATCH',
     drop: (item: { matchId: string }) => {
       onAssignMatch(machine.id, item.matchId);
@@ -33,12 +39,12 @@ export const DroppableMachineCard = ({
       });
       return { machineId: machine.id };
     },
-    canDrop: (item, monitor) => !machine.isOutOfOrder && !machine.currentMatchId,
+    canDrop: () => !machine.isOutOfOrder && !machine.currentMatchId,
     collect: (monitor) => ({
-      isOver: monitor.isOver(),
-      canDrop: monitor.canDrop(),
+      isOver: !!monitor.isOver(),
+      canDrop: !!monitor.canDrop(),
     }),
-  }));
+  });
 
   return (
     <div
@@ -107,19 +113,33 @@ export const DroppableMachineCard = ({
       </div>
 
       {!machine.isOutOfOrder && (
-        <select
-          className="w-full p-1 text-sm rounded border border-gray-200"
-          value={machine.currentMatchId || ""}
-          onChange={(e) => onAssignMatch(machine.id, e.target.value || null)}
-          disabled={machine.isOutOfOrder}
-        >
-          <option value="">Kein Match</option>
-          {availableMatches.map((match) => (
-            <option key={match.id} value={match.id}>
-              {match.player1.firstName} vs {match.player2.firstName}
-            </option>
-          ))}
-        </select>
+        <div className="space-y-2">
+          <select
+            className="w-full p-1 text-sm rounded border border-gray-200"
+            value={machine.currentMatchId || ""}
+            onChange={(e) => onAssignMatch(machine.id, e.target.value || null)}
+            disabled={machine.isOutOfOrder}
+          >
+            <option value="">Kein Match</option>
+            {availableMatches.map((match) => (
+              <option key={match.id} value={match.id}>
+                {match.player1.firstName} vs {match.player2.firstName}
+              </option>
+            ))}
+          </select>
+          
+          {canConfirm && currentMatch && onConfirmMatch && (
+            <Button 
+              size="sm" 
+              variant="outline" 
+              className="w-full text-green-600 border-green-200 hover:bg-green-50"
+              onClick={() => onConfirmMatch(machine.id)}
+            >
+              <CheckCircle className="h-3 w-3 mr-1" />
+              Ergebnis bestätigen
+            </Button>
+          )}
+        </div>
       )}
       
       {canDrop && (

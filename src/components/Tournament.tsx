@@ -24,7 +24,8 @@ export const Tournament = () => {
     exportTournamentData, 
     updateNumberOfMachines,
     updateMachine,
-    assignMatchToMachine
+    assignMatchToMachine,
+    confirmMatchResult
   } = useTournament();
 
   const [showMatchesTable, setShowMatchesTable] = useState(false);
@@ -59,6 +60,22 @@ export const Tournament = () => {
     if (availableMachine) {
       assignMatchToMachine(availableMachine.id, matchId);
     }
+  };
+
+  const getMatchForMachine = (machineId: number) => {
+    return tournament.matches.find(m => 
+      m.machineNumber === machineId && !m.completed
+    ) || null;
+  };
+
+  const canConfirmMatch = (machineId: number) => {
+    const match = getMatchForMachine(machineId);
+    if (!match) return false;
+    
+    // Prüfen, ob alle 3 Spiele gespielt wurden
+    const player1Wins = match.scores.filter(s => s.player1Won).length;
+    const player2Wins = match.scores.filter(s => s.player2Won).length;
+    return player1Wins + player2Wins === 3;
   };
 
   if (!tournament) {
@@ -137,6 +154,9 @@ export const Tournament = () => {
               machines={tournament.machines}
               onUpdateMachine={updateMachine}
               onAssignMatch={assignMatchToMachine}
+              onConfirmMatch={confirmMatchResult}
+              getMatchForMachine={getMatchForMachine}
+              canConfirmMatch={canConfirmMatch}
               availableMatches={availableMatches}
             />
           </div>
