@@ -1,6 +1,6 @@
 
 import { Match as MatchType } from "@/types/tournament";
-import { MatchCard } from "./MatchCard";
+import { DraggableMatchCard } from "./DraggableMatchCard";
 
 interface BracketRoundProps {
   round: number;
@@ -43,13 +43,12 @@ export const BracketRound = ({
         const verticalPosition = totalMatches > 1 ? index * verticalSpacing : 50;
 
         return (
-          <MatchCard
+          <DraggableMatchCard
             key={match.id}
             match={match}
             isCurrentRound={round === currentRound}
             verticalPosition={verticalPosition}
             previousMatches={findPreviousMatches(match)}
-            onMatchClick={onMatchClick}
             onScoreUpdate={onScoreUpdate}
           />
         );
