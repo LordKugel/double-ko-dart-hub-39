@@ -37,9 +37,9 @@ export const MatchCard = ({
   const player2Score = match.scores.filter(s => s.player2Won).length;
 
   const handleScoreUpdate = (index: number, player1Won: boolean) => {
-    // Wenn das Match einem Automaten zugewiesen ist oder die Steuerelemente ausgeblendet werden sollen, 
+    // Wenn die Steuerelemente ausgeblendet werden sollen oder das Match einem Automaten zugewiesen ist,
     // erlauben wir keine Aktualisierung der Punktzahl über diese Komponente
-    if (match.machineNumber || hideScoreControls) return;
+    if (hideScoreControls || match.machineNumber) return;
     onScoreUpdate?.(match.id, index, player1Won);
   };
 
@@ -76,13 +76,8 @@ export const MatchCard = ({
         "relative border rounded p-2 transition-colors",
         getBracketColors(),
         isCurrentRound && "ring-1 ring-blue-500",
-        "text-sm w-[140px]"  // Kleinere Breite für die Darstellung im Bracket
+        "text-sm w-[160px]"  // Breitere Karte für bessere Darstellung
       )}
-      onClick={() => {
-        if (isCurrentRound && !match.completed && onMatchClick) {
-          onMatchClick(match.id);
-        }
-      }}
     >
       <PlayerInfo
         player={match.player1}

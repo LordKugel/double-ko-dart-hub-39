@@ -35,6 +35,8 @@ export const CurrentMatchCards = ({
             verticalPosition={0}
             previousMatches={[]}
             onScoreUpdate={onScoreUpdate}
+            hideScoreControls={true} // Immer verstecken
+            onMatchClick={onMatchClick}
           />
         ))}
       </div>

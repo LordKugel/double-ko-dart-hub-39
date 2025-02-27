@@ -61,15 +61,15 @@ export const TournamentBracket = ({
         <p className="text-sm text-gray-400">Runde {currentRound} von {roundsCount}</p>
       </div>
 
-      <div className="flex items-start space-x-2 overflow-x-auto min-w-full pb-8 pt-2">
+      <div className="flex items-start space-x-4 overflow-x-auto min-w-full pb-8 pt-2">
         {winnerRounds.map((roundMatches, index) => (
-          <div key={`winner-${index}`} className="flex-none w-[140px]">
+          <div key={`winner-${index}`} className="flex-none w-[180px]">
             <div className="text-xs font-semibold mb-2 text-center text-[#0FA0CE]">
               Winner-Runde {index + 1}
             </div>
-            <div className="space-y-2 flex flex-col items-center">
+            <div className="space-y-4 flex flex-col items-center">
               {roundMatches.map(match => (
-                <div key={match.id} className="hover:scale-105 transition-transform">
+                <div key={match.id} className="hover:scale-105 transition-transform w-[160px]">
                   <DraggableMatchCard
                     match={match}
                     isCurrentRound={match.round === currentRound}
@@ -78,7 +78,8 @@ export const TournamentBracket = ({
                     onScoreUpdate={onScoreUpdate}
                     machines={machines}
                     onAssignMatch={onAssignMatch}
-                    hideScoreControls={hideScoreControls}
+                    hideScoreControls={true} // Immer verstecken im Bracket
+                    onMatchClick={onMatchClick}
                   />
                 </div>
               ))}
@@ -87,13 +88,13 @@ export const TournamentBracket = ({
         ))}
 
         {finalMatches.length > 0 && (
-          <div className="flex-none w-[140px]">
+          <div className="flex-none w-[180px]">
             <div className="text-xs font-semibold mb-2 text-center text-[#8B5CF6]">
               Finale
             </div>
-            <div className="space-y-2 flex flex-col items-center">
+            <div className="space-y-4 flex flex-col items-center">
               {finalMatches.map(match => (
-                <div key={match.id} className="hover:scale-105 transition-transform">
+                <div key={match.id} className="hover:scale-105 transition-transform w-[160px]">
                   <DraggableMatchCard
                     match={match}
                     isCurrentRound={match.round === currentRound}
@@ -102,7 +103,8 @@ export const TournamentBracket = ({
                     onScoreUpdate={onScoreUpdate}
                     machines={machines}
                     onAssignMatch={onAssignMatch}
-                    hideScoreControls={hideScoreControls}
+                    hideScoreControls={true} // Immer verstecken im Bracket
+                    onMatchClick={onMatchClick}
                   />
                 </div>
               ))}
@@ -111,13 +113,13 @@ export const TournamentBracket = ({
         )}
 
         {loserRounds.map((roundMatches, index) => (
-          <div key={`loser-${index}`} className="flex-none w-[140px]">
+          <div key={`loser-${index}`} className="flex-none w-[180px]">
             <div className="text-xs font-semibold mb-2 text-center text-red-500">
               Loser-Runde {index + 1}
             </div>
-            <div className="space-y-2 flex flex-col items-center">
+            <div className="space-y-4 flex flex-col items-center">
               {roundMatches.map(match => (
-                <div key={match.id} className="hover:scale-105 transition-transform">
+                <div key={match.id} className="hover:scale-105 transition-transform w-[160px]">
                   <DraggableMatchCard
                     match={match}
                     isCurrentRound={match.round === currentRound}
@@ -126,7 +128,8 @@ export const TournamentBracket = ({
                     onScoreUpdate={onScoreUpdate}
                     machines={machines}
                     onAssignMatch={onAssignMatch}
-                    hideScoreControls={hideScoreControls}
+                    hideScoreControls={true} // Immer verstecken im Bracket
+                    onMatchClick={onMatchClick}
                   />
                 </div>
               ))}

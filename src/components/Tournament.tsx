@@ -217,6 +217,8 @@ export const Tournament = () => {
                     matches={tournament.matches}
                     currentRound={tournament.currentRound}
                     onMatchClick={handleMatchClick}
+                    machines={tournament.machines}
+                    onAssignMatch={assignMatchToMachine}
                     hideScoreControls={true}
                   />
                 </div>
