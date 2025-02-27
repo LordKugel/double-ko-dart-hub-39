@@ -264,6 +264,17 @@ export const useTournament = () => {
     });
   };
 
+  // Neue Funktion zum Zurücksetzen des Turniers
+  const resetTournament = () => {
+    localStorage.removeItem(STORAGE_KEY);
+    setTournament(initialTournamentState);
+    
+    toast({
+      title: "Turnier zurückgesetzt",
+      description: "Das Turnier wurde erfolgreich auf den Ausgangszustand zurückgesetzt"
+    });
+  };
+
   return {
     tournament,
     handleScoreUpdate,
@@ -273,6 +284,7 @@ export const useTournament = () => {
     updateNumberOfMachines,
     updateMachine,
     assignMatchToMachine,
-    confirmMatchResult
+    confirmMatchResult,
+    resetTournament
   };
 };

@@ -12,7 +12,7 @@ import { Input } from "./ui/input";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { CurrentMatchCards } from "./tournament/CurrentMatchCards";
-import { Cog, ChevronDown, ChevronUp } from "lucide-react";
+import { Cog, ChevronDown, ChevronUp, RefreshCw } from "lucide-react";
 import { MarqueeText } from "./tournament/MarqueeText";
 import { toast } from "./ui/use-toast";
 
@@ -26,7 +26,8 @@ export const Tournament = () => {
     updateNumberOfMachines,
     updateMachine,
     assignMatchToMachine,
-    confirmMatchResult
+    confirmMatchResult,
+    resetTournament
   } = useTournament();
 
   const [showMatchesTable, setShowMatchesTable] = useState(false);
@@ -102,6 +103,17 @@ export const Tournament = () => {
     <DndProvider backend={HTML5Backend}>
       <div className="container mx-auto p-4 max-w-7xl animate-fade-in pb-[400px]">
         <h1 className="text-3xl font-bold text-center mb-8">Dart Tournament</h1>
+        
+        <div className="flex justify-center gap-4 mb-4">
+          <Button
+            onClick={resetTournament}
+            variant="outline"
+            className="flex items-center gap-2 text-red-500 hover:bg-red-50 hover:text-red-600"
+          >
+            <RefreshCw className="h-4 w-4" />
+            Turnier zurücksetzen
+          </Button>
+        </div>
         
         {winner && (
           <div className="mb-12 text-center animate-fade-in bg-gradient-to-r from-yellow-50 via-yellow-100 to-yellow-50 p-8 rounded-xl border border-yellow-200 shadow-lg">
