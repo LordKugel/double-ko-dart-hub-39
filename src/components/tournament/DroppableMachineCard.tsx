@@ -54,14 +54,16 @@ export const DroppableMachineCard = ({
     <div
       ref={drop}
       className={cn(
-        "p-3 rounded-lg border",
+        "p-3 rounded-lg border transition-all duration-200",
         machine.isOutOfOrder 
           ? "bg-red-50 border-red-200" 
-          : machine.isFavorite 
-            ? "bg-yellow-50 border-yellow-200"
-            : "bg-white border-gray-200",
-        canDrop && "border-dashed border-green-500",
-        isOver && canDrop && "bg-green-50 border-green-500",
+          : machine.currentMatchId 
+            ? "bg-blue-50 border-blue-300"
+            : machine.isFavorite 
+              ? "bg-yellow-50 border-yellow-200"
+              : "bg-white border-gray-200",
+        canDrop && "border-dashed border-green-500 bg-green-50",
+        isOver && canDrop && "bg-green-100 border-green-600 shadow-md",
         "w-[75%]"
       )}
     >
@@ -118,37 +120,62 @@ export const DroppableMachineCard = ({
 
       {!machine.isOutOfOrder && (
         <div className="space-y-2">
-          <select
-            className="w-full p-1 text-sm rounded border border-gray-200"
-            value={machine.currentMatchId || ""}
-            onChange={(e) => onAssignMatch(machine.id, e.target.value || null)}
-            disabled={machine.isOutOfOrder}
-          >
-            <option value="">Kein Match</option>
-            {availableMatches.map((match) => (
-              <option key={match.id} value={match.id}>
-                {match.player1.firstName} vs {match.player2.firstName}
-              </option>
-            ))}
-          </select>
-          
-          {canConfirm && currentMatch && onConfirmMatch && (
-            <Button 
-              size="sm" 
-              variant="outline" 
-              className="w-full text-green-600 border-green-200 hover:bg-green-50"
-              onClick={() => onConfirmMatch(machine.id)}
-            >
-              <CheckCircle className="h-3 w-3 mr-1" />
-              Ergebnis bestätigen
-            </Button>
+          {machine.currentMatchId ? (
+            <div className="bg-blue-100 p-2 rounded border border-blue-300 text-sm">
+              <div className="font-bold text-blue-800 mb-1">Aktuelles Match:</div>
+              {currentMatch ? (
+                <div>
+                  <div className="font-medium">{currentMatch.player1.firstName} vs {currentMatch.player2.firstName}</div>
+                  <div className="text-xs text-gray-600 mt-1">Match ID: {machine.currentMatchId}</div>
+                </div>
+              ) : (
+                <div className="text-red-500">Match nicht gefunden!</div>
+              )}
+              
+              {canConfirm && onConfirmMatch && (
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="w-full text-green-600 border-green-200 hover:bg-green-50 mt-2"
+                  onClick={() => onConfirmMatch(machine.id)}
+                >
+                  <CheckCircle className="h-3 w-3 mr-1" />
+                  Ergebnis bestätigen
+                </Button>
+              )}
+              
+              <Button 
+                size="sm"
+                variant="ghost"
+                className="w-full text-red-500 mt-1 text-xs"
+                onClick={() => onAssignMatch(machine.id, null)}
+              >
+                Match entfernen
+              </Button>
+            </div>
+          ) : (
+            <>
+              <select
+                className="w-full p-1 text-sm rounded border border-gray-200"
+                value=""
+                onChange={(e) => onAssignMatch(machine.id, e.target.value || null)}
+                disabled={machine.isOutOfOrder}
+              >
+                <option value="">Kein Match</option>
+                {availableMatches.map((match) => (
+                  <option key={match.id} value={match.id}>
+                    {match.player1.firstName} vs {match.player2.firstName}
+                  </option>
+                ))}
+              </select>
+              
+              {canDrop && (
+                <div className="text-xs text-center mt-2 text-green-600 font-bold animate-pulse">
+                  {isOver ? "Match hier ablegen" : "Match hierher ziehen"}
+                </div>
+              )}
+            </>
           )}
-        </div>
-      )}
-      
-      {canDrop && (
-        <div className="text-xs text-center mt-2 text-green-600 font-bold">
-          {isOver ? "Match hier ablegen" : "Match hierher ziehen"}
         </div>
       )}
     </div>

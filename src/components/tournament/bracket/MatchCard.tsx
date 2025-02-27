@@ -27,23 +27,32 @@ export const MatchCard = ({
     onScoreUpdate?.(match.id, index, player1Won);
   };
 
+  // Bestimme die Farben basierend auf dem Bracket
+  const getBracketColors = () => {
+    switch(match.bracket) {
+      case "winners":
+        return "bg-[#0e1627] border-[#0FA0CE]/30 hover:border-[#0FA0CE]";
+      case "losers":
+        return "bg-[#1c1018] border-red-900/30 hover:border-red-500";
+      case "final":
+        return "bg-[#1e173a] border-[#8B5CF6]/30 hover:border-[#8B5CF6]";
+      default:
+        return "bg-gray-800 border-gray-700";
+    }
+  };
+
   return (
     <div 
       className={cn(
-        "relative bg-gray-800 border border-gray-700 rounded p-2 mb-2 hover:bg-gray-700 transition-colors",
+        "relative border rounded p-2 transition-colors",
+        getBracketColors(),
         isCurrentRound && "ring-1 ring-blue-500",
-        "text-sm"  // Kleinere Textgröße
+        "text-sm scale-90 origin-top-left w-[220px]"  // Kleinere Größe
       )}
       onClick={() => {
         if (isCurrentRound && !match.completed && onMatchClick) {
           onMatchClick(match.id);
         }
-      }}
-      style={{
-        // 50% Reduzierung der Größe
-        transform: "scale(0.85)",
-        transformOrigin: "top left",
-        maxWidth: "240px"
       }}
     >
       <PlayerInfo

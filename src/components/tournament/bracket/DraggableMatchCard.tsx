@@ -3,7 +3,6 @@ import { useRef } from 'react';
 import { useDrag } from 'react-dnd';
 import { Match as MatchType } from "@/types/tournament";
 import { MatchCard } from './MatchCard';
-import { toast } from "@/components/ui/use-toast";
 
 export const DraggableMatchCard = ({ 
   match, 
@@ -27,7 +26,6 @@ export const DraggableMatchCard = ({
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
-    // Entfernen des end-Callbacks, um den Toast zu vermeiden
   }));
 
   drag(ref);
@@ -39,7 +37,7 @@ export const DraggableMatchCard = ({
         opacity: isDragging ? 0.5 : 1,
         cursor: isCurrentRound && !match.completed && !match.machineNumber ? 'grab' : 'default',
       }}
-      className="mb-4"
+      className="relative"
     >
       <MatchCard
         match={match}
@@ -48,6 +46,13 @@ export const DraggableMatchCard = ({
         previousMatches={previousMatches}
         onScoreUpdate={onScoreUpdate}
       />
+      {isCurrentRound && !match.completed && !match.machineNumber && (
+        <div className="absolute -top-2 -right-2 bg-green-500 text-white text-xs rounded-full p-1 flex items-center justify-center w-6 h-6 shadow-md">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+          </svg>
+        </div>
+      )}
     </div>
   );
 };

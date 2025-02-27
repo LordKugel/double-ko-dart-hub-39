@@ -101,14 +101,14 @@ export const Tournament = () => {
 
   return (
     <DndProvider backend={HTML5Backend}>
-      <div className="container mx-auto p-4 max-w-7xl animate-fade-in pb-[400px]">
-        <h1 className="text-3xl font-bold text-center mb-8">Dart Tournament</h1>
+      <div className="container mx-auto p-4 max-w-7xl animate-fade-in pb-[400px] bg-[#0A0F1A]">
+        <h1 className="text-3xl font-bold text-center mb-8 text-white">Dart Tournament</h1>
         
         <div className="flex justify-center gap-4 mb-4">
           <Button
             onClick={resetTournament}
             variant="outline"
-            className="flex items-center gap-2 text-red-500 hover:bg-red-50 hover:text-red-600"
+            className="flex items-center gap-2 text-red-500 hover:bg-red-900/20 hover:text-red-400 border-red-800"
           >
             <RefreshCw className="h-4 w-4" />
             Turnier zurücksetzen
@@ -116,15 +116,15 @@ export const Tournament = () => {
         </div>
         
         {winner && (
-          <div className="mb-12 text-center animate-fade-in bg-gradient-to-r from-yellow-50 via-yellow-100 to-yellow-50 p-8 rounded-xl border border-yellow-200 shadow-lg">
-            <h2 className="text-5xl font-extrabold mb-4 bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 bg-clip-text text-transparent">
+          <div className="mb-12 text-center animate-fade-in bg-gradient-to-r from-yellow-900/30 via-yellow-800/40 to-yellow-900/30 p-8 rounded-xl border border-yellow-700 shadow-lg">
+            <h2 className="text-5xl font-extrabold mb-4 bg-gradient-to-r from-yellow-400 via-yellow-300 to-yellow-500 bg-clip-text text-transparent">
               🏆 Turniersieger 🏆
             </h2>
-            <div className="text-3xl font-bold text-yellow-700">
+            <div className="text-3xl font-bold text-yellow-400">
               {winner.firstName} {winner.lastName}
             </div>
             {winner.team && (
-              <div className="text-xl text-yellow-600 mt-2">
+              <div className="text-xl text-yellow-300 mt-2">
                 Team: {winner.team}
               </div>
             )}
@@ -135,7 +135,7 @@ export const Tournament = () => {
           <Button
             onClick={() => setShowMachineManagement(!showMachineManagement)}
             variant="outline"
-            className="mb-4 flex items-center gap-2"
+            className="mb-4 flex items-center gap-2 border-blue-700 text-blue-400 hover:bg-blue-900/20"
           >
             <Cog className="h-4 w-4" />
             Automaten-Verwaltung {tournament.numberOfMachines || 3}
@@ -144,7 +144,7 @@ export const Tournament = () => {
         </div>
         
         {showMachineManagement && (
-          <div className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200 animate-fade-in">
+          <div className="mb-4 p-4 bg-[#121824] rounded-lg border border-blue-900/50 animate-fade-in">
             <div className="flex justify-center gap-4 mb-4">
               {editingMachines ? (
                 <div className="flex items-center gap-2">
@@ -154,12 +154,12 @@ export const Tournament = () => {
                     max="10"
                     value={tempMachines}
                     onChange={(e) => setTempMachines(Number(e.target.value))}
-                    className="w-20"
+                    className="w-20 bg-[#1A2133] border-blue-900/50 text-white"
                   />
-                  <Button onClick={handleMachineNumberUpdate} variant="outline">
+                  <Button onClick={handleMachineNumberUpdate} variant="outline" className="border-blue-700 text-blue-400">
                     Speichern
                   </Button>
-                  <Button onClick={() => setEditingMachines(false)} variant="ghost">
+                  <Button onClick={() => setEditingMachines(false)} variant="ghost" className="text-gray-400">
                     Abbrechen
                   </Button>
                 </div>
@@ -167,6 +167,7 @@ export const Tournament = () => {
                 <Button
                   onClick={() => setEditingMachines(true)}
                   variant="outline"
+                  className="border-blue-700 text-blue-400"
                 >
                   Automaten Anzahl: {tournament.numberOfMachines || 3}
                 </Button>
@@ -215,7 +216,7 @@ export const Tournament = () => {
         ) : (
           <>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <div className="col-span-1 bg-[#0e1627] p-4 rounded-lg">
+              <div className="col-span-1 bg-[#0e1627] p-4 rounded-lg border border-[#0FA0CE]/30">
                 <h2 className="text-xl font-bold mb-4 text-[#0FA0CE]">Winner's Bracket</h2>
                 <CurrentMatchCards
                   matches={winnersMatches}
@@ -234,7 +235,7 @@ export const Tournament = () => {
                 />
               </div>
               
-              <div className="col-span-1 bg-[#1c1018] p-4 rounded-lg">
+              <div className="col-span-1 bg-[#1c1018] p-4 rounded-lg border border-red-900/30">
                 <h2 className="text-xl font-bold mb-4 text-red-500">Loser's Bracket</h2>
                 <CurrentMatchCards
                   matches={losersMatches}
@@ -244,7 +245,7 @@ export const Tournament = () => {
                 />
                 
                 {finalMatches.length > 0 && (
-                  <div className="mt-8">
+                  <div className="mt-8 bg-[#1e173a] p-4 rounded-lg border border-[#8B5CF6]/30">
                     <h2 className="text-xl font-bold mb-4 text-[#8B5CF6]">Finale</h2>
                     <CurrentMatchCards
                       matches={finalMatches}
