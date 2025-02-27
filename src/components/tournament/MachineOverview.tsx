@@ -172,24 +172,28 @@ export const MachineOverview = ({
                                 "w-6 h-6 rounded text-xs mb-1",
                                 score.player1Won 
                                   ? "bg-[#0FA0CE] text-white" 
-                                  : "bg-[#2A2631] border border-[#403E43]"
+                                  : score.player2Won
+                                    ? "bg-red-500 text-white"
+                                    : "bg-[#2A2631] border border-[#403E43]"
                               )}
                               onClick={() => match.completed ? null : handleScoreUpdate(match.id, idx, true)}
                               disabled={match.completed}
                             >
-                              {score.player1Won ? 'W' : '-'}
+                              {score.player1Won ? 'W' : score.player2Won ? 'L' : '-'}
                             </button>
                             <button
                               className={cn(
                                 "w-6 h-6 rounded text-xs",
                                 score.player2Won 
                                   ? "bg-[#0FA0CE] text-white" 
-                                  : "bg-[#2A2631] border border-[#403E43]"
+                                  : score.player1Won
+                                    ? "bg-red-500 text-white"
+                                    : "bg-[#2A2631] border border-[#403E43]"
                               )}
                               onClick={() => match.completed ? null : handleScoreUpdate(match.id, idx, false)}
                               disabled={match.completed}
                             >
-                              {score.player2Won ? 'W' : '-'}
+                              {score.player2Won ? 'W' : score.player1Won ? 'L' : '-'}
                             </button>
                           </div>
                         ))}

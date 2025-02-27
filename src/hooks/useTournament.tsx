@@ -189,63 +189,114 @@ export const useTournament = () => {
         return prev;
       }
 
-      // Match als abgeschlossen markieren
-      const updatedMatch = { ...match, completed: true, countdownStarted: false };
-      const updatedMatches = [...prev.matches];
-      updatedMatches[matchIndex] = updatedMatch;
+      // Starte den Countdown
+      toast({
+        title: "Match vollständig",
+        description: "Ergebnisse können noch 10 Sekunden lang geändert werden"
+      });
       
-      // Spieler aktualisieren
-      const updatedPlayers = prev.players.map(player => {
-        // Gewinner bestimmen
-        const isPlayer1 = player.id === match.player1.id;
-        const isPlayer2 = player.id === match.player2.id;
-        
-        if (!isPlayer1 && !isPlayer2) return player;
-        
-        const isWinner = isPlayer1 ? player1Wins > player2Wins : player2Wins > player1Wins;
-        const isLoser = !isWinner;
-        
-        if (isLoser) {
-          const newLosses = player.losses + 1;
-          // Eliminiert, wenn im Verlierer-Bracket oder 2 Niederlagen
-          const eliminated = player.bracket === "losers" || newLosses >= 2;
+      // Markiere das Match als "countdownStarted"
+      const updatedMatches = [...prev.matches];
+      updatedMatches[matchIndex] = {
+        ...match,
+        countdownStarted: true
+      };
+      
+      // Timer starten, der das Match nach 10 Sekunden abschließt
+      setTimeout(() => {
+        setTournament(currentState => {
+          // Aktuelle Version des Matches holen
+          const currentMatchIndex = currentState.matches.findIndex(m => m.id === machine.currentMatchId);
+          if (currentMatchIndex === -1) return currentState;
+          
+          const currentMatch = currentState.matches[currentMatchIndex];
+          
+          // Match als abgeschlossen markieren
+          const finalUpdatedMatch = { ...currentMatch, completed: true, countdownStarted: false };
+          const finalUpdatedMatches = [...currentState.matches];
+          finalUpdatedMatches[currentMatchIndex] = finalUpdatedMatch;
+          
+          // Spieler aktualisieren
+          const updatedPlayers = currentState.players.map(player => {
+            // Gewinner bestimmen
+            const isPlayer1 = player.id === currentMatch.player1.id;
+            const isPlayer2 = player.id === currentMatch.player2.id;
+            
+            if (!isPlayer1 && !isPlayer2) return player;
+            
+            const p1Wins = currentMatch.scores.filter(s => s.player1Won).length;
+            const p2Wins = currentMatch.scores.filter(s => s.player2Won).length;
+            const isWinner = isPlayer1 ? p1Wins > p2Wins : p2Wins > p1Wins;
+            const isLoser = !isWinner;
+            
+            if (isLoser) {
+              const newLosses = player.losses + 1;
+              // Eliminiert, wenn im Verlierer-Bracket oder 2 Niederlagen
+              const eliminated = player.bracket === "losers" || newLosses >= 2;
+              
+              return {
+                ...player,
+                losses: newLosses,
+                eliminated,
+                bracket: eliminated ? null : "losers" as "winners" | "losers" | null
+              };
+            }
+            
+            return player;
+          });
+          
+          // Maschine freigeben
+          const updatedMachines = currentState.machines.map(m => {
+            if (m.id === machineId) {
+              return { ...m, currentMatchId: null };
+            }
+            return m;
+          });
+          
+          toast({
+            title: "Match abgeschlossen",
+            description: "Das Match wurde abgeschlossen und die Ergebnisse wurden gespeichert."
+          });
+          
+          // Turnier auf Abschluss prüfen
+          const remainingPlayers = updatedPlayers.filter(p => !p.eliminated);
+          const completed = remainingPlayers.length === 1;
+          
+          // Wenn es einen Gewinner gibt, zeige eine spezielle Meldung
+          if (completed && remainingPlayers.length === 1) {
+            const winner = remainingPlayers[0];
+            toast({
+              title: "🏆 Turniersieger",
+              description: `${winner.firstName} ${winner.lastName} hat das Turnier gewonnen!`,
+              duration: 10000,
+            });
+          }
           
           return {
-            ...player,
-            losses: newLosses,
-            eliminated,
-            bracket: eliminated ? null : "losers" as "winners" | "losers" | null
+            ...currentState,
+            matches: finalUpdatedMatches,
+            players: updatedPlayers,
+            machines: updatedMachines,
+            completed,
+            roundStarted: !isRoundComplete(finalUpdatedMatches, currentState.currentRound),
+            winnersBracketMatches: finalUpdatedMatches.filter(m => m.bracket === "winners"),
+            losersBracketMatches: finalUpdatedMatches.filter(m => m.bracket === "losers"),
+            finalMatches: finalUpdatedMatches.filter(m => m.bracket === "final")
           };
-        }
-        
-        return player;
-      });
-      
-      // Maschine freigeben
-      const updatedMachines = prev.machines.map(m => {
-        if (m.id === machineId) {
-          return { ...m, currentMatchId: null };
-        }
-        return m;
-      });
-      
-      toast({
-        title: "Match bestätigt",
-        description: "Das Match wurde abgeschlossen und die Ergebnisse wurden gespeichert."
-      });
-      
-      // Turnier auf Abschluss prüfen
-      const remainingPlayers = updatedPlayers.filter(p => !p.eliminated);
-      const completed = remainingPlayers.length === 1;
+        });
+      }, 10000);
       
       return {
         ...prev,
-        matches: updatedMatches,
-        players: updatedPlayers,
-        machines: updatedMachines,
-        completed
+        matches: updatedMatches
       };
     });
+  };
+
+  // Hilfsfunktion, um zu prüfen, ob eine Runde abgeschlossen ist
+  const isRoundComplete = (matches: Match[], round: number): boolean => {
+    const roundMatches = matches.filter(m => m.round === round);
+    return roundMatches.every(match => match.completed);
   };
 
   const exportTournamentData = () => {

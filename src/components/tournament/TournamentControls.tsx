@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Upload, Download, Table2 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
@@ -35,7 +36,7 @@ export const TournamentControls = ({
   
   const getButtonLabel = () => {
     if (!isStarted) return "Start Tournament";
-    if (!roundStarted) return `Start Runde ${currentRound}`;
+    if (!roundStarted) return `Starte Runde ${currentRound}`;
     return `Runde ${currentRound} läuft...`;
   };
 
