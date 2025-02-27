@@ -76,7 +76,7 @@ export const MatchCard = ({
         "relative border rounded p-2 transition-colors",
         getBracketColors(),
         isCurrentRound && "ring-1 ring-blue-500",
-        "text-sm w-[180px]"  // Breitere Karte für bessere Darstellung
+        "text-xs w-[150px]"  // Schmalere Karte für bessere Darstellung im Bracket
       )}
     >
       <PlayerInfo

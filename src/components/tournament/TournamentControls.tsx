@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { Upload, Download, Table2 } from "lucide-react";
+import { Download, Table2 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import * as XLSX from "xlsx";
 import { Match } from "@/types/tournament";
@@ -36,8 +36,29 @@ export const TournamentControls = ({
   
   const getButtonLabel = () => {
     if (!isStarted) return "Start Tournament";
-    if (!roundStarted) return `Starte Runde ${currentRound}`;
-    return `Runde ${currentRound} läuft...`;
+    
+    // Wenn die Runde bereits gestartet ist, zeige "Runde X läuft..."
+    if (roundStarted) {
+      // Spezialfall für Halbfinale und Finale
+      const isSemifinal = currentRound >= 3 && matches.some(m => m.bracket === "losers" && m.round === currentRound);
+      const isFinal = matches.some(m => m.bracket === "final");
+      
+      if (isFinal) return "Finale läuft...";
+      if (isSemifinal) return "Halbfinale läuft...";
+      return `Runde ${currentRound} läuft...`;
+    }
+    
+    // Wenn die Runde noch nicht gestartet ist, zeige "Starte Runde X"
+    // Spezialfall für Halbfinale und Finale
+    const nextRoundWillBeSemifinal = currentRound >= 2 && 
+      matches.some(m => m.round === currentRound && m.bracket === "losers");
+    const nextRoundWillBeFinal = 
+      matches.filter(m => !m.eliminated && m.bracket === "winners").length === 1 &&
+      matches.filter(m => !m.eliminated && m.bracket === "losers").length === 1;
+    
+    if (nextRoundWillBeFinal) return "Finale starten";
+    if (nextRoundWillBeSemifinal) return "Halbfinale starten";
+    return `Runde ${currentRound + 1} starten`;
   };
 
   const handleGeneratePlayers = () => {
@@ -110,28 +131,10 @@ export const TournamentControls = ({
 
   return (
     <div className="flex justify-center gap-4 mb-8">
-      <div className="flex items-center gap-2">
-        <Input
-          type="number"
-          min="2"
-          max="16"
-          value={playerCount}
-          onChange={(e) => setPlayerCount(Number(e.target.value))}
-          className="w-20"
-          disabled={isStarted}
-        />
-        <Button 
-          onClick={handleGeneratePlayers}
-          disabled={isStarted}
-          className="transition-all duration-200 hover:scale-105"
-        >
-          Generate Players
-        </Button>
-      </div>
       <Button 
         onClick={handleStartTournament}
         disabled={(isStarted && roundStarted) || (!isStarted && !hasPlayers)}
-        className="transition-all duration-200 hover:scale-105"
+        className="transition-all duration-200 hover:scale-105 min-w-[170px]"
       >
         {getButtonLabel()}
       </Button>

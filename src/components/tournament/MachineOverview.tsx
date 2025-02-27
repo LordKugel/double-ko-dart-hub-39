@@ -1,7 +1,7 @@
 
 import { Match, Machine } from "@/types/tournament";
 import { cn } from "@/lib/utils";
-import { Star, AlertTriangle, CheckCircle } from "lucide-react";
+import { Star, AlertTriangle, CheckCircle, Plus, Minus } from "lucide-react";
 import { Button } from "../ui/button";
 import { toast } from "../ui/use-toast";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
@@ -17,6 +17,8 @@ interface MachineOverviewProps {
   getMatchForMachine?: (machineId: number) => Match | null;
   canConfirmMatch?: (machineId: number) => boolean;
   onScoreUpdate?: (matchId: string, gameIndex: number, player1Won: boolean) => void;
+  onIncreaseMaxMachines?: () => void;
+  onDecreaseMaxMachines?: () => void;
 }
 
 export const MachineOverview = ({ 
@@ -29,7 +31,9 @@ export const MachineOverview = ({
   onConfirmMatch,
   getMatchForMachine,
   canConfirmMatch,
-  onScoreUpdate
+  onScoreUpdate,
+  onIncreaseMaxMachines,
+  onDecreaseMaxMachines
 }: MachineOverviewProps) => {
   
   const handleToggleFavorite = (machine: Machine) => {
@@ -58,7 +62,35 @@ export const MachineOverview = ({
     <div className="fixed bottom-0 left-0 right-0 bg-[#1A1721] border-t border-[#403E43] p-4 z-50">
       <div className="container mx-auto">
         <div className="flex justify-between items-center mb-2">
-          <h3 className="text-sm font-semibold text-[#0FA0CE]">Aktive Automaten</h3>
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-[#0FA0CE]">Aktive Automaten</h3>
+            <div className="flex items-center gap-1 ml-4">
+              {onDecreaseMaxMachines && (
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-6 w-6 bg-[#2A2631]/50 hover:bg-[#2A2631]"
+                  onClick={onDecreaseMaxMachines}
+                  disabled={maxMachines <= 1}
+                >
+                  <Minus className="h-3 w-3" />
+                </Button>
+              )}
+              <span className="text-xs text-gray-400 px-2">{maxMachines}</span>
+              {onIncreaseMaxMachines && (
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-6 w-6 bg-[#2A2631]/50 hover:bg-[#2A2631]"
+                  onClick={onIncreaseMaxMachines}
+                  disabled={maxMachines >= 10}
+                >
+                  <Plus className="h-3 w-3" />
+                </Button>
+              )}
+            </div>
+          </div>
+          
           <span className="text-xs text-gray-400">
             {activeMatches.length} / {maxMachines} belegt
           </span>

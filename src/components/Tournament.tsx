@@ -11,7 +11,7 @@ import { Input } from "./ui/input";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { CurrentMatchCards } from "./tournament/CurrentMatchCards";
-import { Cog, ChevronDown, ChevronUp, RefreshCw } from "lucide-react";
+import { Plus, Minus, RefreshCw } from "lucide-react";
 import { MarqueeText } from "./tournament/MarqueeText";
 import { toast } from "./ui/use-toast";
 import { TooltipProvider } from "./ui/tooltip";
@@ -31,8 +31,7 @@ export const Tournament = () => {
   } = useTournament();
 
   const [showMatchesTable, setShowMatchesTable] = useState(false);
-  const [editingMachines, setEditingMachines] = useState(false);
-  const [tempMachines, setTempMachines] = useState(tournament?.numberOfMachines || 3);
+  const [playerCount, setPlayerCount] = useState<number>(8);
 
   const winner = tournament?.completed ? tournament.players.find(p => !p.eliminated) : null;
 
@@ -99,26 +98,59 @@ export const Tournament = () => {
     return <div>Lade Turnier...</div>;
   }
 
-  const handleMachineNumberUpdate = () => {
-    updateNumberOfMachines(tempMachines);
-    setEditingMachines(false);
+  const handleIncreaseMachines = () => {
+    if (tournament.numberOfMachines < 10) {
+      updateNumberOfMachines(tournament.numberOfMachines + 1);
+    }
+  };
+
+  const handleDecreaseMachines = () => {
+    if (tournament.numberOfMachines > 1) {
+      updateNumberOfMachines(tournament.numberOfMachines - 1);
+    }
+  };
+
+  const handleGeneratePlayers = () => {
+    generatePlayers(playerCount);
   };
 
   return (
     <TooltipProvider>
       <DndProvider backend={HTML5Backend}>
         <div className="container mx-auto p-4 max-w-7xl animate-fade-in pb-[400px] bg-[#0A0F1A]">
-          <h1 className="text-3xl font-bold text-center mb-8 text-white">Dart Tournament</h1>
-          
-          <div className="flex justify-center gap-4 mb-4">
-            <Button
-              onClick={resetTournament}
-              variant="outline"
-              className="flex items-center gap-2 text-red-500 hover:bg-red-900/20 hover:text-red-400 border-red-800"
-            >
-              <RefreshCw className="h-4 w-4" />
-              Turnier zurücksetzen
-            </Button>
+          <div className="flex justify-between items-center mb-8">
+            <h1 className="text-3xl font-bold text-white">Dart Tournament</h1>
+            
+            <div className="flex items-center space-x-4">
+              {!tournament.started && (
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="number"
+                    min="2"
+                    max="16"
+                    value={playerCount}
+                    onChange={(e) => setPlayerCount(Number(e.target.value))}
+                    className="w-16 h-8 bg-[#1A2133] border-blue-900/50 text-white text-sm"
+                  />
+                  <Button 
+                    onClick={handleGeneratePlayers}
+                    className="h-8 text-xs"
+                    variant="outline"
+                  >
+                    Generate Players
+                  </Button>
+                </div>
+              )}
+              
+              <Button
+                onClick={resetTournament}
+                variant="outline"
+                className="h-8 text-xs flex items-center gap-1 text-red-500 hover:bg-red-900/20 hover:text-red-400 border-red-800"
+              >
+                <RefreshCw className="h-3 w-3" />
+                Turnier zurücksetzen
+              </Button>
+            </div>
           </div>
           
           {winner && (
@@ -134,41 +166,6 @@ export const Tournament = () => {
                   Team: {winner.team}
                 </div>
               )}
-            </div>
-          )}
-
-          <div className="flex justify-center gap-4 mb-4">
-            <Button
-              onClick={() => setEditingMachines(!editingMachines)}
-              variant="outline"
-              className="mb-4 flex items-center gap-2 border-blue-700 text-blue-400 hover:bg-blue-900/20"
-            >
-              <Cog className="h-4 w-4" />
-              Anzahl Automaten: {tournament.numberOfMachines || 3}
-              {editingMachines ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-            </Button>
-          </div>
-          
-          {editingMachines && (
-            <div className="mb-4 p-4 bg-[#121824] rounded-lg border border-blue-900/50 animate-fade-in">
-              <div className="flex justify-center gap-4 mb-4">
-                <div className="flex items-center gap-2">
-                  <Input
-                    type="number"
-                    min="1"
-                    max="10"
-                    value={tempMachines}
-                    onChange={(e) => setTempMachines(Number(e.target.value))}
-                    className="w-20 bg-[#1A2133] border-blue-900/50 text-white"
-                  />
-                  <Button onClick={handleMachineNumberUpdate} variant="outline" className="border-blue-700 text-blue-400">
-                    Speichern
-                  </Button>
-                  <Button onClick={() => setEditingMachines(false)} variant="ghost" className="text-gray-400">
-                    Abbrechen
-                  </Button>
-                </div>
-              </div>
             </div>
           )}
           
@@ -201,8 +198,8 @@ export const Tournament = () => {
             />
           ) : (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div className="col-span-1 bg-[#0e1627] p-4 rounded-lg border border-[#0FA0CE]/30">
+              <div className="grid grid-cols-1 md:grid-cols-7 gap-6 mb-8">
+                <div className="col-span-1 md:col-span-2 bg-[#0e1627] p-4 rounded-lg border border-[#0FA0CE]/30">
                   <h2 className="text-xl font-bold mb-4 text-[#0FA0CE]">Winner's Bracket</h2>
                   <CurrentMatchCards
                     matches={winnersMatches}
@@ -212,7 +209,7 @@ export const Tournament = () => {
                   />
                 </div>
                 
-                <div className="col-span-1 md:col-span-1">
+                <div className="col-span-1 md:col-span-3">
                   <TournamentBracket 
                     matches={tournament.matches}
                     currentRound={tournament.currentRound}
@@ -223,7 +220,7 @@ export const Tournament = () => {
                   />
                 </div>
                 
-                <div className="col-span-1 bg-[#1c1018] p-4 rounded-lg border border-red-900/30">
+                <div className="col-span-1 md:col-span-2 bg-[#1c1018] p-4 rounded-lg border border-red-900/30">
                   <h2 className="text-xl font-bold mb-4 text-red-500">Loser's Bracket</h2>
                   <CurrentMatchCards
                     matches={losersMatches}
@@ -262,6 +259,8 @@ export const Tournament = () => {
               getMatchForMachine={getMatchForMachine}
               canConfirmMatch={canConfirmMatch}
               onScoreUpdate={handleScoreUpdate}
+              onIncreaseMaxMachines={handleIncreaseMachines}
+              onDecreaseMaxMachines={handleDecreaseMachines}
             />
           )}
         </div>
