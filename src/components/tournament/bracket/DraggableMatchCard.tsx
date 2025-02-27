@@ -19,9 +19,10 @@ export const DraggableMatchCard = ({
 }) => {
   const ref = useRef<HTMLDivElement>(null);
   
+  // Hier ist die korrekte Verwendung von useDrag ohne Funktionsaufruf
   const [{ isDragging }, drag] = useDrag({
     type: 'MATCH',
-    item: { matchId: match.id },
+    item: () => ({ matchId: match.id }),
     canDrag: isCurrentRound && !match.completed && !match.machineNumber,
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
@@ -46,7 +47,6 @@ export const DraggableMatchCard = ({
         previousMatches={previousMatches}
         onScoreUpdate={onScoreUpdate}
       />
-      {/* Entferne den grünen Pfeil */}
     </div>
   );
 };
