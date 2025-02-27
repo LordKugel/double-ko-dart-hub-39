@@ -212,7 +212,7 @@ export const useTournament = () => {
             ...player,
             losses: newLosses,
             eliminated,
-            bracket: eliminated ? null : "losers"
+            bracket: eliminated ? null : "losers" as "winners" | "losers" | null
           };
         }
         
