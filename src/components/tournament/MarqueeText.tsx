@@ -8,7 +8,7 @@ interface MarqueeTextProps {
 
 export const MarqueeText = ({ children, speed = 30 }: MarqueeTextProps) => {
   return (
-    <div className="relative w-full overflow-hidden bg-black py-2 text-white">
+    <div className="relative w-full overflow-hidden bg-gradient-to-r from-red-950 via-red-900 to-red-950 py-3 text-red-200">
       <div
         className="whitespace-nowrap inline-block"
         style={{
@@ -17,9 +17,9 @@ export const MarqueeText = ({ children, speed = 30 }: MarqueeTextProps) => {
         }}
       >
         {children}
-        <span className="mx-4">•</span>
+        <span className="mx-4 text-red-400">•</span>
         {children}
-        <span className="mx-4">•</span>
+        <span className="mx-4 text-red-400">•</span>
       </div>
       
       <style>
@@ -37,3 +37,4 @@ export const MarqueeText = ({ children, speed = 30 }: MarqueeTextProps) => {
     </div>
   );
 };
+

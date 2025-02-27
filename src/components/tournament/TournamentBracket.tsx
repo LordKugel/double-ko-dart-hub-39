@@ -22,23 +22,19 @@ export const TournamentBracket = ({
   onAssignMatch,
   hideScoreControls = false
 }: TournamentBracketProps) => {
-  // Gruppieren der Matches nach Runden und Brackets
   const roundsCount = Math.max(...matches.map(m => m.round), 1);
   const winnerMatches = matches.filter(m => m.bracket === "winners");
   const loserMatches = matches.filter(m => m.bracket === "losers");
   const finalMatches = matches.filter(m => m.bracket === "final");
 
-  // Gruppiert nach Runde für Winner-Bracket
   const winnerRounds = Array.from({ length: roundsCount }, (_, i) => 
     winnerMatches.filter(m => m.round === i + 1)
   );
 
-  // Gruppiert nach Runde für Loser-Bracket
   const loserRounds = Array.from({ length: roundsCount }, (_, i) => 
     loserMatches.filter(m => m.round === i + 1)
   );
 
-  // Finden der vorherigen Matches für jedes Match
   const getPreviousMatches = (match: MatchType) => {
     return matches.filter(m => 
       m.round < match.round && 
@@ -49,7 +45,6 @@ export const TournamentBracket = ({
     );
   };
 
-  // Berechnung der vertikalen Position für jedes Match
   const getVerticalPosition = (match: MatchType, matchesInRound: MatchType[]) => {
     return matchesInRound.findIndex(m => m.id === match.id);
   };
@@ -61,34 +56,38 @@ export const TournamentBracket = ({
         <p className="text-sm text-gray-400">Runde {currentRound} von {roundsCount}</p>
       </div>
 
-      <div className="flex items-start justify-center space-x-6 overflow-x-auto min-w-full pb-8 pt-2">
-        {winnerRounds.map((roundMatches, index) => (
-          <div key={`winner-${index}`} className="flex-none w-[160px]">
-            <div className="text-xs font-semibold mb-2 text-center text-[#0FA0CE]">
-              Winner-Runde {index + 1}
+      <div className="flex items-start justify-between space-x-6 overflow-x-auto min-w-full pb-8 pt-2">
+        {/* Winner Bracket - Left aligned */}
+        <div className="flex-none space-x-6">
+          {winnerRounds.map((roundMatches, index) => (
+            <div key={`winner-${index}`} className="inline-block w-[160px]">
+              <div className="text-xs font-semibold mb-2 text-center text-[#0FA0CE]">
+                Winner-Runde {index + 1}
+              </div>
+              <div className="space-y-6 flex flex-col items-center">
+                {roundMatches.map(match => (
+                  <div key={match.id} className="hover:scale-105 transition-transform w-[150px]">
+                    <DraggableMatchCard
+                      match={match}
+                      isCurrentRound={match.round === currentRound}
+                      verticalPosition={getVerticalPosition(match, roundMatches)}
+                      previousMatches={getPreviousMatches(match)}
+                      onScoreUpdate={onScoreUpdate}
+                      machines={machines}
+                      onAssignMatch={onAssignMatch}
+                      hideScoreControls={true}
+                      onMatchClick={onMatchClick}
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="space-y-6 flex flex-col items-center">
-              {roundMatches.map(match => (
-                <div key={match.id} className="hover:scale-105 transition-transform w-[150px]">
-                  <DraggableMatchCard
-                    match={match}
-                    isCurrentRound={match.round === currentRound}
-                    verticalPosition={getVerticalPosition(match, roundMatches)}
-                    previousMatches={getPreviousMatches(match)}
-                    onScoreUpdate={onScoreUpdate}
-                    machines={machines}
-                    onAssignMatch={onAssignMatch}
-                    hideScoreControls={true} // Immer verstecken im Bracket
-                    onMatchClick={onMatchClick}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
 
+        {/* Final Matches - Centered */}
         {finalMatches.length > 0 && (
-          <div className="flex-none w-[160px]">
+          <div className="flex-none">
             <div className="text-xs font-semibold mb-2 text-center text-[#8B5CF6]">
               Finale
             </div>
@@ -103,7 +102,7 @@ export const TournamentBracket = ({
                     onScoreUpdate={onScoreUpdate}
                     machines={machines}
                     onAssignMatch={onAssignMatch}
-                    hideScoreControls={true} // Immer verstecken im Bracket
+                    hideScoreControls={true}
                     onMatchClick={onMatchClick}
                   />
                 </div>
@@ -112,31 +111,35 @@ export const TournamentBracket = ({
           </div>
         )}
 
-        {loserRounds.map((roundMatches, index) => (
-          <div key={`loser-${index}`} className="flex-none w-[160px]">
-            <div className="text-xs font-semibold mb-2 text-center text-red-500">
-              Loser-Runde {index + 1}
+        {/* Loser Bracket - Right aligned */}
+        <div className="flex-none space-x-6">
+          {loserRounds.map((roundMatches, index) => (
+            <div key={`loser-${index}`} className="inline-block w-[160px]">
+              <div className="text-xs font-semibold mb-2 text-center text-red-500">
+                Loser-Runde {index + 1}
+              </div>
+              <div className="space-y-6 flex flex-col items-center">
+                {roundMatches.map(match => (
+                  <div key={match.id} className="hover:scale-105 transition-transform w-[150px]">
+                    <DraggableMatchCard
+                      match={match}
+                      isCurrentRound={match.round === currentRound}
+                      verticalPosition={getVerticalPosition(match, roundMatches)}
+                      previousMatches={getPreviousMatches(match)}
+                      onScoreUpdate={onScoreUpdate}
+                      machines={machines}
+                      onAssignMatch={onAssignMatch}
+                      hideScoreControls={true}
+                      onMatchClick={onMatchClick}
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="space-y-6 flex flex-col items-center">
-              {roundMatches.map(match => (
-                <div key={match.id} className="hover:scale-105 transition-transform w-[150px]">
-                  <DraggableMatchCard
-                    match={match}
-                    isCurrentRound={match.round === currentRound}
-                    verticalPosition={getVerticalPosition(match, roundMatches)}
-                    previousMatches={getPreviousMatches(match)}
-                    onScoreUpdate={onScoreUpdate}
-                    machines={machines}
-                    onAssignMatch={onAssignMatch}
-                    hideScoreControls={true} // Immer verstecken im Bracket
-                    onMatchClick={onMatchClick}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );
 };
+
