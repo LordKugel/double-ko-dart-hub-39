@@ -15,7 +15,7 @@ const Index = () => {
     console.log("Touch Support:", {
       maxTouchPoints: navigator.maxTouchPoints,
       ontouchstart: 'ontouchstart' in window,
-      msPointerEnabled: !!(navigator.msPointerEnabled)
+      pointerEvents: 'PointerEvent' in window
     });
   }, []);
 
