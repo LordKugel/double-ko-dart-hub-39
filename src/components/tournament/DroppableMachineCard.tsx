@@ -32,11 +32,8 @@ export const DroppableMachineCard = ({
   const [{ isOver, canDrop }, drop] = useDrop({
     accept: 'MATCH',
     drop: (item: { matchId: string }) => {
+      console.log("Match dropped on machine", machine.id, item.matchId);
       onAssignMatch(machine.id, item.matchId);
-      toast({
-        title: "Match zugewiesen",
-        description: `Match wurde Automat ${machine.id} zugewiesen`
-      });
       return { machineId: machine.id };
     },
     canDrop: () => !machine.isOutOfOrder && !machine.currentMatchId,
@@ -56,8 +53,8 @@ export const DroppableMachineCard = ({
           : machine.isFavorite 
             ? "bg-yellow-50 border-yellow-200"
             : "bg-white border-gray-200",
-        canDrop && "border-dashed",
-        isOver && canDrop && "bg-green-50 border-green-300",
+        canDrop && "border-dashed border-green-500",
+        isOver && canDrop && "bg-green-50 border-green-500",
         "w-[75%]"
       )}
     >
@@ -143,7 +140,7 @@ export const DroppableMachineCard = ({
       )}
       
       {canDrop && (
-        <div className="text-xs text-center mt-2 text-green-600">
+        <div className="text-xs text-center mt-2 text-green-600 font-bold">
           {isOver ? "Match hier ablegen" : "Match hierher ziehen"}
         </div>
       )}

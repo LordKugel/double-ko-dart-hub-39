@@ -14,6 +14,7 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import { CurrentMatchCards } from "./tournament/CurrentMatchCards";
 import { Cog, ChevronDown, ChevronUp } from "lucide-react";
 import { MarqueeText } from "./tournament/MarqueeText";
+import { toast } from "./ui/use-toast";
 
 export const Tournament = () => {
   const { 
@@ -59,6 +60,16 @@ export const Tournament = () => {
 
     if (availableMachine) {
       assignMatchToMachine(availableMachine.id, matchId);
+      toast({
+        title: "Match zugewiesen",
+        description: `Match wurde automatisch Automat ${availableMachine.id} zugewiesen`
+      });
+    } else {
+      toast({
+        title: "Kein Automat verfügbar",
+        description: "Es gibt aktuell keinen freien Automaten",
+        variant: "destructive"
+      });
     }
   };
 
