@@ -1,5 +1,5 @@
 
-import { useRef, useEffect } from 'react';
+import { useRef } from 'react';
 import { useDrag } from 'react-dnd';
 import { Match as MatchType, Machine } from "@/types/tournament";
 import { MatchCard } from './MatchCard';
@@ -31,15 +31,6 @@ export const DraggableMatchCard = ({
   // keinem Automaten zugewiesen ist
   const canBeDragged = isCurrentRound && !match.completed && !match.machineNumber;
   
-  useEffect(() => {
-    console.log(`Match ${match.id} drag status:`, {
-      isCurrentRound,
-      completed: match.completed,
-      hasMachine: !!match.machineNumber,
-      canBeDragged
-    });
-  }, [match.id, isCurrentRound, match.completed, match.machineNumber, canBeDragged]);
-  
   const [{ isDragging }, drag] = useDrag(() => ({
     type: 'MATCH',
     item: { matchId: match.id },
@@ -50,12 +41,6 @@ export const DraggableMatchCard = ({
     end: (item, monitor) => {
       const dropResult = monitor.getDropResult<{ machineId: number }>();
       
-      console.log("Drag ended", { 
-        item, 
-        dropResult, 
-        didDrop: monitor.didDrop()
-      });
-      
       if (dropResult && onAssignMatch) {
         onAssignMatch(dropResult.machineId, item.matchId);
       }
@@ -65,13 +50,6 @@ export const DraggableMatchCard = ({
   // Hier verbinden wir die Drag-Funktionalität mit dem DOM-Element
   drag(ref);
 
-  // Wenn ein Match gezogen werden kann (und angeklickt), dann soll es zu einem Automaten zugewiesen werden
-  const handleClick = () => {
-    if (isCurrentRound && !match.completed && !match.machineNumber && onMatchClick) {
-      onMatchClick(match.id);
-    }
-  };
-
   return (
     <div 
       ref={ref} 
@@ -80,7 +58,6 @@ export const DraggableMatchCard = ({
         cursor: canBeDragged ? 'grab' : 'default',
       }}
       className="relative"
-      onClick={handleClick}
     >
       <MatchCard
         match={match}
@@ -90,15 +67,9 @@ export const DraggableMatchCard = ({
         onScoreUpdate={onScoreUpdate}
         machines={machines}
         onAssignMatch={onAssignMatch}
-        hideScoreControls={true} // Immer verstecken, da die Punkteeingabe nur im Automaten erfolgen soll
+        hideScoreControls={hideScoreControls}
+        onMatchClick={onMatchClick}
       />
-      
-      {/* Ziehbar-Badge - nur anzeigen, wenn das Match gezogen werden kann */}
-      {canBeDragged && (
-        <div className="absolute -top-2 -right-2 bg-green-500 text-white text-xs px-1 rounded-full">
-          Ziehbar
-        </div>
-      )}
     </div>
   );
 };

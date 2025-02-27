@@ -1,7 +1,8 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Match as MatchType, Machine } from "@/types/tournament";
 import { DraggableMatchCard } from './bracket/DraggableMatchCard';
+import { Slider } from "@/components/ui/slider";
 
 interface TournamentBracketProps {
   matches: MatchType[];
@@ -22,6 +23,9 @@ export const TournamentBracket = ({
   onAssignMatch,
   hideScoreControls = false
 }: TournamentBracketProps) => {
+  const [bracketWidth, setBracketWidth] = useState<number>(160);
+  const [bracketHeight, setBracketHeight] = useState<number>(600);
+  
   const roundsCount = Math.max(...matches.map(m => m.round), 1);
   const winnerMatches = matches.filter(m => m.bracket === "winners");
   const loserMatches = matches.filter(m => m.bracket === "losers");
@@ -50,23 +54,49 @@ export const TournamentBracket = ({
   };
 
   return (
-    <div className="w-full h-full bg-[#121824] text-white p-4 rounded-lg overflow-auto max-h-[600px]">
+    <div className="w-full h-full bg-[#121824] text-white p-4 rounded-lg overflow-auto" style={{ maxHeight: `${bracketHeight}px` }}>
       <div className="text-center mb-4">
         <h3 className="font-bold text-lg">Turnierbaum</h3>
         <p className="text-sm text-gray-400">Runde {currentRound} von {roundsCount}</p>
+      </div>
+      
+      {/* Controls for bracket size */}
+      <div className="mb-4 grid grid-cols-2 gap-6">
+        <div>
+          <label className="text-xs text-gray-400 mb-1 block">Breite der Brackets</label>
+          <Slider 
+            defaultValue={[bracketWidth]} 
+            min={120} 
+            max={250} 
+            step={10}
+            onValueChange={(values) => setBracketWidth(values[0])}
+          />
+          <div className="text-xs text-gray-500 mt-1">{bracketWidth}px</div>
+        </div>
+        <div>
+          <label className="text-xs text-gray-400 mb-1 block">Höhe des Turnierbaums</label>
+          <Slider 
+            defaultValue={[bracketHeight]} 
+            min={400} 
+            max={800} 
+            step={50}
+            onValueChange={(values) => setBracketHeight(values[0])}
+          />
+          <div className="text-xs text-gray-500 mt-1">{bracketHeight}px</div>
+        </div>
       </div>
 
       <div className="flex items-start justify-between space-x-6 overflow-x-auto min-w-full pb-8 pt-2">
         {/* Winner Bracket - Left aligned */}
         <div className="flex-none space-x-6">
           {winnerRounds.map((roundMatches, index) => (
-            <div key={`winner-${index}`} className="inline-block w-[160px]">
+            <div key={`winner-${index}`} className="inline-block" style={{ width: `${bracketWidth}px` }}>
               <div className="text-xs font-semibold mb-2 text-center text-[#0FA0CE]">
                 Winner-Runde {index + 1}
               </div>
               <div className="space-y-6 flex flex-col items-center">
                 {roundMatches.map(match => (
-                  <div key={match.id} className="hover:scale-105 transition-transform w-[150px]">
+                  <div key={match.id} className="hover:scale-105 transition-transform" style={{ width: `${bracketWidth - 10}px` }}>
                     <DraggableMatchCard
                       match={match}
                       isCurrentRound={match.round === currentRound}
@@ -93,7 +123,7 @@ export const TournamentBracket = ({
             </div>
             <div className="space-y-6 flex flex-col items-center">
               {finalMatches.map(match => (
-                <div key={match.id} className="hover:scale-105 transition-transform w-[150px]">
+                <div key={match.id} className="hover:scale-105 transition-transform" style={{ width: `${bracketWidth - 10}px` }}>
                   <DraggableMatchCard
                     match={match}
                     isCurrentRound={match.round === currentRound}
@@ -114,13 +144,13 @@ export const TournamentBracket = ({
         {/* Loser Bracket - Right aligned */}
         <div className="flex-none space-x-6">
           {loserRounds.map((roundMatches, index) => (
-            <div key={`loser-${index}`} className="inline-block w-[160px]">
+            <div key={`loser-${index}`} className="inline-block" style={{ width: `${bracketWidth}px` }}>
               <div className="text-xs font-semibold mb-2 text-center text-red-500">
                 Loser-Runde {index + 1}
               </div>
               <div className="space-y-6 flex flex-col items-center">
                 {roundMatches.map(match => (
-                  <div key={match.id} className="hover:scale-105 transition-transform w-[150px]">
+                  <div key={match.id} className="hover:scale-105 transition-transform" style={{ width: `${bracketWidth - 10}px` }}>
                     <DraggableMatchCard
                       match={match}
                       isCurrentRound={match.round === currentRound}
@@ -142,4 +172,3 @@ export const TournamentBracket = ({
     </div>
   );
 };
-

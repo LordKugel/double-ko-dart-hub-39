@@ -35,6 +35,10 @@ export const MatchCard = ({
 }: MatchCardProps) => {
   const player1Score = match.scores.filter(s => s.player1Won).length;
   const player2Score = match.scores.filter(s => s.player2Won).length;
+  
+  // Bestimmen des Gewinner-Status
+  const player1IsWinner = match.completed && player1Score > player2Score;
+  const player2IsWinner = match.completed && player2Score > player1Score;
 
   const handleScoreUpdate = (index: number, player1Won: boolean) => {
     // Wenn die Steuerelemente ausgeblendet werden sollen oder das Match einem Automaten zugewiesen ist,
@@ -70,14 +74,21 @@ export const MatchCard = ({
   // Filtere verfügbare Automaten (nicht belegt und nicht außer Betrieb)
   const availableMachines = machines.filter(m => !m.isOutOfOrder && !m.currentMatchId);
 
+  const handleClick = () => {
+    if (onMatchClick && isCurrentRound && !match.completed && !match.machineNumber) {
+      onMatchClick(match.id);
+    }
+  };
+
   const cardContent = (
     <div 
       className={cn(
-        "relative border rounded p-2 transition-colors",
+        "relative border rounded p-2 transition-colors cursor-pointer",
         getBracketColors(),
         isCurrentRound && "ring-1 ring-blue-500",
-        "text-xs w-[150px]"  // Schmalere Karte für bessere Darstellung im Bracket
+        "text-xs w-full"
       )}
+      onClick={handleClick}
     >
       <PlayerInfo
         player={match.player1}
@@ -89,6 +100,8 @@ export const MatchCard = ({
         onScoreUpdate={handleScoreUpdate}
         completed={match.completed}
         showScoreControls={!hideScoreControls && !match.machineNumber}
+        isMatchCompleted={match.completed}
+        isFinalWinner={player1IsWinner}
       />
       <div className="my-1 border-t border-gray-700" />
       <PlayerInfo
@@ -101,6 +114,8 @@ export const MatchCard = ({
         onScoreUpdate={handleScoreUpdate}
         completed={match.completed}
         showScoreControls={!hideScoreControls && !match.machineNumber}
+        isMatchCompleted={match.completed}
+        isFinalWinner={player2IsWinner}
       />
       {match.completed && (
         <div className="mt-1 text-xs text-gray-500 text-center">
@@ -125,7 +140,7 @@ export const MatchCard = ({
   return (
     <ContextMenu>
       <ContextMenuTrigger>{cardContent}</ContextMenuTrigger>
-      <ContextMenuContent className="w-56 bg-[#1A2133] border-gray-700 text-white">
+      <ContextMenuContent className="z-50 w-56 bg-[#1A2133] border-gray-700 text-white">
         <div className="px-2 py-1.5 text-xs font-semibold text-gray-300">
           Match zuweisen
         </div>

@@ -13,6 +13,8 @@ interface PlayerInfoProps {
   onScoreUpdate: (index: number, player1Won: boolean) => void;
   completed: boolean;
   showScoreControls?: boolean;
+  isMatchCompleted?: boolean;
+  isFinalWinner?: boolean;
 }
 
 export const PlayerInfo = ({ 
@@ -24,15 +26,28 @@ export const PlayerInfo = ({
   isPlayer1,
   onScoreUpdate,
   completed,
-  showScoreControls = false
+  showScoreControls = false,
+  isMatchCompleted = false,
+  isFinalWinner = false
 }: PlayerInfoProps) => {
+  // Bestimme die Textfarbe basierend auf dem Ergebnis des abgeschlossenen Matches
+  const getPlayerNameColor = () => {
+    if (isMatchCompleted) {
+      return isFinalWinner ? "text-[#0FA0CE]" : "text-red-500";
+    }
+    return "text-white";
+  };
+
   return (
     <div className={cn(
       "flex justify-between items-center",
-      isWinner && "text-[#0FA0CE] font-semibold"
+      isWinner && "font-semibold"
     )}>
       <div className="flex flex-col">
-        <span className="font-medium text-xs text-white">
+        <span className={cn(
+          "font-medium text-xs",
+          getPlayerNameColor()
+        )}>
           {player.firstName} {player.lastName}
         </span>
         {player.team && (

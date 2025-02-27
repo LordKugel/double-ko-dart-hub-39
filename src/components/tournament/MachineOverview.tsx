@@ -5,6 +5,8 @@ import { Star, AlertTriangle, CheckCircle, Plus, Minus } from "lucide-react";
 import { Button } from "../ui/button";
 import { toast } from "../ui/use-toast";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
+import { Slider } from "../ui/slider";
+import { useState } from "react";
 
 interface MachineOverviewProps {
   activeMatches: Match[];
@@ -35,6 +37,7 @@ export const MachineOverview = ({
   onIncreaseMaxMachines,
   onDecreaseMaxMachines
 }: MachineOverviewProps) => {
+  const [machineHeight, setMachineHeight] = useState<number>(200);
   
   const handleToggleFavorite = (machine: Machine) => {
     onUpdateMachine({
@@ -89,6 +92,21 @@ export const MachineOverview = ({
                 </Button>
               )}
             </div>
+            
+            {/* Höhensteuerung für Automaten */}
+            <div className="ml-6 flex items-center gap-2">
+              <label className="text-xs text-gray-400">Höhe:</label>
+              <div className="w-32">
+                <Slider 
+                  defaultValue={[machineHeight]} 
+                  min={150} 
+                  max={300} 
+                  step={10}
+                  onValueChange={(values) => setMachineHeight(values[0])}
+                />
+              </div>
+              <span className="text-xs text-gray-400">{machineHeight}px</span>
+            </div>
           </div>
           
           <span className="text-xs text-gray-400">
@@ -121,6 +139,7 @@ export const MachineOverview = ({
                         ? "bg-[#22291F] border-yellow-700/30"
                         : "bg-[#1A1721]/50 border-dashed border-[#403E43]/50",
                 )}
+                style={{ height: `${machineHeight}px`, overflow: 'auto' }}
               >
                 {machine.currentMatchId && match ? (
                   <div className="space-y-2">
@@ -254,7 +273,7 @@ export const MachineOverview = ({
                     </Button>
                   </div>
                 ) : (
-                  <div className="flex flex-col items-center justify-center h-[150px] text-gray-400">
+                  <div className="flex flex-col items-center justify-center h-full text-gray-400">
                     <div className="flex justify-between w-full mb-2">
                       <span className="text-sm">Automat {machineId}</span>
                       <div className="flex items-center gap-1">
