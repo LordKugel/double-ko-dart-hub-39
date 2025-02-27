@@ -27,16 +27,7 @@ export const DraggableMatchCard = ({
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
-    end: (item, monitor) => {
-      const didDrop = monitor.didDrop();
-      if (!didDrop) {
-        toast({
-          title: "Nicht zugewiesen",
-          description: "Match wurde nicht auf einen Automaten gezogen",
-          variant: "destructive"
-        });
-      }
-    },
+    // Entfernen des end-Callbacks, um den Toast zu vermeiden
   }));
 
   drag(ref);

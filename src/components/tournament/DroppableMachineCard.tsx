@@ -34,6 +34,13 @@ export const DroppableMachineCard = ({
     drop: (item: { matchId: string }) => {
       console.log("Match dropped on machine", machine.id, item.matchId);
       onAssignMatch(machine.id, item.matchId);
+      
+      // Erfolgstoast hier hinzufügen
+      toast({
+        title: "Match zugewiesen",
+        description: `Match wurde erfolgreich Automat ${machine.id} zugewiesen`
+      });
+      
       return { machineId: machine.id };
     },
     canDrop: () => !machine.isOutOfOrder && !machine.currentMatchId,
