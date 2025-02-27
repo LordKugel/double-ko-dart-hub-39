@@ -5,6 +5,7 @@ import { Button } from "../ui/button";
 import { Star, AlertTriangle, CheckCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "../ui/use-toast";
+import { useEffect } from 'react';
 
 interface DroppableMachineCardProps {
   machine: Machine;
@@ -29,11 +30,21 @@ export const DroppableMachineCard = ({
   currentMatch,
   canConfirm = false
 }: DroppableMachineCardProps) => {
-  // Verbesserte Drop-Implementierung
+  // Debug: Logge Zustand und Bedingungen
+  const isDroppable = !machine.isOutOfOrder && !machine.currentMatchId;
+  
+  useEffect(() => {
+    console.log(`Machine ${machine.id} drop status:`, {
+      isOutOfOrder: machine.isOutOfOrder,
+      hasCurrentMatch: !!machine.currentMatchId,
+      canReceiveDrops: isDroppable
+    });
+  }, [machine.id, machine.isOutOfOrder, machine.currentMatchId, isDroppable]);
+
   const [{ isOver, canDrop }, drop] = useDrop({
     accept: 'MATCH',
     drop: (item: any) => {
-      console.log("Match dropped on machine", machine.id, item);
+      console.log("DROP DETECTED on machine", machine.id, item);
       if (item && item.matchId) {
         onAssignMatch(machine.id, item.matchId);
         
@@ -44,12 +55,19 @@ export const DroppableMachineCard = ({
       }
       return { machineId: machine.id };
     },
-    canDrop: () => !machine.isOutOfOrder && !machine.currentMatchId,
+    canDrop: () => isDroppable,
     collect: (monitor) => ({
       isOver: !!monitor.isOver(),
       canDrop: !!monitor.canDrop(),
     }),
   });
+
+  // Debug: Logge Drop-Zone-Status
+  useEffect(() => {
+    if (isOver) {
+      console.log(`Machine ${machine.id} has drag item OVER it, canDrop:`, canDrop);
+    }
+  }, [machine.id, isOver, canDrop]);
 
   return (
     <div
@@ -179,6 +197,12 @@ export const DroppableMachineCard = ({
           )}
         </div>
       )}
+      
+      {/* Debug-Anzeige für die Drop-Zone */}
+      <div className="mt-2 text-xs text-gray-500">
+        Status: {isDroppable ? 'Kann Matches empfangen' : 'Nicht verfügbar'}
+        {isOver && <span className="ml-1 text-green-500"> • Drag darüber</span>}
+      </div>
     </div>
   );
 };
