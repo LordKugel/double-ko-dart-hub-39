@@ -19,14 +19,14 @@ export const DraggableMatchCard = ({
 }) => {
   const ref = useRef<HTMLDivElement>(null);
   
-  const [{ isDragging }, drag] = useDrag(() => ({
+  const [{ isDragging }, drag] = useDrag({
     type: 'MATCH',
     item: { matchId: match.id },
     canDrag: isCurrentRound && !match.completed && !match.machineNumber,
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
-  }));
+  });
 
   drag(ref);
 
@@ -46,13 +46,7 @@ export const DraggableMatchCard = ({
         previousMatches={previousMatches}
         onScoreUpdate={onScoreUpdate}
       />
-      {isCurrentRound && !match.completed && !match.machineNumber && (
-        <div className="absolute -top-2 -right-2 bg-green-500 text-white text-xs rounded-full p-1 flex items-center justify-center w-6 h-6 shadow-md">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-          </svg>
-        </div>
-      )}
+      {/* Entferne den grünen Pfeil */}
     </div>
   );
 };

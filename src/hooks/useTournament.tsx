@@ -128,6 +128,8 @@ export const useTournament = () => {
   };
 
   const assignMatchToMachine = (machineId: number, matchId: string | null) => {
+    console.log("Assigning match to machine", machineId, matchId);
+    
     setTournament(prev => {
       // Zuerst aktualisieren wir die Maschine
       const updatedMachines = prev.machines.map(machine => {

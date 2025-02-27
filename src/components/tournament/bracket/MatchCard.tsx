@@ -47,7 +47,7 @@ export const MatchCard = ({
         "relative border rounded p-2 transition-colors",
         getBracketColors(),
         isCurrentRound && "ring-1 ring-blue-500",
-        "text-sm scale-90 origin-top-left w-[220px]"  // Kleinere Größe
+        "text-sm w-[180px]"  // Kleinere Größe
       )}
       onClick={() => {
         if (isCurrentRound && !match.completed && onMatchClick) {

@@ -49,21 +49,21 @@ export const TournamentBracket = ({
   };
 
   return (
-    <div className="w-full h-full bg-[#121824] text-white p-4 rounded-lg overflow-auto">
+    <div className="w-full h-full bg-[#121824] text-white p-4 rounded-lg overflow-auto max-h-[600px]">
       <div className="text-center mb-6">
         <h3 className="font-bold text-lg">Turnierbaum</h3>
         <p className="text-sm text-gray-400">Runde {currentRound} von {roundsCount}</p>
       </div>
 
-      <div className="flex items-start space-x-6 overflow-x-auto min-w-full pb-8 pt-2">
+      <div className="flex items-start space-x-4 overflow-x-auto min-w-full pb-8 pt-2">
         {winnerRounds.map((roundMatches, index) => (
           <div key={`winner-${index}`} className="flex-none">
             <div className="text-xs font-semibold mb-2 text-center text-[#0FA0CE]">
               Winner-Runde {index + 1}
             </div>
-            <div className="space-y-3">
+            <div className="space-y-2">
               {roundMatches.map(match => (
-                <div key={match.id} className="transform-gpu hover:scale-105 transition-transform">
+                <div key={match.id} className="hover:scale-105 transition-transform">
                   <DraggableMatchCard
                     match={match}
                     isCurrentRound={match.round === currentRound}
@@ -82,9 +82,9 @@ export const TournamentBracket = ({
             <div className="text-xs font-semibold mb-2 text-center text-[#8B5CF6]">
               Finale
             </div>
-            <div className="space-y-3">
+            <div className="space-y-2">
               {finalMatches.map(match => (
-                <div key={match.id} className="transform-gpu hover:scale-105 transition-transform">
+                <div key={match.id} className="hover:scale-105 transition-transform">
                   <DraggableMatchCard
                     match={match}
                     isCurrentRound={match.round === currentRound}
@@ -103,9 +103,9 @@ export const TournamentBracket = ({
             <div className="text-xs font-semibold mb-2 text-center text-red-500">
               Loser-Runde {index + 1}
             </div>
-            <div className="space-y-3">
+            <div className="space-y-2">
               {roundMatches.map(match => (
-                <div key={match.id} className="transform-gpu hover:scale-105 transition-transform">
+                <div key={match.id} className="hover:scale-105 transition-transform">
                   <DraggableMatchCard
                     match={match}
                     isCurrentRound={match.round === currentRound}
