@@ -11,6 +11,9 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
+import { CurrentMatchCards } from "./tournament/CurrentMatchCards";
+import { Cog, ChevronDown, ChevronUp } from "lucide-react";
+import { MarqueeText } from "./tournament/MarqueeText";
 
 export const Tournament = () => {
   const { 
@@ -25,6 +28,7 @@ export const Tournament = () => {
   } = useTournament();
 
   const [showMatchesTable, setShowMatchesTable] = useState(false);
+  const [showMachineManagement, setShowMachineManagement] = useState(false);
   const [editingMachines, setEditingMachines] = useState(false);
   const [tempMachines, setTempMachines] = useState(tournament?.numberOfMachines || 3);
 
@@ -35,6 +39,10 @@ export const Tournament = () => {
     !match.completed &&
     (!match.machineNumber || match.machineNumber === null)
   ) || [];
+
+  const winnersMatches = availableMatches.filter(match => match.bracket === "winners");
+  const losersMatches = availableMatches.filter(match => match.bracket === "losers");
+  const finalMatches = availableMatches.filter(match => match.bracket === "final");
 
   const activeMatches = tournament?.matches?.filter(match => 
     match.round === tournament.currentRound && 
@@ -84,33 +92,55 @@ export const Tournament = () => {
         )}
 
         <div className="flex justify-center gap-4 mb-4">
-          {editingMachines ? (
-            <div className="flex items-center gap-2">
-              <Input
-                type="number"
-                min="1"
-                max="10"
-                value={tempMachines}
-                onChange={(e) => setTempMachines(Number(e.target.value))}
-                className="w-20"
-              />
-              <Button onClick={handleMachineNumberUpdate} variant="outline">
-                Speichern
-              </Button>
-              <Button onClick={() => setEditingMachines(false)} variant="ghost">
-                Abbrechen
-              </Button>
-            </div>
-          ) : (
-            <Button
-              onClick={() => setEditingMachines(true)}
-              variant="outline"
-              className="mb-4"
-            >
-              Automaten Anzahl: {tournament.numberOfMachines || 3}
-            </Button>
-          )}
+          <Button
+            onClick={() => setShowMachineManagement(!showMachineManagement)}
+            variant="outline"
+            className="mb-4 flex items-center gap-2"
+          >
+            <Cog className="h-4 w-4" />
+            Automaten-Verwaltung {tournament.numberOfMachines || 3}
+            {showMachineManagement ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+          </Button>
         </div>
+        
+        {showMachineManagement && (
+          <div className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200 animate-fade-in">
+            <div className="flex justify-center gap-4 mb-4">
+              {editingMachines ? (
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="number"
+                    min="1"
+                    max="10"
+                    value={tempMachines}
+                    onChange={(e) => setTempMachines(Number(e.target.value))}
+                    className="w-20"
+                  />
+                  <Button onClick={handleMachineNumberUpdate} variant="outline">
+                    Speichern
+                  </Button>
+                  <Button onClick={() => setEditingMachines(false)} variant="ghost">
+                    Abbrechen
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  onClick={() => setEditingMachines(true)}
+                  variant="outline"
+                >
+                  Automaten Anzahl: {tournament.numberOfMachines || 3}
+                </Button>
+              )}
+            </div>
+            
+            <MachineManagement
+              machines={tournament.machines}
+              onUpdateMachine={updateMachine}
+              onAssignMatch={assignMatchToMachine}
+              availableMatches={availableMatches}
+            />
+          </div>
+        )}
         
         <TournamentControls
           onGeneratePlayers={generatePlayers}
@@ -125,15 +155,11 @@ export const Tournament = () => {
           showMatchesTable={showMatchesTable}
         />
 
-        {tournament.started && (
-          <div className="mb-8">
-            <h2 className="text-xl font-bold mb-4">Automaten-Verwaltung</h2>
-            <MachineManagement
-              machines={tournament.machines}
-              onUpdateMachine={updateMachine}
-              onAssignMatch={assignMatchToMachine}
-              availableMatches={availableMatches}
-            />
+        {tournament.started && tournament.players.filter(p => p.eliminated).length > 0 && (
+          <div className="my-4">
+            <MarqueeText>
+              Ausgeschiedene Spieler: {tournament.players.filter(p => p.eliminated).map(p => `${p.firstName} ${p.lastName}`).join(' • ')}
+            </MarqueeText>
           </div>
         )}
 
@@ -145,20 +171,47 @@ export const Tournament = () => {
           />
         ) : (
           <>
-            <TournamentBracket 
-              matches={tournament.matches}
-              currentRound={tournament.currentRound}
-              onScoreUpdate={handleScoreUpdate}
-              onMatchClick={handleMatchClick}
-            />
-
-            <div className="mt-8">
-              <h2 className="text-xl font-bold mb-4">Ausgeschiedene Spieler</h2>
-              <PlayersList 
-                players={tournament.players.filter(p => p.eliminated)}
-                matches={tournament.matches}
-                title="Eliminierte Spieler"
-              />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <div className="col-span-1 bg-[#0e1627] p-4 rounded-lg">
+                <h2 className="text-xl font-bold mb-4 text-[#0FA0CE]">Winner's Bracket</h2>
+                <CurrentMatchCards
+                  matches={winnersMatches}
+                  title={`Runde ${tournament.currentRound}`}
+                  onScoreUpdate={handleScoreUpdate}
+                  onMatchClick={handleMatchClick}
+                />
+              </div>
+              
+              <div className="col-span-1 md:col-span-1">
+                <TournamentBracket 
+                  matches={tournament.matches}
+                  currentRound={tournament.currentRound}
+                  onScoreUpdate={handleScoreUpdate}
+                  onMatchClick={handleMatchClick}
+                />
+              </div>
+              
+              <div className="col-span-1 bg-[#1c1018] p-4 rounded-lg">
+                <h2 className="text-xl font-bold mb-4 text-red-500">Loser's Bracket</h2>
+                <CurrentMatchCards
+                  matches={losersMatches}
+                  title={`Runde ${tournament.currentRound}`}
+                  onScoreUpdate={handleScoreUpdate}
+                  onMatchClick={handleMatchClick}
+                />
+                
+                {finalMatches.length > 0 && (
+                  <div className="mt-8">
+                    <h2 className="text-xl font-bold mb-4 text-[#8B5CF6]">Finale</h2>
+                    <CurrentMatchCards
+                      matches={finalMatches}
+                      title="Finale"
+                      onScoreUpdate={handleScoreUpdate}
+                      onMatchClick={handleMatchClick}
+                    />
+                  </div>
+                )}
+              </div>
             </div>
           </>
         )}

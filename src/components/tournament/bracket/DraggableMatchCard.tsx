@@ -48,6 +48,7 @@ export const DraggableMatchCard = ({
         opacity: isDragging ? 0.5 : 1,
         cursor: isCurrentRound && !match.completed && !match.machineNumber ? 'grab' : 'default',
       }}
+      className="mb-4"
     >
       <MatchCard
         match={match}
