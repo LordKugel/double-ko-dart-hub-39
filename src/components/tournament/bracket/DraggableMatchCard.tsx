@@ -1,7 +1,7 @@
 
 import { useRef } from 'react';
 import { useDrag } from 'react-dnd';
-import { Match as MatchType } from "@/types/tournament";
+import { Match as MatchType, Machine } from "@/types/tournament";
 import { MatchCard } from './MatchCard';
 
 export const DraggableMatchCard = ({ 
@@ -9,25 +9,29 @@ export const DraggableMatchCard = ({
   isCurrentRound, 
   verticalPosition,
   previousMatches,
-  onScoreUpdate
+  onScoreUpdate,
+  machines,
+  onAssignMatch
 }: {
   match: MatchType;
   isCurrentRound: boolean;
   verticalPosition: number;
   previousMatches: MatchType[];
   onScoreUpdate?: (matchId: string, gameIndex: number, player1Won: boolean) => void;
+  machines?: Machine[];
+  onAssignMatch?: (machineId: number, matchId: string) => void;
 }) => {
   const ref = useRef<HTMLDivElement>(null);
   
-  // Hier ist die korrekte Verwendung von useDrag ohne Funktionsaufruf
-  const [{ isDragging }, drag] = useDrag({
+  // Hier ist die korrekte Verwendung von useDrag mit item als Funktion
+  const [{ isDragging }, drag] = useDrag(() => ({
     type: 'MATCH',
-    item: () => ({ matchId: match.id }),
+    item: { matchId: match.id },
     canDrag: isCurrentRound && !match.completed && !match.machineNumber,
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
-  });
+  }), [match.id, isCurrentRound, match.completed, match.machineNumber]);
 
   drag(ref);
 
@@ -46,6 +50,8 @@ export const DraggableMatchCard = ({
         verticalPosition={verticalPosition}
         previousMatches={previousMatches}
         onScoreUpdate={onScoreUpdate}
+        machines={machines}
+        onAssignMatch={onAssignMatch}
       />
     </div>
   );
