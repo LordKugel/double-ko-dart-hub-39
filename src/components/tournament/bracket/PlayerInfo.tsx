@@ -33,9 +33,16 @@ export const PlayerInfo = ({
   // Bestimme die Textfarbe basierend auf dem Ergebnis des abgeschlossenen Matches
   const getPlayerNameColor = () => {
     if (isMatchCompleted) {
-      return isFinalWinner ? "text-[#0FA0CE]" : "text-red-500";
+      if (isFinalWinner) {
+        return "text-[#0FA0CE]";  // Sieger bleibt blau
+      } else if (player.bracket === "losers") {
+        return "text-[#FEF7CD]";  // Verlierer, der ins Loser-Bracket geht, wird gelb
+      } else if (player.eliminated) {
+        return "text-[#ea384c]";  // Ausgeschiedene Spieler werden rot
+      }
+      return "text-gray-400";  // Standardfall
     }
-    return "text-white";
+    return "text-white";  // Standard für laufende Matches
   };
 
   return (
@@ -51,7 +58,15 @@ export const PlayerInfo = ({
           {player.firstName} {player.lastName}
         </span>
         {player.team && (
-          <span className="text-[10px] text-gray-400">{player.team}</span>
+          <span className={cn(
+            "text-[10px]",
+            isMatchCompleted && isFinalWinner ? "text-[#0FA0CE]/70" : 
+            isMatchCompleted && player.bracket === "losers" ? "text-[#FEF7CD]/70" :
+            isMatchCompleted && player.eliminated ? "text-[#ea384c]/70" :
+            "text-gray-400"
+          )}>
+            {player.team}
+          </span>
         )}
       </div>
       <div className="flex items-center gap-1">

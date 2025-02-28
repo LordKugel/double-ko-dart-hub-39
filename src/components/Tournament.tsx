@@ -12,7 +12,6 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { CurrentMatchCards } from "./tournament/CurrentMatchCards";
 import { Plus, Minus, RefreshCw } from "lucide-react";
-import { MarqueeText } from "./tournament/MarqueeText";
 import { toast } from "./ui/use-toast";
 import { TooltipProvider } from "./ui/tooltip";
 
@@ -44,6 +43,28 @@ export const Tournament = () => {
   const winnersMatches = availableMatches.filter(match => match.bracket === "winners");
   const losersMatches = availableMatches.filter(match => match.bracket === "losers");
   const finalMatches = availableMatches.filter(match => match.bracket === "final");
+
+  // Liste der Spieler in aktiven Matches
+  const playersInActiveMatches = availableMatches.flatMap(match => 
+    [match.player1.id, match.player2.id]
+  );
+
+  // Aktive Spieler aus dem Winnerbracket, die nicht in einem aktuellen Match sind
+  const activeWinnerPlayers = tournament.players.filter(player => 
+    !player.eliminated && 
+    player.bracket === "winners" && 
+    !playersInActiveMatches.includes(player.id)
+  );
+
+  // Aktive Spieler aus dem Loserbracket, die nicht in einem aktuellen Match sind
+  const activeLoserPlayers = tournament.players.filter(player => 
+    !player.eliminated && 
+    player.bracket === "losers" && 
+    !playersInActiveMatches.includes(player.id)
+  );
+
+  // Ausgeschiedene Spieler
+  const eliminatedPlayers = tournament.players.filter(p => p.eliminated);
 
   const activeMatches = tournament?.matches?.filter(match => 
     match.round === tournament.currentRound && 
@@ -125,9 +146,6 @@ export const Tournament = () => {
     exportTournamentData(true);
   }
 
-  // Ausgeschiedene Spieler abrufen
-  const eliminatedPlayers = tournament.players.filter(p => p.eliminated);
-
   return (
     <TooltipProvider>
       <DndProvider backend={HTML5Backend}>
@@ -196,14 +214,6 @@ export const Tournament = () => {
             showMatchesTable={showMatchesTable}
           />
 
-          {tournament.started && eliminatedPlayers.length > 0 && (
-            <div className="my-4">
-              <MarqueeText>
-                Ausgeschiedene Spieler: {eliminatedPlayers.map(p => `${p.firstName} ${p.lastName}`).join(' • ')}
-              </MarqueeText>
-            </div>
-          )}
-
           {!tournament.started ? (
             <PlayersList 
               players={tournament.players}
@@ -211,9 +221,9 @@ export const Tournament = () => {
               title="Alle Spieler"
             />
           ) : (
-            <div className="flex flex-row gap-6 mb-8">
-              {/* Seitenleiste für Winner/Loser/Freilos */}
-              <div className="w-64 flex flex-col gap-6">
+            <div className="flex flex-col md:flex-row gap-6 mb-8">
+              {/* Seitenleiste für Winner/Loser/Freilos - jetzt vertikal */}
+              <div className="w-full md:w-64 flex flex-col gap-4">
                 {/* Winner's Bracket */}
                 <div className="bg-[#0e1627] p-4 rounded-lg border border-[#0FA0CE]/30">
                   <h2 className="text-xl font-bold mb-4 text-[#0FA0CE]">Winner's Bracket</h2>
@@ -233,100 +243,61 @@ export const Tournament = () => {
                     </div>
                   )}
                   
-                  {winnersMatches.length > 0 ? (
-                    <div className="space-y-3">
-                      {winnersMatches.map(match => (
+                  {/* Verfügbare Spieler im Winner-Bracket */}
+                  {activeWinnerPlayers.length > 0 ? (
+                    <div className="space-y-2">
+                      {activeWinnerPlayers.map(player => (
                         <div 
-                          key={match.id} 
-                          className="p-2 bg-[#121824] rounded border border-[#0FA0CE]/20 hover:border-[#0FA0CE]/50 cursor-pointer"
-                          onClick={() => handleMatchClick(match.id)}
+                          key={player.id} 
+                          className="p-2 bg-[#121824] rounded border border-[#0FA0CE]/20"
                         >
                           <div className="flex flex-col gap-1">
-                            <div className="flex justify-between items-center">
-                              <span className="text-sm text-white">{match.player1.firstName} {match.player1.lastName}</span>
-                              {match.player1.team && (
-                                <span className="text-xs text-gray-400">{match.player1.team}</span>
-                              )}
-                            </div>
-                            <div className="border-t border-gray-700 my-1" />
-                            <div className="flex justify-between items-center">
-                              <span className="text-sm text-white">{match.player2.firstName} {match.player2.lastName}</span>
-                              {match.player2.team && (
-                                <span className="text-xs text-gray-400">{match.player2.team}</span>
-                              )}
-                            </div>
+                            <span className="text-sm text-white">
+                              {player.firstName} {player.lastName}
+                            </span>
+                            {player.team && (
+                              <span className="text-xs text-gray-400">{player.team}</span>
+                            )}
                           </div>
                         </div>
                       ))}
                     </div>
-                  ) : (
-                    <div className="text-gray-400 text-sm">Keine aktiven Matches</div>
-                  )}
+                  ) : winnersMatches.length === 0 ? (
+                    <div className="text-gray-400 text-sm">Keine aktiven Spieler</div>
+                  ) : null}
                 </div>
                 
                 {/* Loser's Bracket */}
                 <div className="bg-[#1c1018] p-4 rounded-lg border border-red-900/30">
                   <h2 className="text-xl font-bold mb-4 text-red-500">Loser's Bracket</h2>
-                  {losersMatches.length > 0 ? (
-                    <div className="space-y-3">
-                      {losersMatches.map(match => (
+                  {/* Verfügbare Spieler im Loser-Bracket */}
+                  {activeLoserPlayers.length > 0 ? (
+                    <div className="space-y-2">
+                      {activeLoserPlayers.map(player => (
                         <div 
-                          key={match.id} 
-                          className="p-2 bg-[#121824] rounded border border-red-900/20 hover:border-red-900/50 cursor-pointer"
-                          onClick={() => handleMatchClick(match.id)}
+                          key={player.id} 
+                          className="p-2 bg-[#121824] rounded border border-red-900/20"
                         >
                           <div className="flex flex-col gap-1">
-                            <div className="flex justify-between items-center">
-                              <span className="text-sm text-white">{match.player1.firstName} {match.player1.lastName}</span>
-                              {match.player1.team && (
-                                <span className="text-xs text-gray-400">{match.player1.team}</span>
-                              )}
-                            </div>
-                            <div className="border-t border-gray-700 my-1" />
-                            <div className="flex justify-between items-center">
-                              <span className="text-sm text-white">{match.player2.firstName} {match.player2.lastName}</span>
-                              {match.player2.team && (
-                                <span className="text-xs text-gray-400">{match.player2.team}</span>
-                              )}
-                            </div>
+                            <span className="text-sm text-[#FEF7CD]">
+                              {player.firstName} {player.lastName}
+                            </span>
+                            {player.team && (
+                              <span className="text-xs text-[#FEF7CD]/70">{player.team}</span>
+                            )}
                           </div>
                         </div>
                       ))}
                     </div>
-                  ) : (
-                    <div className="text-gray-400 text-sm">Keine aktiven Matches</div>
-                  )}
+                  ) : losersMatches.length === 0 ? (
+                    <div className="text-gray-400 text-sm">Keine aktiven Spieler</div>
+                  ) : null}
                 </div>
                 
                 {/* Finale */}
                 {finalMatches.length > 0 && (
                   <div className="bg-[#1e173a] p-4 rounded-lg border border-[#8B5CF6]/30">
                     <h2 className="text-xl font-bold mb-4 text-[#8B5CF6]">Finale</h2>
-                    <div className="space-y-3">
-                      {finalMatches.map(match => (
-                        <div 
-                          key={match.id} 
-                          className="p-2 bg-[#121824] rounded border border-[#8B5CF6]/20 hover:border-[#8B5CF6]/50 cursor-pointer"
-                          onClick={() => handleMatchClick(match.id)}
-                        >
-                          <div className="flex flex-col gap-1">
-                            <div className="flex justify-between items-center">
-                              <span className="text-sm text-white">{match.player1.firstName} {match.player1.lastName}</span>
-                              {match.player1.team && (
-                                <span className="text-xs text-gray-400">{match.player1.team}</span>
-                              )}
-                            </div>
-                            <div className="border-t border-gray-700 my-1" />
-                            <div className="flex justify-between items-center">
-                              <span className="text-sm text-white">{match.player2.firstName} {match.player2.lastName}</span>
-                              {match.player2.team && (
-                                <span className="text-xs text-gray-400">{match.player2.team}</span>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
                   </div>
                 )}
                 
@@ -336,9 +307,9 @@ export const Tournament = () => {
                     <h2 className="text-lg font-bold mb-3 text-gray-400">Ausgeschieden</h2>
                     <div className="space-y-2">
                       {eliminatedPlayers.map(player => (
-                        <div key={player.id} className="text-sm text-gray-400 flex justify-between">
+                        <div key={player.id} className="text-sm text-[#ea384c] flex justify-between p-2 bg-[#121824] rounded border border-[#ea384c]/20">
                           <span>{player.firstName} {player.lastName}</span>
-                          {player.team && <span className="text-xs">{player.team}</span>}
+                          {player.team && <span className="text-xs text-[#ea384c]/70">{player.team}</span>}
                         </div>
                       ))}
                     </div>
