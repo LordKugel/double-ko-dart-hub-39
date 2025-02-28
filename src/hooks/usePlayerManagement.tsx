@@ -7,7 +7,7 @@ export const usePlayerManagement = (
   isStarted: boolean,
   setTournament: (value: any) => void
 ) => {
-  const generatePlayers = (count?: number) => {
+  const generateTournamentPlayers = (count?: number) => {
     if (isStarted) {
       toast({
         title: "Turnier bereits gestartet",
@@ -30,5 +30,5 @@ export const usePlayerManagement = (
     });
   };
 
-  return { generatePlayers };
+  return { generatePlayers: generateTournamentPlayers };
 };
