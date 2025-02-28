@@ -22,7 +22,7 @@ export const BracketSidebar = ({
   finalMatches
 }: BracketSidebarProps) => {
   return (
-    <div className="w-full md:w-48 flex flex-col gap-4">
+    <div className="w-full md:w-40 flex flex-col gap-4">
       {/* Winner's Bracket */}
       <div className="bg-[#0e1627] p-4 rounded-lg border border-[#0FA0CE]/30">
         <h2 className="text-xl font-bold mb-4 text-[#0FA0CE]">Winner's Bracket</h2>
@@ -60,15 +60,15 @@ export const BracketSidebar = ({
         />
       </div>
       
-      {/* Loser's Bracket */}
-      <div className="bg-[#1c1018] p-4 rounded-lg border border-red-900/30">
-        <h2 className="text-xl font-bold mb-4 text-red-500">Loser's Bracket</h2>
+      {/* Loser's Bracket - hier ändern wir die Farbe auf gelb */}
+      <div className="bg-[#1c1917] p-4 rounded-lg border border-yellow-900/30">
+        <h2 className="text-xl font-bold mb-4 text-[#FEF7CD]">Loser's Bracket</h2>
         {/* Verfügbare Spieler im Loser-Bracket */}
         <BracketPlayers 
           title="Loser's Bracket Players"
           players={activeLoserPlayers}
           bgColorClass="bg-[#121824]"
-          borderColorClass="border-red-900/20"
+          borderColorClass="border-yellow-900/20"
           textColorClass="text-[#FEF7CD]"
         />
       </div>

@@ -16,7 +16,7 @@ const teams = [
   "Golden Lions", "Silver Wolves", "Bronze Bears", "Purple Phoenix"
 ];
 
-export function generateRandomPlayers(count: number = 8): Player[] {
+export function generateRandomPlayers(count: number = 9): Player[] {
   if (count < 2) count = 2; // Mindestens 2 Spieler
   if (count > 16) count = 16; // Maximal 16 Spieler
   
