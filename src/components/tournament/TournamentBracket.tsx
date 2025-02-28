@@ -26,7 +26,7 @@ export const TournamentBracket = ({
   hideScoreControls = false
 }: TournamentBracketProps) => {
   // Standardwerte als Prozentsätze und relative Einheiten
-  const [bracketWidth, setBracketWidth] = useState<number>(160);
+  const [bracketWidth, setBracketWidth] = useState<number>(140); // Reduzierte Standardbreite
   const [bracketHeight, setBracketHeight] = useState<number>(600);
   const [containerWidth, setContainerWidth] = useState<number>(100); // Prozent der verfügbaren Breite
   
@@ -77,8 +77,8 @@ export const TournamentBracket = ({
           <label className="text-xs text-gray-400 mb-1 block">Breite der Brackets</label>
           <Slider 
             defaultValue={[bracketWidth]} 
-            min={120} 
-            max={250} 
+            min={100} 
+            max={200} 
             step={10}
             onValueChange={(values) => setBracketWidth(values[0])}
           />
@@ -110,34 +110,29 @@ export const TournamentBracket = ({
 
       <div className="flex items-start justify-between space-x-6 overflow-x-auto min-w-full pb-8 pt-2">
         {/* Winner Bracket - Left aligned */}
-        <div className="flex-none space-x-6">
+        <div className="flex-none space-x-4">
           {winnerRounds.map((roundMatches, index) => (
             <div key={`winner-${index}`} className="inline-block" style={{ width: `${bracketWidth}px` }}>
               <div className="text-xs font-semibold mb-2 text-center text-[#0FA0CE]">
                 Winner-Runde {index + 1}
               </div>
               <div className="space-y-6 flex flex-col items-center">
-                {roundMatches.map(match => {
-                  // Freilos-Spieler in Runde 1 sofort anzeigen, ohne Rücksicht auf completed status
-                  const isByeMatch = match.player1.hasBye || match.player2.hasBye;
-                  
-                  return (
-                    <div key={match.id} className="hover:scale-105 transition-transform" style={{ width: `${bracketWidth - 10}px` }}>
-                      <DraggableMatchCard
-                        match={match}
-                        isCurrentRound={match.round === currentRound}
-                        verticalPosition={getVerticalPosition(match, roundMatches)}
-                        previousMatches={getPreviousMatches(match)}
-                        onScoreUpdate={onScoreUpdate}
-                        machines={machines}
-                        onAssignMatch={onAssignMatch}
-                        hideScoreControls={hideScoreControls}
-                        onMatchClick={onMatchClick}
-                        simplifiedView={true} // Immer vereinfachte Ansicht für Brackets
-                      />
-                    </div>
-                  );
-                })}
+                {roundMatches.map(match => (
+                  <div key={match.id} className="hover:scale-105 transition-transform" style={{ width: `${bracketWidth - 10}px` }}>
+                    <DraggableMatchCard
+                      match={match}
+                      isCurrentRound={match.round === currentRound}
+                      verticalPosition={getVerticalPosition(match, roundMatches)}
+                      previousMatches={getPreviousMatches(match)}
+                      onScoreUpdate={onScoreUpdate}
+                      machines={machines}
+                      onAssignMatch={onAssignMatch}
+                      hideScoreControls={hideScoreControls}
+                      onMatchClick={onMatchClick}
+                      simplifiedView={true} // Immer vereinfachte Ansicht für Brackets
+                    />
+                  </div>
+                ))}
               </div>
             </div>
           ))}
@@ -171,7 +166,7 @@ export const TournamentBracket = ({
         )}
 
         {/* Loser Bracket - Right aligned */}
-        <div className="flex-none space-x-6">
+        <div className="flex-none space-x-4">
           {loserRounds.map((roundMatches, index) => (
             <div key={`loser-${index}`} className="inline-block" style={{ width: `${bracketWidth}px` }}>
               <div className="text-xs font-semibold mb-2 text-center text-red-500">

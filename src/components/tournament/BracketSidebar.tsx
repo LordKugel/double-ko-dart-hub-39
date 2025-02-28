@@ -22,7 +22,7 @@ export const BracketSidebar = ({
   finalMatches
 }: BracketSidebarProps) => {
   return (
-    <div className="w-full md:w-64 flex flex-col gap-4">
+    <div className="w-full md:w-48 flex flex-col gap-4">
       {/* Winner's Bracket */}
       <div className="bg-[#0e1627] p-4 rounded-lg border border-[#0FA0CE]/30">
         <h2 className="text-xl font-bold mb-4 text-[#0FA0CE]">Winner's Bracket</h2>
