@@ -8,6 +8,7 @@ export interface Player {
   losses: number;
   eliminated: boolean;
   bracket: "winners" | "losers" | null;
+  hasBye?: boolean; // Zeigt an, ob ein Spieler ein Freilos hat
 }
 
 export interface Match {
@@ -48,4 +49,5 @@ export interface Tournament {
   finalMatches: Match[];
   numberOfMachines: number;
   machines: Machine[];
+  byePlayer?: Player | null; // Spieler mit Freilos in Runde 1
 }
