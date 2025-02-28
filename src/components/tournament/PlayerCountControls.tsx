@@ -20,7 +20,7 @@ export const PlayerCountControls = ({
   };
 
   return (
-    <div className="flex items-center space-x-4">
+    <div className="flex items-center gap-4 flex-wrap">
       <div className="flex items-center gap-2">
         <Input
           type="number"
