@@ -40,13 +40,9 @@ export const DraggableMatchCard = ({
     })
   });
 
-  // Wenn wir nur abgeschlossene Matches zeigen sollen und dieses Match nicht abgeschlossen ist
-  // und kein Freilos-Spieler darin ist, dann nichts anzeigen
-  if (showOnlyCompletedMatches && !match.completed && 
-      !match.player1.hasBye && !match.player2.hasBye) {
-    return null;
-  }
-
+  // Zeige Match-Karten immer im Turnierbaum, unabhängig davon ob das Match abgeschlossen ist
+  // Entfernung des Filters für completed matches
+  
   return (
     <div 
       ref={drag} 

@@ -118,7 +118,7 @@ export const TournamentBracket = ({
               </div>
               <div className="space-y-6 flex flex-col items-center">
                 {roundMatches.map(match => {
-                  // Freilos-Spieler in Runde 1 sofort anzeigen
+                  // Freilos-Spieler in Runde 1 sofort anzeigen, ohne Rücksicht auf completed status
                   const isByeMatch = match.player1.hasBye || match.player2.hasBye;
                   
                   return (
@@ -131,10 +131,9 @@ export const TournamentBracket = ({
                         onScoreUpdate={onScoreUpdate}
                         machines={machines}
                         onAssignMatch={onAssignMatch}
-                        hideScoreControls={true}
+                        hideScoreControls={hideScoreControls}
                         onMatchClick={onMatchClick}
                         simplifiedView={true} // Immer vereinfachte Ansicht für Brackets
-                        showOnlyCompletedMatches={!isByeMatch} // Zeige nur abgeschlossene Matches, es sei denn, es ist ein Freilos-Match
                       />
                     </div>
                   );
@@ -161,10 +160,9 @@ export const TournamentBracket = ({
                     onScoreUpdate={onScoreUpdate}
                     machines={machines}
                     onAssignMatch={onAssignMatch}
-                    hideScoreControls={true}
+                    hideScoreControls={hideScoreControls}
                     onMatchClick={onMatchClick}
                     simplifiedView={true} // Immer vereinfachte Ansicht für Brackets
-                    showOnlyCompletedMatches={true} // Zeige nur abgeschlossene Matches
                   />
                 </div>
               ))}
@@ -190,10 +188,9 @@ export const TournamentBracket = ({
                       onScoreUpdate={onScoreUpdate}
                       machines={machines}
                       onAssignMatch={onAssignMatch}
-                      hideScoreControls={true}
+                      hideScoreControls={hideScoreControls}
                       onMatchClick={onMatchClick}
                       simplifiedView={true} // Immer vereinfachte Ansicht für Brackets
-                      showOnlyCompletedMatches={true} // Zeige nur abgeschlossene Matches
                     />
                   </div>
                 ))}

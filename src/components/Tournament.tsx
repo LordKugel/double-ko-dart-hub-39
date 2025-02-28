@@ -34,6 +34,7 @@ export const Tournament = () => {
 
   const winner = tournament?.completed ? tournament.players.find(p => !p.eliminated) : null;
 
+  // Nur Matches der aktuellen Runde, die nicht zugewiesen oder gestartet sind
   const availableMatches = tournament?.matches?.filter(match => 
     match.round === tournament.currentRound && 
     !match.completed &&
@@ -44,28 +45,46 @@ export const Tournament = () => {
   const losersMatches = availableMatches.filter(match => match.bracket === "losers");
   const finalMatches = availableMatches.filter(match => match.bracket === "final");
 
-  // Liste der Spieler in aktiven Matches
-  const playersInActiveMatches = availableMatches.flatMap(match => 
-    [match.player1.id, match.player2.id]
+  // Liste aller Spieler in laufenden oder anstehenden Matches dieser Runde
+  const allPlayersInCurrentRound = tournament.matches
+    .filter(match => match.round === tournament.currentRound)
+    .flatMap(match => [match.player1.id, match.player2.id]);
+
+  // Spieler, die aktuell einem Automaten zugewiesen sind (also in einem laufenden Match)
+  const playersInActiveMatches = tournament.matches
+    .filter(match => 
+      match.round === tournament.currentRound && 
+      !match.completed && 
+      match.machineNumber !== null
+    )
+    .flatMap(match => [match.player1.id, match.player2.id]);
+
+  // Spieler mit Freilos in dieser Runde
+  const byePlayers = tournament.players.filter(player => 
+    player.hasBye && !player.eliminated
   );
 
-  // Aktive Spieler aus dem Winnerbracket, die nicht in einem aktuellen Match sind
+  // Aktive Spieler aus dem Winnerbracket, die nicht in einem laufenden Match sind und kein Freilos haben
   const activeWinnerPlayers = tournament.players.filter(player => 
     !player.eliminated && 
     player.bracket === "winners" && 
-    !playersInActiveMatches.includes(player.id)
+    !playersInActiveMatches.includes(player.id) &&
+    !allPlayersInCurrentRound.includes(player.id) &&
+    !player.hasBye
   );
 
-  // Aktive Spieler aus dem Loserbracket, die nicht in einem aktuellen Match sind
+  // Aktive Spieler aus dem Loserbracket, die nicht in einem laufenden Match sind
   const activeLoserPlayers = tournament.players.filter(player => 
     !player.eliminated && 
     player.bracket === "losers" && 
-    !playersInActiveMatches.includes(player.id)
+    !playersInActiveMatches.includes(player.id) &&
+    !allPlayersInCurrentRound.includes(player.id)
   );
 
   // Ausgeschiedene Spieler
   const eliminatedPlayers = tournament.players.filter(p => p.eliminated);
 
+  // Matches, die aktuell einem Automaten zugewiesen sind
   const activeMatches = tournament?.matches?.filter(match => 
     match.round === tournament.currentRound && 
     !match.completed &&
@@ -227,19 +246,27 @@ export const Tournament = () => {
                 {/* Winner's Bracket */}
                 <div className="bg-[#0e1627] p-4 rounded-lg border border-[#0FA0CE]/30">
                   <h2 className="text-xl font-bold mb-4 text-[#0FA0CE]">Winner's Bracket</h2>
-                  {tournament.byePlayer && (
-                    <div className="mb-4 p-3 bg-green-900/30 border border-green-700 rounded-lg">
-                      <h4 className="text-sm font-semibold text-green-400">Freilos Runde {tournament.currentRound + 1}</h4>
-                      <div className="flex flex-col">
-                        <span className="text-green-300">
-                          {tournament.byePlayer.firstName} {tournament.byePlayer.lastName}
-                        </span>
-                        {tournament.byePlayer.team && (
-                          <span className="text-xs text-green-400">
-                            Team: {tournament.byePlayer.team}
-                          </span>
-                        )}
-                      </div>
+                  
+                  {/* Freilos-Spieler anzeigen */}
+                  {byePlayers.length > 0 && (
+                    <div className="mb-4 space-y-2">
+                      {byePlayers.map(player => (
+                        <div 
+                          key={player.id}
+                          className="p-2 bg-green-900/30 border border-green-700 rounded-lg"
+                        >
+                          <div className="flex flex-col">
+                            <span className="text-sm font-semibold text-green-400">
+                              {player.firstName} {player.lastName} (Freilos)
+                            </span>
+                            {player.team && (
+                              <span className="text-xs text-green-400/70">
+                                Team: {player.team}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   )}
                   
@@ -262,9 +289,9 @@ export const Tournament = () => {
                         </div>
                       ))}
                     </div>
-                  ) : winnersMatches.length === 0 ? (
+                  ) : winnersMatches.length === 0 && (
                     <div className="text-gray-400 text-sm">Keine aktiven Spieler</div>
-                  ) : null}
+                  )}
                 </div>
                 
                 {/* Loser's Bracket */}
@@ -289,9 +316,9 @@ export const Tournament = () => {
                         </div>
                       ))}
                     </div>
-                  ) : losersMatches.length === 0 ? (
+                  ) : losersMatches.length === 0 && (
                     <div className="text-gray-400 text-sm">Keine aktiven Spieler</div>
-                  ) : null}
+                  )}
                 </div>
                 
                 {/* Finale */}
