@@ -98,10 +98,10 @@ export const MatchCard = ({
           <div className="flex justify-between items-center">
             <span className={cn(
               "text-xs font-medium",
+              match.player1.hasBye ? "text-green-400" : // Freilos-Spieler immer grün
               player1IsWinner ? "text-[#0FA0CE]" : 
               match.player1.bracket === "losers" ? "text-[#FEF7CD]" : 
-              player2IsWinner ? "text-gray-400" : "text-white",
-              match.player1.hasBye && "text-green-400" // Grüne Markierung für Freilos-Spieler
+              player2IsWinner ? "text-gray-400" : "text-white"
             )}>
               {match.player1.firstName} {match.player1.lastName}
               {match.player1.hasBye && " (Freilos)"}
@@ -116,10 +116,10 @@ export const MatchCard = ({
           <div className="flex justify-between items-center">
             <span className={cn(
               "text-xs font-medium",
+              match.player2.hasBye ? "text-green-400" : // Freilos-Spieler immer grün
               player2IsWinner ? "text-[#0FA0CE]" : 
               match.player2.bracket === "losers" ? "text-[#FEF7CD]" : 
-              player1IsWinner ? "text-gray-400" : "text-white",
-              match.player2.hasBye && "text-green-400" // Grüne Markierung für Freilos-Spieler
+              player1IsWinner ? "text-gray-400" : "text-white"
             )}>
               {match.player2.firstName} {match.player2.lastName}
               {match.player2.hasBye && " (Freilos)"}
