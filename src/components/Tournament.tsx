@@ -185,6 +185,7 @@ export const Tournament = () => {
             roundStarted={tournament.roundStarted}
             onToggleMatchesTable={() => setShowMatchesTable(!showMatchesTable)}
             showMatchesTable={showMatchesTable}
+            onResetTournament={tournament.started ? resetTournament : undefined}
           />
 
           {!tournament.started ? (

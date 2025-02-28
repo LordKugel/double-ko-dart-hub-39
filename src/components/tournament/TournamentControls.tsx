@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { Download, Table2 } from "lucide-react";
+import { Download, Table2, RefreshCw } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import * as XLSX from "xlsx";
 import { Match } from "@/types/tournament";
@@ -18,6 +18,7 @@ interface TournamentControlsProps {
   roundStarted: boolean;
   onToggleMatchesTable: () => void;
   showMatchesTable: boolean;
+  onResetTournament?: () => void;
 }
 
 export const TournamentControls = ({
@@ -30,7 +31,8 @@ export const TournamentControls = ({
   currentRound,
   roundStarted,
   onToggleMatchesTable,
-  showMatchesTable
+  showMatchesTable,
+  onResetTournament
 }: TournamentControlsProps) => {
   const [playerCount, setPlayerCount] = useState<number>(8);
   
@@ -130,7 +132,7 @@ export const TournamentControls = ({
   };
 
   return (
-    <div className="flex justify-center gap-4 mb-8">
+    <div className="flex justify-center gap-4 mb-8 flex-wrap">
       <Button 
         onClick={handleStartTournament}
         disabled={(isStarted && roundStarted) || (!isStarted && !hasPlayers)}
@@ -162,6 +164,17 @@ export const TournamentControls = ({
         <Table2 className="mr-2 h-4 w-4" />
         {showMatchesTable ? "Tabelle ausblenden" : "Tabelle anzeigen"}
       </Button>
+      
+      {onResetTournament && (
+        <Button
+          onClick={onResetTournament}
+          variant="outline"
+          className="transition-all duration-200 hover:scale-105 text-red-500 hover:bg-red-900/20 hover:text-red-400 border-red-800"
+        >
+          <RefreshCw className="mr-2 h-4 w-4" />
+          Turnier zurücksetzen
+        </Button>
+      )}
     </div>
   );
 };
