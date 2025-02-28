@@ -3,6 +3,7 @@ import { Match, Player } from "../types/tournament";
 
 export const createInitialMatches = (players: Player[]): Match[] => {
   const matches: Match[] = [];
+  // Wir nehmen bereits gemischte Spieler, paaren sie einfach
   for (let i = 0; i < players.length; i += 2) {
     if (i + 1 < players.length) {
       matches.push({
@@ -28,12 +29,16 @@ export const createNextRoundMatches = (
   bracket: "winners" | "losers"
 ): Match[] => {
   const matches: Match[] = [];
-  for (let i = 0; i < players.length; i += 2) {
-    if (i + 1 < players.length) {
+  
+  // Zufällig mischen der Spieler für die nächste Runde
+  const shuffledPlayers = [...players].sort(() => Math.random() - 0.5);
+  
+  for (let i = 0; i < shuffledPlayers.length; i += 2) {
+    if (i + 1 < shuffledPlayers.length) {
       matches.push({
         id: `match-${bracket}-${round}-${i/2 + 1}`,
-        player1: players[i],
-        player2: players[i + 1],
+        player1: shuffledPlayers[i],
+        player2: shuffledPlayers[i + 1],
         scores: Array(3).fill({ player1Won: null, player2Won: null }),
         completed: false,
         countdownStarted: false,

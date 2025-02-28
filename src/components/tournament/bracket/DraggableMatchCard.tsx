@@ -1,20 +1,10 @@
 
-import { useRef } from 'react';
+import React from 'react';
 import { useDrag } from 'react-dnd';
-import { Match as MatchType, Machine } from "@/types/tournament";
 import { MatchCard } from './MatchCard';
+import { Match as MatchType, Machine } from "@/types/tournament";
 
-export const DraggableMatchCard = ({ 
-  match, 
-  isCurrentRound, 
-  verticalPosition,
-  previousMatches,
-  onScoreUpdate,
-  machines,
-  onAssignMatch,
-  hideScoreControls,
-  onMatchClick
-}: {
+interface DraggableMatchCardProps {
   match: MatchType;
   isCurrentRound: boolean;
   verticalPosition: number;
@@ -24,42 +14,40 @@ export const DraggableMatchCard = ({
   onAssignMatch?: (machineId: number, matchId: string) => void;
   hideScoreControls?: boolean;
   onMatchClick?: (matchId: string) => void;
-}) => {
-  const ref = useRef<HTMLDivElement>(null);
-  
-  // Ein Match kann gezogen werden, wenn es in der aktuellen Runde ist, nicht abgeschlossen und 
-  // keinem Automaten zugewiesen ist
-  const canBeDragged = isCurrentRound && !match.completed && !match.machineNumber;
-  
-  const [{ isDragging }, drag] = useDrag(() => ({
+  simplifiedView?: boolean;
+}
+
+export const DraggableMatchCard = ({ 
+  match, 
+  isCurrentRound, 
+  verticalPosition, 
+  previousMatches,
+  onScoreUpdate,
+  machines,
+  onAssignMatch,
+  hideScoreControls,
+  onMatchClick,
+  simplifiedView = false
+}: DraggableMatchCardProps) => {
+  const [{ isDragging }, drag] = useDrag({
     type: 'MATCH',
     item: { matchId: match.id },
-    canDrag: canBeDragged,
+    canDrag: isCurrentRound && !match.completed && !match.machineNumber,
     collect: (monitor) => ({
-      isDragging: monitor.isDragging()
-    }),
-    end: (item, monitor) => {
-      const dropResult = monitor.getDropResult<{ machineId: number }>();
-      
-      if (dropResult && onAssignMatch) {
-        onAssignMatch(dropResult.machineId, item.matchId);
-      }
-    }
-  }), [match.id, canBeDragged, onAssignMatch]);
+      isDragging: !!monitor.isDragging()
+    })
+  });
 
-  // Hier verbinden wir die Drag-Funktionalität mit dem DOM-Element
-  drag(ref);
-
+  // Hier benutzen wir die simplifiedView-Property
   return (
     <div 
-      ref={ref} 
+      ref={drag} 
       style={{ 
         opacity: isDragging ? 0.5 : 1,
-        cursor: canBeDragged ? 'grab' : 'default',
+        cursor: isCurrentRound && !match.completed && !match.machineNumber ? 'grab' : 'default'
       }}
-      className="relative"
     >
-      <MatchCard
+      <MatchCard 
         match={match}
         isCurrentRound={isCurrentRound}
         verticalPosition={verticalPosition}
@@ -69,6 +57,7 @@ export const DraggableMatchCard = ({
         onAssignMatch={onAssignMatch}
         hideScoreControls={hideScoreControls}
         onMatchClick={onMatchClick}
+        simplifiedView={simplifiedView}
       />
     </div>
   );

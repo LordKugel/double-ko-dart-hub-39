@@ -20,6 +20,7 @@ interface MatchCardProps {
   machines?: Machine[];
   onAssignMatch?: (machineId: number, matchId: string) => void;
   hideScoreControls?: boolean;
+  simplifiedView?: boolean;
 }
 
 export const MatchCard = ({ 
@@ -31,7 +32,8 @@ export const MatchCard = ({
   onScoreUpdate,
   machines = [],
   onAssignMatch,
-  hideScoreControls = false
+  hideScoreControls = false,
+  simplifiedView = false
 }: MatchCardProps) => {
   const player1Score = match.scores.filter(s => s.player1Won).length;
   const player2Score = match.scores.filter(s => s.player2Won).length;
@@ -80,6 +82,49 @@ export const MatchCard = ({
     }
   };
 
+  // Vereinfachte Darstellung für frühere oder zukünftige Runden
+  if (simplifiedView) {
+    return (
+      <div 
+        className={cn(
+          "relative border rounded p-2 transition-colors",
+          getBracketColors(),
+          isCurrentRound && "ring-1 ring-blue-500",
+          "text-xs w-full"
+        )}
+      >
+        <div className="flex flex-col gap-1">
+          <div className="flex justify-between items-center">
+            <span className={cn(
+              "text-xs font-medium",
+              player1IsWinner ? "text-[#0FA0CE]" : player2IsWinner ? "text-gray-400" : "text-white"
+            )}>
+              {match.player1.firstName} {match.player1.lastName}
+            </span>
+            {match.player1.team && (
+              <span className="text-[10px] text-gray-400">{match.player1.team}</span>
+            )}
+          </div>
+          
+          <div className="border-t border-gray-700 my-1" />
+          
+          <div className="flex justify-between items-center">
+            <span className={cn(
+              "text-xs font-medium",
+              player2IsWinner ? "text-[#0FA0CE]" : player1IsWinner ? "text-gray-400" : "text-white"
+            )}>
+              {match.player2.firstName} {match.player2.lastName}
+            </span>
+            {match.player2.team && (
+              <span className="text-[10px] text-gray-400">{match.player2.team}</span>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Normale vollständige Darstellung
   const cardContent = (
     <div 
       className={cn(

@@ -1,8 +1,9 @@
 
 import React, { useState } from 'react';
-import { Match as MatchType, Machine } from "@/types/tournament";
+import { Match as MatchType, Machine, Player } from "@/types/tournament";
 import { DraggableMatchCard } from './bracket/DraggableMatchCard';
 import { Slider } from "@/components/ui/slider";
+import { cn } from '@/lib/utils';
 
 interface TournamentBracketProps {
   matches: MatchType[];
@@ -12,6 +13,7 @@ interface TournamentBracketProps {
   machines?: Machine[];
   onAssignMatch?: (machineId: number, matchId: string) => void;
   hideScoreControls?: boolean;
+  byePlayer?: Player | null;
 }
 
 export const TournamentBracket = ({ 
@@ -21,7 +23,8 @@ export const TournamentBracket = ({
   onMatchClick,
   machines,
   onAssignMatch,
-  hideScoreControls = false
+  hideScoreControls = false,
+  byePlayer
 }: TournamentBracketProps) => {
   // Standardwerte als Prozentsätze und relative Einheiten
   const [bracketWidth, setBracketWidth] = useState<number>(160);
@@ -106,6 +109,23 @@ export const TournamentBracket = ({
         </div>
       </div>
 
+      {/* Freilos-Spieler anzeigen, falls vorhanden */}
+      {byePlayer && (
+        <div className="mb-4 p-3 bg-green-900/30 border border-green-700 rounded-lg">
+          <h4 className="text-sm font-semibold text-green-400">Freilos für Runde {currentRound + 1}</h4>
+          <div className="flex items-center">
+            <span className="text-green-300">
+              {byePlayer.firstName} {byePlayer.lastName}
+            </span>
+            {byePlayer.team && (
+              <span className="ml-2 text-xs text-green-400">
+                Team: {byePlayer.team}
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+
       <div className="flex items-start justify-between space-x-6 overflow-x-auto min-w-full pb-8 pt-2">
         {/* Winner Bracket - Left aligned */}
         <div className="flex-none space-x-6">
@@ -127,6 +147,7 @@ export const TournamentBracket = ({
                       onAssignMatch={onAssignMatch}
                       hideScoreControls={true}
                       onMatchClick={onMatchClick}
+                      simplifiedView={match.round !== currentRound} // Vereinfachte Ansicht für nicht-aktuelle Runden
                     />
                   </div>
                 ))}
@@ -154,6 +175,7 @@ export const TournamentBracket = ({
                     onAssignMatch={onAssignMatch}
                     hideScoreControls={true}
                     onMatchClick={onMatchClick}
+                    simplifiedView={match.round !== currentRound} // Vereinfachte Ansicht für nicht-aktuelle Runden
                   />
                 </div>
               ))}
@@ -181,6 +203,7 @@ export const TournamentBracket = ({
                       onAssignMatch={onAssignMatch}
                       hideScoreControls={true}
                       onMatchClick={onMatchClick}
+                      simplifiedView={match.round !== currentRound} // Vereinfachte Ansicht für nicht-aktuelle Runden
                     />
                   </div>
                 ))}

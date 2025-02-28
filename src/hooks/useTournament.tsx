@@ -29,7 +29,8 @@ const initialTournamentState: TournamentType = {
   losersBracketMatches: [],
   finalMatches: [],
   numberOfMachines: 3,
-  machines: Array.from({ length: 3 }, (_, i) => createMachine(i + 1))
+  machines: Array.from({ length: 3 }, (_, i) => createMachine(i + 1)),
+  byePlayer: null
 };
 
 export const useTournament = () => {
@@ -299,16 +300,24 @@ export const useTournament = () => {
     return roundMatches.every(match => match.completed);
   };
 
-  const exportTournamentData = () => {
+  const exportTournamentData = (openInNewWindow: boolean = false) => {
     const dataStr = JSON.stringify(tournament, null, 2);
     const dataBlob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(dataBlob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `tournament-${new Date().toISOString()}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    
+    if (openInNewWindow) {
+      // Öffne in neuem Fenster oder Tab
+      window.open(url, '_blank');
+    } else {
+      // Alter Download-Mechanismus
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `tournament-${new Date().toISOString()}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+    
     URL.revokeObjectURL(url);
     
     toast({

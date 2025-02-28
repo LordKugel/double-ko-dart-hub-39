@@ -120,6 +120,11 @@ export const Tournament = () => {
     generatePlayers(playerCount);
   };
 
+  const handleExportData = () => {
+    // Öffne Excel-Export in neuem Fenster/Tab
+    exportTournamentData(true);
+  }
+
   return (
     <TooltipProvider>
       <DndProvider backend={HTML5Backend}>
@@ -178,7 +183,7 @@ export const Tournament = () => {
           <TournamentControls
             onGeneratePlayers={generatePlayers}
             onStartTournament={startTournament}
-            onExportData={exportTournamentData}
+            onExportData={handleExportData} // Geändert zu unserem neuen Handler
             isStarted={tournament.started}
             hasPlayers={tournament.players.length > 0}
             matches={tournament.matches}
@@ -223,6 +228,7 @@ export const Tournament = () => {
                     machines={tournament.machines}
                     onAssignMatch={assignMatchToMachine}
                     hideScoreControls={true}
+                    byePlayer={tournament.byePlayer}
                   />
                 </div>
                 
