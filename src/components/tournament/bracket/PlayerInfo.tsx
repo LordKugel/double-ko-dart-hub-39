@@ -32,6 +32,7 @@ export const PlayerInfo = ({
 }: PlayerInfoProps) => {
   // Bestimme die Textfarbe basierend auf dem Ergebnis des abgeschlossenen Matches
   const getPlayerNameColor = () => {
+    // Prüfe zuerst, ob es sich um einen Freilos-Spieler handelt
     if (player.hasBye) {
       return "text-green-400"; // Freilos-Spieler werden grün dargestellt
     }
