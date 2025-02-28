@@ -125,6 +125,9 @@ export const Tournament = () => {
     exportTournamentData(true);
   }
 
+  // Ausgeschiedene Spieler abrufen
+  const eliminatedPlayers = tournament.players.filter(p => p.eliminated);
+
   return (
     <TooltipProvider>
       <DndProvider backend={HTML5Backend}>
@@ -183,7 +186,7 @@ export const Tournament = () => {
           <TournamentControls
             onGeneratePlayers={generatePlayers}
             onStartTournament={startTournament}
-            onExportData={handleExportData} // Geändert zu unserem neuen Handler
+            onExportData={handleExportData}
             isStarted={tournament.started}
             hasPlayers={tournament.players.length > 0}
             matches={tournament.matches}
@@ -193,10 +196,10 @@ export const Tournament = () => {
             showMatchesTable={showMatchesTable}
           />
 
-          {tournament.started && tournament.players.filter(p => p.eliminated).length > 0 && (
+          {tournament.started && eliminatedPlayers.length > 0 && (
             <div className="my-4">
               <MarqueeText>
-                Ausgeschiedene Spieler: {tournament.players.filter(p => p.eliminated).map(p => `${p.firstName} ${p.lastName}`).join(' • ')}
+                Ausgeschiedene Spieler: {eliminatedPlayers.map(p => `${p.firstName} ${p.lastName}`).join(' • ')}
               </MarqueeText>
             </div>
           )}
@@ -208,53 +211,153 @@ export const Tournament = () => {
               title="Alle Spieler"
             />
           ) : (
-            <>
-              <div className="grid grid-cols-1 md:grid-cols-7 gap-6 mb-8">
-                <div className="col-span-1 md:col-span-2 bg-[#0e1627] p-4 rounded-lg border border-[#0FA0CE]/30">
+            <div className="flex flex-row gap-6 mb-8">
+              {/* Seitenleiste für Winner/Loser/Freilos */}
+              <div className="w-64 flex flex-col gap-6">
+                {/* Winner's Bracket */}
+                <div className="bg-[#0e1627] p-4 rounded-lg border border-[#0FA0CE]/30">
                   <h2 className="text-xl font-bold mb-4 text-[#0FA0CE]">Winner's Bracket</h2>
-                  <CurrentMatchCards
-                    matches={winnersMatches}
-                    title={`Runde ${tournament.currentRound}`}
-                    onScoreUpdate={handleScoreUpdate}
-                    onMatchClick={handleMatchClick}
-                  />
-                </div>
-                
-                <div className="col-span-1 md:col-span-3">
-                  <TournamentBracket 
-                    matches={tournament.matches}
-                    currentRound={tournament.currentRound}
-                    onMatchClick={handleMatchClick}
-                    machines={tournament.machines}
-                    onAssignMatch={assignMatchToMachine}
-                    hideScoreControls={true}
-                    byePlayer={tournament.byePlayer}
-                  />
-                </div>
-                
-                <div className="col-span-1 md:col-span-2 bg-[#1c1018] p-4 rounded-lg border border-red-900/30">
-                  <h2 className="text-xl font-bold mb-4 text-red-500">Loser's Bracket</h2>
-                  <CurrentMatchCards
-                    matches={losersMatches}
-                    title={`Runde ${tournament.currentRound}`}
-                    onScoreUpdate={handleScoreUpdate}
-                    onMatchClick={handleMatchClick}
-                  />
-                  
-                  {finalMatches.length > 0 && (
-                    <div className="mt-8 bg-[#1e173a] p-4 rounded-lg border border-[#8B5CF6]/30">
-                      <h2 className="text-xl font-bold mb-4 text-[#8B5CF6]">Finale</h2>
-                      <CurrentMatchCards
-                        matches={finalMatches}
-                        title="Finale"
-                        onScoreUpdate={handleScoreUpdate}
-                        onMatchClick={handleMatchClick}
-                      />
+                  {tournament.byePlayer && (
+                    <div className="mb-4 p-3 bg-green-900/30 border border-green-700 rounded-lg">
+                      <h4 className="text-sm font-semibold text-green-400">Freilos Runde {tournament.currentRound + 1}</h4>
+                      <div className="flex flex-col">
+                        <span className="text-green-300">
+                          {tournament.byePlayer.firstName} {tournament.byePlayer.lastName}
+                        </span>
+                        {tournament.byePlayer.team && (
+                          <span className="text-xs text-green-400">
+                            Team: {tournament.byePlayer.team}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   )}
+                  
+                  {winnersMatches.length > 0 ? (
+                    <div className="space-y-3">
+                      {winnersMatches.map(match => (
+                        <div 
+                          key={match.id} 
+                          className="p-2 bg-[#121824] rounded border border-[#0FA0CE]/20 hover:border-[#0FA0CE]/50 cursor-pointer"
+                          onClick={() => handleMatchClick(match.id)}
+                        >
+                          <div className="flex flex-col gap-1">
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm text-white">{match.player1.firstName} {match.player1.lastName}</span>
+                              {match.player1.team && (
+                                <span className="text-xs text-gray-400">{match.player1.team}</span>
+                              )}
+                            </div>
+                            <div className="border-t border-gray-700 my-1" />
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm text-white">{match.player2.firstName} {match.player2.lastName}</span>
+                              {match.player2.team && (
+                                <span className="text-xs text-gray-400">{match.player2.team}</span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-gray-400 text-sm">Keine aktiven Matches</div>
+                  )}
                 </div>
+                
+                {/* Loser's Bracket */}
+                <div className="bg-[#1c1018] p-4 rounded-lg border border-red-900/30">
+                  <h2 className="text-xl font-bold mb-4 text-red-500">Loser's Bracket</h2>
+                  {losersMatches.length > 0 ? (
+                    <div className="space-y-3">
+                      {losersMatches.map(match => (
+                        <div 
+                          key={match.id} 
+                          className="p-2 bg-[#121824] rounded border border-red-900/20 hover:border-red-900/50 cursor-pointer"
+                          onClick={() => handleMatchClick(match.id)}
+                        >
+                          <div className="flex flex-col gap-1">
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm text-white">{match.player1.firstName} {match.player1.lastName}</span>
+                              {match.player1.team && (
+                                <span className="text-xs text-gray-400">{match.player1.team}</span>
+                              )}
+                            </div>
+                            <div className="border-t border-gray-700 my-1" />
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm text-white">{match.player2.firstName} {match.player2.lastName}</span>
+                              {match.player2.team && (
+                                <span className="text-xs text-gray-400">{match.player2.team}</span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-gray-400 text-sm">Keine aktiven Matches</div>
+                  )}
+                </div>
+                
+                {/* Finale */}
+                {finalMatches.length > 0 && (
+                  <div className="bg-[#1e173a] p-4 rounded-lg border border-[#8B5CF6]/30">
+                    <h2 className="text-xl font-bold mb-4 text-[#8B5CF6]">Finale</h2>
+                    <div className="space-y-3">
+                      {finalMatches.map(match => (
+                        <div 
+                          key={match.id} 
+                          className="p-2 bg-[#121824] rounded border border-[#8B5CF6]/20 hover:border-[#8B5CF6]/50 cursor-pointer"
+                          onClick={() => handleMatchClick(match.id)}
+                        >
+                          <div className="flex flex-col gap-1">
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm text-white">{match.player1.firstName} {match.player1.lastName}</span>
+                              {match.player1.team && (
+                                <span className="text-xs text-gray-400">{match.player1.team}</span>
+                              )}
+                            </div>
+                            <div className="border-t border-gray-700 my-1" />
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm text-white">{match.player2.firstName} {match.player2.lastName}</span>
+                              {match.player2.team && (
+                                <span className="text-xs text-gray-400">{match.player2.team}</span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Ausgeschiedene Spieler */}
+                {eliminatedPlayers.length > 0 && (
+                  <div className="bg-[#1A1721] p-4 rounded-lg border border-gray-700">
+                    <h2 className="text-lg font-bold mb-3 text-gray-400">Ausgeschieden</h2>
+                    <div className="space-y-2">
+                      {eliminatedPlayers.map(player => (
+                        <div key={player.id} className="text-sm text-gray-400 flex justify-between">
+                          <span>{player.firstName} {player.lastName}</span>
+                          {player.team && <span className="text-xs">{player.team}</span>}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
-            </>
+              
+              {/* Turnierbaum (nimmt den restlichen Platz ein) */}
+              <div className="flex-1">
+                <TournamentBracket 
+                  matches={tournament.matches}
+                  currentRound={tournament.currentRound}
+                  onMatchClick={handleMatchClick}
+                  machines={tournament.machines}
+                  onAssignMatch={assignMatchToMachine}
+                  hideScoreControls={true}
+                />
+              </div>
+            </div>
           )}
 
           {showMatchesTable && <MatchesTable matches={tournament.matches} />}

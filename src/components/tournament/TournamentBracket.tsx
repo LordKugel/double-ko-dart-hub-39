@@ -23,13 +23,12 @@ export const TournamentBracket = ({
   onMatchClick,
   machines,
   onAssignMatch,
-  hideScoreControls = false,
-  byePlayer
+  hideScoreControls = false
 }: TournamentBracketProps) => {
   // Standardwerte als Prozentsätze und relative Einheiten
   const [bracketWidth, setBracketWidth] = useState<number>(160);
   const [bracketHeight, setBracketHeight] = useState<number>(600);
-  const [containerWidth, setContainerWidth] = useState<number>(90); // Prozent der verfügbaren Breite
+  const [containerWidth, setContainerWidth] = useState<number>(100); // Prozent der verfügbaren Breite
   
   const roundsCount = Math.max(...matches.map(m => m.round), 1);
   const winnerMatches = matches.filter(m => m.bracket === "winners");
@@ -108,23 +107,6 @@ export const TournamentBracket = ({
           <div className="text-xs text-gray-500 mt-1">{containerWidth}%</div>
         </div>
       </div>
-
-      {/* Freilos-Spieler anzeigen, falls vorhanden */}
-      {byePlayer && (
-        <div className="mb-4 p-3 bg-green-900/30 border border-green-700 rounded-lg">
-          <h4 className="text-sm font-semibold text-green-400">Freilos für Runde {currentRound + 1}</h4>
-          <div className="flex items-center">
-            <span className="text-green-300">
-              {byePlayer.firstName} {byePlayer.lastName}
-            </span>
-            {byePlayer.team && (
-              <span className="ml-2 text-xs text-green-400">
-                Team: {byePlayer.team}
-              </span>
-            )}
-          </div>
-        </div>
-      )}
 
       <div className="flex items-start justify-between space-x-6 overflow-x-auto min-w-full pb-8 pt-2">
         {/* Winner Bracket - Left aligned */}
