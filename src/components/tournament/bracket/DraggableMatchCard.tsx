@@ -39,9 +39,6 @@ export const DraggableMatchCard = ({
       isDragging: !!monitor.isDragging()
     })
   });
-
-  // Zeige Match-Karten immer im Turnierbaum, unabhängig davon ob das Match abgeschlossen ist
-  // Entfernung des Filters für completed matches
   
   return (
     <div 

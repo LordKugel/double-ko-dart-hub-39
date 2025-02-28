@@ -32,16 +32,27 @@ export const PlayerInfo = ({
 }: PlayerInfoProps) => {
   // Bestimme die Textfarbe basierend auf dem Ergebnis des abgeschlossenen Matches
   const getPlayerNameColor = () => {
+    if (player.hasBye) {
+      return "text-green-400"; // Freilos-Spieler werden grün dargestellt
+    }
+    
     if (isMatchCompleted) {
       if (isFinalWinner) {
         return "text-[#0FA0CE]";  // Sieger bleibt blau
       } else if (player.bracket === "losers") {
-        return "text-[#FEF7CD]";  // Verlierer, der ins Loser-Bracket geht, wird gelb
+        return "text-[#FEF7CD]";  // Spieler im Loser-Bracket werden gelb
       } else if (player.eliminated) {
-        return "text-[#ea384c]";  // Ausgeschiedene Spieler werden rot
+        return "text-red-500";  // Ausgeschiedene Spieler werden rot
       }
       return "text-gray-400";  // Standardfall
     }
+    
+    if (player.bracket === "losers") {
+      return "text-[#FEF7CD]";  // Spieler im Loser-Bracket werden gelb
+    } else if (player.eliminated) {
+      return "text-red-500";  // Ausgeschiedene Spieler werden rot
+    }
+    
     return "text-white";  // Standard für laufende Matches
   };
 
@@ -56,13 +67,14 @@ export const PlayerInfo = ({
           getPlayerNameColor()
         )}>
           {player.firstName} {player.lastName}
+          {player.hasBye && " (Freilos)"}
         </span>
         {player.team && (
           <span className={cn(
             "text-[10px]",
             isMatchCompleted && isFinalWinner ? "text-[#0FA0CE]/70" : 
             isMatchCompleted && player.bracket === "losers" ? "text-[#FEF7CD]/70" :
-            isMatchCompleted && player.eliminated ? "text-[#ea384c]/70" :
+            isMatchCompleted && player.eliminated ? "text-red-500/70" :
             "text-gray-400"
           )}>
             {player.team}

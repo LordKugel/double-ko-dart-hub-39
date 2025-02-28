@@ -87,11 +87,12 @@ export const MatchCard = ({
     return (
       <div 
         className={cn(
-          "relative border rounded p-2 transition-colors",
+          "relative border rounded p-2 transition-colors cursor-pointer",
           getBracketColors(),
           isCurrentRound && "ring-1 ring-blue-500",
           "text-xs w-full"
         )}
+        onClick={handleClick}
       >
         <div className="flex flex-col gap-1">
           <div className="flex justify-between items-center">
