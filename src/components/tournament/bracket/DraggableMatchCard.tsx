@@ -15,6 +15,7 @@ interface DraggableMatchCardProps {
   hideScoreControls?: boolean;
   onMatchClick?: (matchId: string) => void;
   simplifiedView?: boolean;
+  showOnlyCompletedMatches?: boolean;
 }
 
 export const DraggableMatchCard = ({ 
@@ -27,7 +28,8 @@ export const DraggableMatchCard = ({
   onAssignMatch,
   hideScoreControls,
   onMatchClick,
-  simplifiedView = false
+  simplifiedView = false,
+  showOnlyCompletedMatches = false
 }: DraggableMatchCardProps) => {
   const [{ isDragging }, drag] = useDrag({
     type: 'MATCH',
@@ -38,7 +40,13 @@ export const DraggableMatchCard = ({
     })
   });
 
-  // Hier benutzen wir die simplifiedView-Property
+  // Wenn wir nur abgeschlossene Matches zeigen sollen und dieses Match nicht abgeschlossen ist
+  // und kein Freilos-Spieler darin ist, dann nichts anzeigen
+  if (showOnlyCompletedMatches && !match.completed && 
+      !match.player1.hasBye && !match.player2.hasBye) {
+    return null;
+  }
+
   return (
     <div 
       ref={drag} 

@@ -135,22 +135,28 @@ export const TournamentBracket = ({
                 Winner-Runde {index + 1}
               </div>
               <div className="space-y-6 flex flex-col items-center">
-                {roundMatches.map(match => (
-                  <div key={match.id} className="hover:scale-105 transition-transform" style={{ width: `${bracketWidth - 10}px` }}>
-                    <DraggableMatchCard
-                      match={match}
-                      isCurrentRound={match.round === currentRound}
-                      verticalPosition={getVerticalPosition(match, roundMatches)}
-                      previousMatches={getPreviousMatches(match)}
-                      onScoreUpdate={onScoreUpdate}
-                      machines={machines}
-                      onAssignMatch={onAssignMatch}
-                      hideScoreControls={true}
-                      onMatchClick={onMatchClick}
-                      simplifiedView={match.round !== currentRound} // Vereinfachte Ansicht für nicht-aktuelle Runden
-                    />
-                  </div>
-                ))}
+                {roundMatches.map(match => {
+                  // Freilos-Spieler in Runde 1 sofort anzeigen
+                  const isByeMatch = match.player1.hasBye || match.player2.hasBye;
+                  
+                  return (
+                    <div key={match.id} className="hover:scale-105 transition-transform" style={{ width: `${bracketWidth - 10}px` }}>
+                      <DraggableMatchCard
+                        match={match}
+                        isCurrentRound={match.round === currentRound}
+                        verticalPosition={getVerticalPosition(match, roundMatches)}
+                        previousMatches={getPreviousMatches(match)}
+                        onScoreUpdate={onScoreUpdate}
+                        machines={machines}
+                        onAssignMatch={onAssignMatch}
+                        hideScoreControls={true}
+                        onMatchClick={onMatchClick}
+                        simplifiedView={true} // Immer vereinfachte Ansicht für Brackets
+                        showOnlyCompletedMatches={!isByeMatch} // Zeige nur abgeschlossene Matches, es sei denn, es ist ein Freilos-Match
+                      />
+                    </div>
+                  );
+                })}
               </div>
             </div>
           ))}
@@ -175,7 +181,8 @@ export const TournamentBracket = ({
                     onAssignMatch={onAssignMatch}
                     hideScoreControls={true}
                     onMatchClick={onMatchClick}
-                    simplifiedView={match.round !== currentRound} // Vereinfachte Ansicht für nicht-aktuelle Runden
+                    simplifiedView={true} // Immer vereinfachte Ansicht für Brackets
+                    showOnlyCompletedMatches={true} // Zeige nur abgeschlossene Matches
                   />
                 </div>
               ))}
@@ -203,7 +210,8 @@ export const TournamentBracket = ({
                       onAssignMatch={onAssignMatch}
                       hideScoreControls={true}
                       onMatchClick={onMatchClick}
-                      simplifiedView={match.round !== currentRound} // Vereinfachte Ansicht für nicht-aktuelle Runden
+                      simplifiedView={true} // Immer vereinfachte Ansicht für Brackets
+                      showOnlyCompletedMatches={true} // Zeige nur abgeschlossene Matches
                     />
                   </div>
                 ))}

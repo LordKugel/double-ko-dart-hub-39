@@ -82,7 +82,7 @@ export const MatchCard = ({
     }
   };
 
-  // Vereinfachte Darstellung für frühere oder zukünftige Runden
+  // Vereinfachte Darstellung für frühere oder zukünftige Runden - nur Spielername und Team
   if (simplifiedView) {
     return (
       <div 
@@ -97,9 +97,11 @@ export const MatchCard = ({
           <div className="flex justify-between items-center">
             <span className={cn(
               "text-xs font-medium",
-              player1IsWinner ? "text-[#0FA0CE]" : player2IsWinner ? "text-gray-400" : "text-white"
+              player1IsWinner ? "text-[#0FA0CE]" : player2IsWinner ? "text-gray-400" : "text-white",
+              match.player1.hasBye && "text-green-400" // Grüne Markierung für Freilos-Spieler
             )}>
               {match.player1.firstName} {match.player1.lastName}
+              {match.player1.hasBye && " (Freilos)"}
             </span>
             {match.player1.team && (
               <span className="text-[10px] text-gray-400">{match.player1.team}</span>
@@ -111,9 +113,11 @@ export const MatchCard = ({
           <div className="flex justify-between items-center">
             <span className={cn(
               "text-xs font-medium",
-              player2IsWinner ? "text-[#0FA0CE]" : player1IsWinner ? "text-gray-400" : "text-white"
+              player2IsWinner ? "text-[#0FA0CE]" : player1IsWinner ? "text-gray-400" : "text-white",
+              match.player2.hasBye && "text-green-400" // Grüne Markierung für Freilos-Spieler
             )}>
               {match.player2.firstName} {match.player2.lastName}
+              {match.player2.hasBye && " (Freilos)"}
             </span>
             {match.player2.team && (
               <span className="text-[10px] text-gray-400">{match.player2.team}</span>
