@@ -39,8 +39,7 @@ function generateRandomPlayer(id: string): Player {
     winPercentage: 0,
     losses: 0,
     eliminated: false,
-    bracket: null,
-    matches: []
+    bracket: null
   };
 }
 

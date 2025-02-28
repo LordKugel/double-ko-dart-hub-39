@@ -1,6 +1,6 @@
 
 import { toast } from "@/components/ui/use-toast";
-import { generateRandomPlayers } from "@/utils/playerGenerator";
+import { generatePlayers } from "@/utils/playerGenerator";
 import { Player } from "@/types/tournament";
 
 export const usePlayerManagement = (
@@ -17,7 +17,7 @@ export const usePlayerManagement = (
       return;
     }
     
-    const players = generateRandomPlayers(count);
+    const players = generatePlayers(count);
     setTournament(prev => ({
       ...prev,
       players,
