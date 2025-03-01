@@ -1,6 +1,7 @@
 
 import { Player, Match } from "@/types/tournament";
 import { BracketPlayers } from "./BracketPlayers";
+import { cn } from "@/lib/utils";
 
 interface BracketSidebarProps {
   byePlayers: Player[];
@@ -30,6 +31,7 @@ export const BracketSidebar = ({
         {/* Freilos-Spieler anzeigen */}
         {byePlayers.length > 0 && (
           <div className="mb-4 space-y-2">
+            <div className="text-sm font-semibold mb-1 text-green-400">Freilos-Spieler:</div>
             {byePlayers.map(player => (
               <div 
                 key={player.id}
@@ -37,7 +39,7 @@ export const BracketSidebar = ({
               >
                 <div className="flex flex-col">
                   <span className="text-sm font-semibold text-green-400">
-                    {player.firstName} {player.lastName} (Freilos)
+                    {player.firstName} {player.lastName}
                   </span>
                   {player.team && (
                     <span className="text-xs text-green-400/70">
@@ -88,7 +90,12 @@ export const BracketSidebar = ({
             {eliminatedPlayers.map(player => (
               <div 
                 key={player.id} 
-                className="text-sm text-[#ea384c] flex justify-between p-2 bg-[#121824] rounded border border-[#ea384c]/20"
+                className={cn(
+                  "text-sm flex justify-between p-2 rounded border",
+                  "bg-[#121824]",
+                  "border-[#ea384c]/20",
+                  "text-[#ea384c]"
+                )}
               >
                 <span>{player.firstName} {player.lastName}</span>
                 {player.team && <span className="text-xs text-[#ea384c]/70">{player.team}</span>}

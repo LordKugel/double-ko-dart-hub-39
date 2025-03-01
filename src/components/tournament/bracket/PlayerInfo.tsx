@@ -32,9 +32,9 @@ export const PlayerInfo = ({
 }: PlayerInfoProps) => {
   // Bestimme die Textfarbe basierend auf dem Ergebnis des abgeschlossenen Matches
   const getPlayerNameColor = () => {
-    // Prüfe zuerst, ob es sich um einen Freilos-Spieler handelt
+    // Freilos-Spieler werden immer grün dargestellt
     if (player.hasBye) {
-      return "text-green-400"; // Freilos-Spieler werden grün dargestellt
+      return "text-green-400";
     }
     
     if (isMatchCompleted) {
@@ -45,7 +45,7 @@ export const PlayerInfo = ({
       } else if (player.eliminated) {
         return "text-red-500";  // Ausgeschiedene Spieler werden rot
       }
-      return "text-gray-400";  // Standardfall
+      return "text-gray-400";  // Standardfall für Verlierer ohne Elimination
     }
     
     if (player.bracket === "losers") {

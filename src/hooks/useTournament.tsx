@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Tournament as TournamentType, Machine, Match } from "../types/tournament";
 import { useMatchHandling } from "./useMatchHandling";
@@ -132,7 +131,6 @@ export const useTournament = () => {
     console.log("Assigning match to machine", machineId, matchId);
     
     setTournament(prev => {
-      // Zuerst aktualisieren wir die Maschine
       const updatedMachines = prev.machines.map(machine => {
         if (machine.id === machineId) {
           return { ...machine, currentMatchId: matchId };
@@ -140,12 +138,10 @@ export const useTournament = () => {
         return machine;
       });
 
-      // Dann aktualisieren wir das Match
       const updatedMatches = prev.matches.map(match => {
         if (match.id === matchId) {
           return { ...match, machineNumber: machineId };
         }
-        // Wenn ein anderes Match bereits dieser Maschine zugewiesen war, entfernen wir die Zuweisung
         if (match.machineNumber === machineId && match.id !== matchId) {
           return { ...match, machineNumber: null };
         }
@@ -177,7 +173,6 @@ export const useTournament = () => {
 
       const match = prev.matches[matchIndex];
       
-      // Prüfen, ob alle drei Spiele gespielt wurden
       const player1Wins = match.scores.filter(s => s.player1Won).length;
       const player2Wins = match.scores.filter(s => s.player2Won).length;
       
@@ -190,36 +185,29 @@ export const useTournament = () => {
         return prev;
       }
 
-      // Starte den Countdown
       toast({
         title: "Match vollständig",
         description: "Ergebnisse können noch 10 Sekunden lang geändert werden"
       });
       
-      // Markiere das Match als "countdownStarted"
       const updatedMatches = [...prev.matches];
       updatedMatches[matchIndex] = {
         ...match,
         countdownStarted: true
       };
       
-      // Timer starten, der das Match nach 10 Sekunden abschließt
       setTimeout(() => {
         setTournament(currentState => {
-          // Aktuelle Version des Matches holen
           const currentMatchIndex = currentState.matches.findIndex(m => m.id === machine.currentMatchId);
           if (currentMatchIndex === -1) return currentState;
           
           const currentMatch = currentState.matches[currentMatchIndex];
           
-          // Match als abgeschlossen markieren
           const finalUpdatedMatch = { ...currentMatch, completed: true, countdownStarted: false };
           const finalUpdatedMatches = [...currentState.matches];
           finalUpdatedMatches[currentMatchIndex] = finalUpdatedMatch;
           
-          // Spieler aktualisieren
           const updatedPlayers = currentState.players.map(player => {
-            // Gewinner bestimmen
             const isPlayer1 = player.id === currentMatch.player1.id;
             const isPlayer2 = player.id === currentMatch.player2.id;
             
@@ -232,8 +220,32 @@ export const useTournament = () => {
             
             if (isLoser) {
               const newLosses = player.losses + 1;
-              // Eliminiert, wenn im Verlierer-Bracket oder 2 Niederlagen
               const eliminated = player.bracket === "losers" || newLosses >= 2;
+              
+              finalUpdatedMatches.forEach((m, idx) => {
+                if (m.player1.id === player.id) {
+                  finalUpdatedMatches[idx] = {
+                    ...m,
+                    player1: {
+                      ...m.player1,
+                      losses: newLosses,
+                      eliminated,
+                      bracket: eliminated ? null : "losers" as "winners" | "losers" | null
+                    }
+                  };
+                }
+                if (m.player2.id === player.id) {
+                  finalUpdatedMatches[idx] = {
+                    ...m,
+                    player2: {
+                      ...m.player2,
+                      losses: newLosses,
+                      eliminated,
+                      bracket: eliminated ? null : "losers" as "winners" | "losers" | null
+                    }
+                  };
+                }
+              });
               
               return {
                 ...player,
@@ -246,7 +258,6 @@ export const useTournament = () => {
             return player;
           });
           
-          // Maschine freigeben
           const updatedMachines = currentState.machines.map(m => {
             if (m.id === machineId) {
               return { ...m, currentMatchId: null };
@@ -259,11 +270,9 @@ export const useTournament = () => {
             description: "Das Match wurde abgeschlossen und die Ergebnisse wurden gespeichert."
           });
           
-          // Turnier auf Abschluss prüfen
           const remainingPlayers = updatedPlayers.filter(p => !p.eliminated);
           const completed = remainingPlayers.length === 1;
           
-          // Wenn es einen Gewinner gibt, zeige eine spezielle Meldung
           if (completed && remainingPlayers.length === 1) {
             const winner = remainingPlayers[0];
             toast({
@@ -294,7 +303,6 @@ export const useTournament = () => {
     });
   };
 
-  // Hilfsfunktion, um zu prüfen, ob eine Runde abgeschlossen ist
   const isRoundComplete = (matches: Match[], round: number): boolean => {
     const roundMatches = matches.filter(m => m.round === round);
     return roundMatches.every(match => match.completed);
@@ -306,10 +314,8 @@ export const useTournament = () => {
     const url = URL.createObjectURL(dataBlob);
     
     if (openInNewWindow) {
-      // Öffne in neuem Fenster oder Tab
       window.open(url, '_blank');
     } else {
-      // Alter Download-Mechanismus
       const a = document.createElement('a');
       a.href = url;
       a.download = `tournament-${new Date().toISOString()}.json`;
@@ -326,7 +332,6 @@ export const useTournament = () => {
     });
   };
 
-  // Neue Funktion zum Zurücksetzen des Turniers
   const resetTournament = () => {
     localStorage.removeItem(STORAGE_KEY);
     setTournament(initialTournamentState);
@@ -350,3 +355,5 @@ export const useTournament = () => {
     resetTournament
   };
 };
+
+export default useTournament;

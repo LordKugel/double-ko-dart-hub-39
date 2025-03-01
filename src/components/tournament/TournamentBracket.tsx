@@ -35,6 +35,7 @@ export const TournamentBracket = ({
   const loserMatches = matches.filter(m => m.bracket === "losers");
   const finalMatches = matches.filter(m => m.bracket === "final");
 
+  // Hier sammeln wir für jede Runde alle Matches, sortiert nach Runde
   const winnerRounds = Array.from({ length: roundsCount }, (_, i) => 
     winnerMatches.filter(m => m.round === i + 1)
   );
@@ -129,7 +130,7 @@ export const TournamentBracket = ({
                       onAssignMatch={onAssignMatch}
                       hideScoreControls={hideScoreControls}
                       onMatchClick={onMatchClick}
-                      simplifiedView={true} // Immer vereinfachte Ansicht für Brackets
+                      simplifiedView={match.round !== currentRound} // Nur vereinfachte Ansicht für nicht-aktuelle Runden
                     />
                   </div>
                 ))}
@@ -157,7 +158,7 @@ export const TournamentBracket = ({
                     onAssignMatch={onAssignMatch}
                     hideScoreControls={hideScoreControls}
                     onMatchClick={onMatchClick}
-                    simplifiedView={true} // Immer vereinfachte Ansicht für Brackets
+                    simplifiedView={match.round !== currentRound} // Nur vereinfachte Ansicht für nicht-aktuelle Runden
                   />
                 </div>
               ))}
@@ -169,7 +170,7 @@ export const TournamentBracket = ({
         <div className="flex-none space-x-4">
           {loserRounds.map((roundMatches, index) => (
             <div key={`loser-${index}`} className="inline-block" style={{ width: `${bracketWidth}px` }}>
-              <div className="text-xs font-semibold mb-2 text-center text-red-500">
+              <div className="text-xs font-semibold mb-2 text-center text-[#FEF7CD]">
                 Loser-Runde {index + 1}
               </div>
               <div className="space-y-6 flex flex-col items-center">
@@ -185,7 +186,7 @@ export const TournamentBracket = ({
                       onAssignMatch={onAssignMatch}
                       hideScoreControls={hideScoreControls}
                       onMatchClick={onMatchClick}
-                      simplifiedView={true} // Immer vereinfachte Ansicht für Brackets
+                      simplifiedView={match.round !== currentRound} // Nur vereinfachte Ansicht für nicht-aktuelle Runden
                     />
                   </div>
                 ))}
