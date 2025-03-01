@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { PlayerInfo } from "./PlayerInfo";
 import { MatchCardSimplified } from "./MatchCardSimplified";
 import { MatchCardContextMenu } from "./MatchCardContextMenu";
-import { getScores, getBracketColors } from "./MatchCardUtils";
+import { getScores } from "./MatchCardUtils";
 
 interface MatchCardProps {
   match: MatchType;
@@ -57,12 +57,40 @@ export const MatchCard = ({
     }
   };
 
+  // Bestimme die Farben basierend auf dem Bracket
+  const getBracketColors = () => {
+    switch(match.bracket) {
+      case "winners":
+        return "border-[#0FA0CE]";
+      case "losers":
+        return "border-[#FFD700]";
+      case "final":
+        return "border-[#8B5CF6]";
+      default:
+        return "border-gray-700";
+    }
+  };
+
+  const getBracketBackgroundColors = () => {
+    switch(match.bracket) {
+      case "winners":
+        return "bg-[#0e1627]";
+      case "losers":
+        return "bg-[#1c1917]";
+      case "final":
+        return "bg-[#1e173a]";
+      default:
+        return "bg-gray-800";
+    }
+  };
+
   // Normale vollständige Darstellung
   const cardContent = (
     <div 
       className={cn(
         "relative border rounded p-2 transition-colors cursor-pointer",
-        getBracketColors(match.bracket),
+        getBracketBackgroundColors(),
+        getBracketColors(),
         isCurrentRound && "ring-1 ring-blue-500",
         "text-xs w-full"
       )}

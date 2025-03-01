@@ -18,11 +18,21 @@ export const ScoreDisplay = ({ score, isWinner, player }: ScoreDisplayProps) => 
     );
   }
   
+  // Farbgebung basierend auf Bracket und Gewinner-Status
+  let colorClasses = "bg-[#403E43]";
+  
+  if (isWinner) {
+    colorClasses = "bg-[#0FA0CE]/20 text-[#0FA0CE]";
+  } else if (player.bracket === "losers") {
+    colorClasses = "bg-[#FFD700]/20 text-[#FFD700]";
+  } else if (player.eliminated) {
+    colorClasses = "bg-red-500/20 text-red-500";
+  }
+  
   return (
     <span className={cn(
       "text-xs px-1 py-0.5 rounded font-semibold",
-      isWinner ? "bg-[#0FA0CE]/20 text-[#0FA0CE]" : 
-      "bg-[#403E43]"
+      colorClasses
     )}>
       {score}
     </span>

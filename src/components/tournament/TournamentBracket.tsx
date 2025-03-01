@@ -170,7 +170,7 @@ export const TournamentBracket = ({
         <div className="flex-none space-x-4">
           {loserRounds.map((roundMatches, index) => (
             <div key={`loser-${index}`} className="inline-block" style={{ width: `${bracketWidth}px` }}>
-              <div className="text-xs font-semibold mb-2 text-center text-[#FEF7CD]">
+              <div className="text-xs font-semibold mb-2 text-center text-[#FFD700]">
                 Loser-Runde {index + 1}
               </div>
               <div className="space-y-6 flex flex-col items-center">

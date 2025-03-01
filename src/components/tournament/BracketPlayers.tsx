@@ -31,7 +31,7 @@ export const BracketPlayers = ({
           className={cn(
             "p-2 rounded border",
             bgColorClass,
-            borderColorClass
+            `border-${borderColorClass}`
           )}
         >
           <div className="flex flex-col gap-1">

@@ -18,7 +18,7 @@ export const getPlayerNameColor = (
     if (isFinalWinner) {
       return "text-[#0FA0CE]";  // Sieger bleibt blau
     } else if (player.bracket === "losers") {
-      return "text-[#FEF7CD]";  // Spieler im Loser-Bracket werden gelb
+      return "text-[#FFD700]";  // Spieler im Loser-Bracket werden kräftiger gelb
     } else if (player.eliminated) {
       return "text-red-500";  // Ausgeschiedene Spieler werden rot
     }
@@ -26,7 +26,7 @@ export const getPlayerNameColor = (
   }
   
   if (player.bracket === "losers") {
-    return "text-[#FEF7CD]";  // Spieler im Loser-Bracket werden gelb
+    return "text-[#FFD700]";  // Kräftigeres Gelb für Loser Bracket
   } else if (player.eliminated) {
     return "text-red-500";  // Ausgeschiedene Spieler werden rot
   }
@@ -50,7 +50,7 @@ export const getTeamNameColor = (
   if (isMatchCompleted && isFinalWinner) {
     return "text-[#0FA0CE]/70";
   } else if (isMatchCompleted && player.bracket === "losers") {
-    return "text-[#FEF7CD]/70";
+    return "text-[#FFD700]/70";  // Kräftigeres Gelb für Loser Bracket Teams
   } else if (isMatchCompleted && player.eliminated) {
     return "text-red-500/70";
   }

@@ -39,7 +39,7 @@ export const updatePlayersAfterMatch = (
         // Ein verlorenes Spiel verschiebt den Spieler ins Loser-Bracket
         // Zwei verlorene Spiele führen zur Elimination
         const isEliminated = newLosses >= 2;
-        const newBracket = isEliminated ? null : "losers";
+        const newBracket = isEliminated ? p.bracket : "losers";
         
         // Sammle alle Matches des Spielers
         const playerMatches = updatedMatches.filter(m => 
