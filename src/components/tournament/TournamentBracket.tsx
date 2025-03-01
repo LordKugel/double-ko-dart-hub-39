@@ -130,7 +130,7 @@ export const TournamentBracket = ({
                       onAssignMatch={onAssignMatch}
                       hideScoreControls={hideScoreControls}
                       onMatchClick={onMatchClick}
-                      simplifiedView={match.round !== currentRound} // Nur vereinfachte Ansicht für nicht-aktuelle Runden
+                      simplifiedView={false} // Nicht vereinfachte Ansicht, um Namen immer anzuzeigen
                     />
                   </div>
                 ))}
@@ -158,7 +158,7 @@ export const TournamentBracket = ({
                     onAssignMatch={onAssignMatch}
                     hideScoreControls={hideScoreControls}
                     onMatchClick={onMatchClick}
-                    simplifiedView={match.round !== currentRound} // Nur vereinfachte Ansicht für nicht-aktuelle Runden
+                    simplifiedView={false} // Nicht vereinfachte Ansicht, um Namen immer anzuzeigen
                   />
                 </div>
               ))}
@@ -186,7 +186,7 @@ export const TournamentBracket = ({
                       onAssignMatch={onAssignMatch}
                       hideScoreControls={hideScoreControls}
                       onMatchClick={onMatchClick}
-                      simplifiedView={match.round !== currentRound} // Nur vereinfachte Ansicht für nicht-aktuelle Runden
+                      simplifiedView={false} // Nicht vereinfachte Ansicht, um Namen immer anzuzeigen
                     />
                   </div>
                 ))}

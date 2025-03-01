@@ -43,7 +43,7 @@ export const BracketSidebar = ({
                   </span>
                   {player.team && (
                     <span className="text-xs text-green-400/70">
-                      Team: {player.team}
+                      {player.team}
                     </span>
                   )}
                 </div>

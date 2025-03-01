@@ -101,13 +101,23 @@ export const MatchCard = ({
               match.player1.hasBye ? "text-green-400" : // Freilos-Spieler immer grün
               player1IsWinner ? "text-[#0FA0CE]" : 
               match.player1.bracket === "losers" ? "text-[#FEF7CD]" : 
+              match.player1.eliminated ? "text-red-500" : // Rot für eliminierte Spieler
               player2IsWinner ? "text-gray-400" : "text-white"
             )}>
               {match.player1.firstName} {match.player1.lastName}
               {match.player1.hasBye && " (Freilos)"}
             </span>
             {match.player1.team && (
-              <span className="text-[10px] text-gray-400">{match.player1.team}</span>
+              <span className={cn(
+                "text-[10px]",
+                match.player1.hasBye ? "text-green-400/70" : // Freilos-Team auch grün
+                player1IsWinner ? "text-[#0FA0CE]/70" :
+                match.player1.bracket === "losers" ? "text-[#FEF7CD]/70" :
+                match.player1.eliminated ? "text-red-500/70" :
+                "text-gray-400"
+              )}>
+                {match.player1.team}
+              </span>
             )}
           </div>
           
@@ -119,13 +129,23 @@ export const MatchCard = ({
               match.player2.hasBye ? "text-green-400" : // Freilos-Spieler immer grün
               player2IsWinner ? "text-[#0FA0CE]" : 
               match.player2.bracket === "losers" ? "text-[#FEF7CD]" : 
+              match.player2.eliminated ? "text-red-500" : // Rot für eliminierte Spieler
               player1IsWinner ? "text-gray-400" : "text-white"
             )}>
               {match.player2.firstName} {match.player2.lastName}
               {match.player2.hasBye && " (Freilos)"}
             </span>
             {match.player2.team && (
-              <span className="text-[10px] text-gray-400">{match.player2.team}</span>
+              <span className={cn(
+                "text-[10px]",
+                match.player2.hasBye ? "text-green-400/70" : // Freilos-Team auch grün
+                player2IsWinner ? "text-[#0FA0CE]/70" :
+                match.player2.bracket === "losers" ? "text-[#FEF7CD]/70" :
+                match.player2.eliminated ? "text-red-500/70" :
+                "text-gray-400"
+              )}>
+                {match.player2.team}
+              </span>
             )}
           </div>
         </div>
@@ -147,7 +167,7 @@ export const MatchCard = ({
       <PlayerInfo
         player={match.player1}
         score={player1Score}
-        isWinner={player1Score > player2Score}
+        isWinner={player1IsWinner}
         isCurrentRound={isCurrentRound}
         scores={match.scores}
         isPlayer1={true}
@@ -161,7 +181,7 @@ export const MatchCard = ({
       <PlayerInfo
         player={match.player2}
         score={player2Score}
-        isWinner={player2Score > player1Score}
+        isWinner={player2IsWinner}
         isCurrentRound={isCurrentRound}
         scores={match.scores}
         isPlayer1={false}
