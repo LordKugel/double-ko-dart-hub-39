@@ -1,7 +1,10 @@
 
 import { cn } from "@/lib/utils";
 import { Match } from "@/types/tournament";
-import { MatchScore } from "./MatchScore"; 
+import { MatchScore } from "./MatchScore";
+import { TeamDisplay } from "./TeamDisplay";
+import { ScoreDisplay } from "./ScoreDisplay";
+import { getPlayerNameColor } from "./PlayerNameUtils";
 
 interface PlayerInfoProps {
   player: Match["player1"] | Match["player2"];
@@ -30,33 +33,7 @@ export const PlayerInfo = ({
   isMatchCompleted = false,
   isFinalWinner = false
 }: PlayerInfoProps) => {
-  // Bestimme die Textfarbe basierend auf dem Ergebnis des abgeschlossenen Matches
-  const getPlayerNameColor = () => {
-    // Freilos-Spieler werden immer grün dargestellt
-    if (player.hasBye) {
-      return "text-green-400";
-    }
-    
-    if (isMatchCompleted) {
-      if (isFinalWinner) {
-        return "text-[#0FA0CE]";  // Sieger bleibt blau
-      } else if (player.bracket === "losers") {
-        return "text-[#FEF7CD]";  // Spieler im Loser-Bracket werden gelb
-      } else if (player.eliminated) {
-        return "text-red-500";  // Ausgeschiedene Spieler werden rot
-      }
-      return "text-gray-400";  // Standardfall für Verlierer ohne Elimination
-    }
-    
-    if (player.bracket === "losers") {
-      return "text-[#FEF7CD]";  // Spieler im Loser-Bracket werden gelb
-    } else if (player.eliminated) {
-      return "text-red-500";  // Ausgeschiedene Spieler werden rot
-    }
-    
-    return "text-white";  // Standard für laufende Matches
-  };
-
+  
   return (
     <div className={cn(
       "flex justify-between items-center",
@@ -65,22 +42,16 @@ export const PlayerInfo = ({
       <div className="flex flex-col">
         <span className={cn(
           "font-medium text-xs",
-          getPlayerNameColor()
+          getPlayerNameColor(player, isMatchCompleted, isFinalWinner)
         )}>
           {player.firstName} {player.lastName}
           {player.hasBye && " (Freilos)"}
         </span>
-        {player.team && (
-          <span className={cn(
-            "text-[10px]",
-            isMatchCompleted && isFinalWinner ? "text-[#0FA0CE]/70" : 
-            isMatchCompleted && player.bracket === "losers" ? "text-[#FEF7CD]/70" :
-            isMatchCompleted && player.eliminated ? "text-red-500/70" :
-            "text-gray-400"
-          )}>
-            {player.team}
-          </span>
-        )}
+        <TeamDisplay 
+          player={player} 
+          isMatchCompleted={isMatchCompleted} 
+          isFinalWinner={isFinalWinner}
+        />
       </div>
       <div className="flex items-center gap-1">
         {!completed && isCurrentRound && showScoreControls && (
@@ -96,14 +67,11 @@ export const PlayerInfo = ({
             ))}
           </div>
         )}
-        <span className={cn(
-          "text-xs px-1 py-0.5 rounded font-semibold",
-          isWinner ? "bg-[#0FA0CE]/20 text-[#0FA0CE]" : 
-          player.hasBye ? "bg-green-400/20 text-green-400" : // Freilos-Spieler Score mit grünem Hintergrund
-          "bg-[#403E43]"
-        )}>
-          {score}
-        </span>
+        <ScoreDisplay 
+          score={score} 
+          isWinner={isWinner} 
+          player={player} 
+        />
       </div>
     </div>
   );
