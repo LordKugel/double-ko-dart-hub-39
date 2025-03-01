@@ -9,11 +9,19 @@ interface ScoreDisplayProps {
 }
 
 export const ScoreDisplay = ({ score, isWinner, player }: ScoreDisplayProps) => {
+  // Der Spieler mit Freilos bekommt eine grüne Markierung
+  if (player.hasBye) {
+    return (
+      <span className="text-xs px-1 py-0.5 rounded font-semibold bg-green-400/20 text-green-400">
+        Freilos
+      </span>
+    );
+  }
+  
   return (
     <span className={cn(
       "text-xs px-1 py-0.5 rounded font-semibold",
       isWinner ? "bg-[#0FA0CE]/20 text-[#0FA0CE]" : 
-      player.hasBye ? "bg-green-400/20 text-green-400" : // Freilos-Spieler Score mit grünem Hintergrund
       "bg-[#403E43]"
     )}>
       {score}

@@ -35,7 +35,11 @@ export const updatePlayersAfterMatch = (
     return players.map(p => {
       if (p.id === loser.id) {
         const newLosses = p.losses + 1;
-        const isEliminated = p.bracket === "losers" || newLosses >= 2;
+        
+        // Ein verlorenes Spiel verschiebt den Spieler ins Loser-Bracket
+        // Zwei verlorene Spiele führen zur Elimination
+        const isEliminated = newLosses >= 2;
+        const newBracket = isEliminated ? null : "losers";
         
         // Sammle alle Matches des Spielers
         const playerMatches = updatedMatches.filter(m => 
@@ -46,7 +50,7 @@ export const updatePlayersAfterMatch = (
           ...p,
           losses: newLosses,
           eliminated: isEliminated,
-          bracket: isEliminated ? null : "losers",
+          bracket: newBracket,
           winPercentage: calculateWinPercentage(updatedMatches, p.id),
           matches: playerMatches // Speichere die Matches des Spielers
         };
@@ -57,6 +61,7 @@ export const updatePlayersAfterMatch = (
           m.player1.id === p.id || m.player2.id === p.id
         );
         
+        // Der Winner behält sein Bracket bei
         return {
           ...p,
           winPercentage: calculateWinPercentage(updatedMatches, p.id),

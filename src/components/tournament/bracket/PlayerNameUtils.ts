@@ -42,6 +42,11 @@ export const getTeamNameColor = (
   isMatchCompleted?: boolean, 
   isFinalWinner?: boolean
 ) => {
+  // Freilos-Spieler haben grüne Teamnamen
+  if (player.hasBye) {
+    return "text-green-400/70";
+  }
+  
   if (isMatchCompleted && isFinalWinner) {
     return "text-[#0FA0CE]/70";
   } else if (isMatchCompleted && player.bracket === "losers") {

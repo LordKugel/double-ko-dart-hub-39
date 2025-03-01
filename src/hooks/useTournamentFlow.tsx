@@ -60,7 +60,8 @@ export const useTournamentFlow = (tournament: TournamentType, setTournament: (va
           ...player,
           bracket: "winners" as const,
           losses: 0,
-          eliminated: false
+          eliminated: false,
+          hasBye: false // Reset any existing bye status
         }));
 
       let initialMatches: MatchType[] = [];
@@ -71,7 +72,8 @@ export const useTournamentFlow = (tournament: TournamentType, setTournament: (va
         const byePlayerIndex = Math.floor(Math.random() * shuffledPlayers.length);
         byePlayer = {
           ...shuffledPlayers[byePlayerIndex],
-          hasBye: true  // Markieren des Freilos-Spielers
+          hasBye: true,  // Markieren des Freilos-Spielers
+          bracket: "winners" // Stelle sicher, dass der Freilos-Spieler im Winner-Bracket ist
         };
         
         // Entferne den Freilos-Spieler aus der Liste für Paarungen
@@ -92,10 +94,15 @@ export const useTournamentFlow = (tournament: TournamentType, setTournament: (va
         initialMatches = createInitialMatches(shuffledPlayers);
       }
       
+      // Aktualisiere die Spielerliste, um den Freilos-Spieler einzuschließen
+      const updatedPlayers = byePlayer 
+        ? [...shuffledPlayers.filter(p => p.id !== byePlayer.id), byePlayer]
+        : shuffledPlayers;
+      
       setTournament(prev => ({
         ...prev,
         started: true,
-        players: shuffledPlayers,
+        players: updatedPlayers,
         matches: initialMatches,
         currentRound: 1,
         roundStarted: true,
