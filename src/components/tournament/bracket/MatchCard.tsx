@@ -84,6 +84,20 @@ export const MatchCard = ({
     }
   };
 
+  // Färbung für die Automaten-Zuweisung
+  const getMachineColor = () => {
+    switch(match.bracket) {
+      case "winners":
+        return "text-[#0FA0CE]";
+      case "losers":
+        return "text-[#FFD700]";
+      case "final":
+        return "text-[#8B5CF6]";
+      default:
+        return "text-blue-500";
+    }
+  };
+
   // Normale vollständige Darstellung
   const cardContent = (
     <div 
@@ -129,7 +143,7 @@ export const MatchCard = ({
         </div>
       )}
       {match.machineNumber && !match.completed && (
-        <div className="mt-1 text-xs text-blue-500 text-center">
+        <div className={cn("mt-1 text-xs text-center", getMachineColor())}>
           Automat {match.machineNumber}
         </div>
       )}

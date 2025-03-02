@@ -18,9 +18,7 @@ export const BracketPlayers = ({
   textColorClass
 }: BracketPlayersProps) => {
   if (players.length === 0) {
-    return (
-      <div className="text-gray-400 text-sm">Keine aktiven Spieler</div>
-    );
+    return null; // Keine Meldung mehr anzeigen, wenn keine Spieler vorhanden sind
   }
   
   return (
@@ -29,9 +27,9 @@ export const BracketPlayers = ({
         <div 
           key={player.id} 
           className={cn(
-            "p-2 rounded border",
+            "p-2 rounded",
             bgColorClass,
-            `border-${borderColorClass}`
+            player.hasBye ? `border border-${borderColorClass}` : "" // Nur Freilos-Spieler haben einen Rahmen
           )}
         >
           <div className="flex flex-col gap-1">

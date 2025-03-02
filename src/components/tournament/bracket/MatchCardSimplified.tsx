@@ -32,6 +32,20 @@ export const MatchCardSimplified = ({
     }
   };
 
+  // Farbe für die Automaten-Anzeige
+  const getMachineColor = () => {
+    switch(match.bracket) {
+      case "winners":
+        return "text-[#0FA0CE]";
+      case "losers":
+        return "text-[#FFD700]";
+      case "final":
+        return "text-[#8B5CF6]";
+      default:
+        return "text-blue-500";
+    }
+  };
+
   const handleClick = () => {
     if (onMatchClick && isCurrentRound && !match.completed && !match.machineNumber) {
       onMatchClick(match.id);
@@ -103,6 +117,12 @@ export const MatchCardSimplified = ({
           )}
         </div>
       </div>
+      
+      {match.machineNumber && !match.completed && (
+        <div className={cn("mt-1 text-xs text-center", getMachineColor())}>
+          Automat {match.machineNumber}
+        </div>
+      )}
     </div>
   );
 };

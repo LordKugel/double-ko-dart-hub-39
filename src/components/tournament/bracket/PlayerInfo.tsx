@@ -37,7 +37,8 @@ export const PlayerInfo = ({
   return (
     <div className={cn(
       "flex justify-between items-center",
-      isWinner && "font-semibold"
+      isWinner && "font-semibold",
+      player.hasBye && "border rounded p-1" // Nur für Freilos-Spieler einen Rahmen hinzufügen
     )}>
       <div className="flex flex-col">
         <span className={cn(
