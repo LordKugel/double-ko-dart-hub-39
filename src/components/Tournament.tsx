@@ -1,4 +1,3 @@
-
 import { TournamentControls } from "./tournament/TournamentControls";
 import { PlayersList } from "./tournament/PlayersList";
 import { MatchesTable } from "./tournament/MatchesTable";
@@ -25,14 +24,14 @@ export const Tournament = () => {
     updateMachine,
     assignMatchToMachine,
     confirmMatchResult,
-    resetTournament
+    resetTournament,
+    confirmationTimers
   } = useTournament();
 
   const [showMatchesTable, setShowMatchesTable] = useState(false);
 
   const winner = tournament?.completed ? tournament.players.find(p => !p.eliminated) : null;
 
-  // Nur Matches der aktuellen Runde, die nicht zugewiesen oder gestartet sind
   const availableMatches = tournament?.matches?.filter(match => 
     match.round === tournament.currentRound && 
     !match.completed &&
@@ -43,12 +42,10 @@ export const Tournament = () => {
   const losersMatches = availableMatches.filter(match => match.bracket === "losers");
   const finalMatches = availableMatches.filter(match => match.bracket === "final");
 
-  // Liste aller Spieler in laufenden oder anstehenden Matches dieser Runde
   const allPlayersInCurrentRound = tournament.matches
     .filter(match => match.round === tournament.currentRound)
     .flatMap(match => [match.player1.id, match.player2.id]);
 
-  // Spieler, die aktuell einem Automaten zugewiesen sind (also in einem laufenden Match)
   const playersInActiveMatches = tournament.matches
     .filter(match => 
       match.round === tournament.currentRound && 
@@ -57,12 +54,10 @@ export const Tournament = () => {
     )
     .flatMap(match => [match.player1.id, match.player2.id]);
 
-  // Spieler mit Freilos in dieser Runde
   const byePlayers = tournament.players.filter(player => 
     player.hasBye && !player.eliminated
   );
 
-  // Aktive Spieler aus dem Winnerbracket, die nicht in einem laufenden Match sind und kein Freilos haben
   const activeWinnerPlayers = tournament.players.filter(player => 
     !player.eliminated && 
     player.bracket === "winners" && 
@@ -71,7 +66,6 @@ export const Tournament = () => {
     !player.hasBye
   );
 
-  // Aktive Spieler aus dem Loserbracket, die nicht in einem laufenden Match sind
   const activeLoserPlayers = tournament.players.filter(player => 
     !player.eliminated && 
     player.bracket === "losers" && 
@@ -79,10 +73,8 @@ export const Tournament = () => {
     !allPlayersInCurrentRound.includes(player.id)
   );
 
-  // Ausgeschiedene Spieler
   const eliminatedPlayers = tournament.players.filter(p => p.eliminated);
 
-  // Matches, die aktuell einem Automaten zugewiesen sind
   const activeMatches = tournament?.matches?.filter(match => 
     match.round === tournament.currentRound && 
     !match.completed &&
@@ -91,12 +83,10 @@ export const Tournament = () => {
   ) || [];
 
   const handleMatchClick = (matchId: string) => {
-    // Erst Favoriten-Automaten durchsuchen, dann die anderen
     const favoriteMachine = tournament.machines.find(machine => 
       machine.isFavorite && !machine.isOutOfOrder && !machine.currentMatchId
     );
     
-    // Wenn kein Favorit verfügbar ist, suche nach einem anderen freien Automaten
     const availableMachine = favoriteMachine || tournament.machines.find(machine => 
       !machine.isOutOfOrder && !machine.currentMatchId
     );
@@ -132,16 +122,14 @@ export const Tournament = () => {
     const match = getMatchForMachine(machineId);
     if (!match) return false;
     
-    // Prüfen, ob alle 3 Spiele gespielt wurden
     const player1Wins = match.scores.filter(s => s.player1Won).length;
     const player2Wins = match.scores.filter(s => s.player2Won).length;
     return player1Wins + player2Wins === 3;
   };
 
   const handleExportData = () => {
-    // Öffne Excel-Export in neuem Fenster/Tab
     exportTournamentData(true);
-  }
+  };
 
   const handleIncreaseMachines = () => {
     if (tournament.numberOfMachines < 10) {
@@ -196,7 +184,6 @@ export const Tournament = () => {
             />
           ) : (
             <div className="flex flex-col md:flex-row gap-6 mb-8">
-              {/* Seitenleiste für Winner/Loser/Freilos - jetzt als separate Komponente */}
               <BracketSidebar 
                 byePlayers={byePlayers}
                 activeWinnerPlayers={activeWinnerPlayers}
@@ -207,7 +194,6 @@ export const Tournament = () => {
                 finalMatches={finalMatches}
               />
               
-              {/* Turnierbaum (nimmt den restlichen Platz ein) */}
               <div className="flex-1">
                 <TournamentBracket 
                   matches={tournament.matches}
@@ -237,6 +223,7 @@ export const Tournament = () => {
               onScoreUpdate={handleScoreUpdate}
               onIncreaseMaxMachines={handleIncreaseMachines}
               onDecreaseMaxMachines={handleDecreaseMachines}
+              confirmationTimers={confirmationTimers}
             />
           )}
         </div>

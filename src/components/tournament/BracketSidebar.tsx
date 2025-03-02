@@ -31,7 +31,7 @@ export const BracketSidebar = ({
         {/* Freilos-Spieler anzeigen */}
         {byePlayers.length > 0 && (
           <div className="mb-4 space-y-2">
-            <div className="text-sm font-semibold mb-1 text-green-400">Freilos-Spieler:</div>
+            <div className="text-sm font-semibold mb-1 text-[#0FA0CE]">Freilos-Spieler:</div>
             {byePlayers.map(player => (
               <div 
                 key={player.id}
