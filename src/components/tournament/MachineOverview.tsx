@@ -21,6 +21,7 @@ interface MachineOverviewProps {
   onScoreUpdate?: (matchId: string, gameIndex: number, player1Won: boolean) => void;
   onIncreaseMaxMachines?: () => void;
   onDecreaseMaxMachines?: () => void;
+  confirmationTimers?: {[machineId: number]: number};
 }
 
 export const MachineOverview = ({ 
@@ -35,7 +36,8 @@ export const MachineOverview = ({
   canConfirmMatch,
   onScoreUpdate,
   onIncreaseMaxMachines,
-  onDecreaseMaxMachines
+  onDecreaseMaxMachines,
+  confirmationTimers = {}
 }: MachineOverviewProps) => {
   const [machineHeight, setMachineHeight] = useState<number>(200);
   const [containerHeight, setContainerHeight] = useState<number>(35); // vh units
@@ -275,9 +277,12 @@ export const MachineOverview = ({
                         variant="outline" 
                         className="w-full text-green-600 border-green-800 hover:bg-green-900/20 hover:text-green-400 mt-2"
                         onClick={() => onConfirmMatch(machineId)}
+                        disabled={confirmationTimers && confirmationTimers[machineId] !== undefined}
                       >
                         <CheckCircle className="h-3 w-3 mr-1" />
-                        Ergebnis bestätigen
+                        {confirmationTimers && confirmationTimers[machineId] !== undefined 
+                          ? `Bestätigung in ${confirmationTimers[machineId]}s` 
+                          : 'Ergebnis bestätigen'}
                       </Button>
                     )}
                     
