@@ -91,9 +91,8 @@ export const BracketSidebar = ({
               <div 
                 key={player.id} 
                 className={cn(
-                  "text-sm flex justify-between p-2 rounded border",
+                  "text-sm flex justify-between p-2 rounded",
                   "bg-[#121824]",
-                  "border-red-500/50",
                   "text-red-500"
                 )}
               >
