@@ -1,3 +1,4 @@
+
 import { TournamentControls } from "./tournament/TournamentControls";
 import { PlayersList } from "./tournament/PlayersList";
 import { MatchesTable } from "./tournament/MatchesTable";
@@ -42,10 +43,15 @@ export const Tournament = () => {
   const losersMatches = availableMatches.filter(match => match.bracket === "losers");
   const finalMatches = availableMatches.filter(match => match.bracket === "final");
 
-  const allPlayersInCurrentRound = tournament.matches
-    .filter(match => match.round === tournament.currentRound)
+  // Spieler in aktiven, nicht abgeschlossenen Matches der aktuellen Runde
+  const playersInActiveUnfinishedMatches = tournament.matches
+    .filter(match => 
+      match.round === tournament.currentRound && 
+      !match.completed
+    )
     .flatMap(match => [match.player1.id, match.player2.id]);
 
+  // Spieler in zugewiesenen Automaten/aktiven Matches
   const playersInActiveMatches = tournament.matches
     .filter(match => 
       match.round === tournament.currentRound && 
@@ -58,19 +64,19 @@ export const Tournament = () => {
     player.hasBye && !player.eliminated
   );
 
+  // Aktive Winner-Bracket Spieler - korrigiert, um abgeschlossene Matches zu berücksichtigen
   const activeWinnerPlayers = tournament.players.filter(player => 
     !player.eliminated && 
     player.bracket === "winners" && 
-    !playersInActiveMatches.includes(player.id) &&
-    !allPlayersInCurrentRound.includes(player.id) &&
+    !playersInActiveUnfinishedMatches.includes(player.id) &&
     !player.hasBye
   );
 
+  // Aktive Loser-Bracket Spieler - korrigiert, um abgeschlossene Matches zu berücksichtigen
   const activeLoserPlayers = tournament.players.filter(player => 
     !player.eliminated && 
     player.bracket === "losers" && 
-    !playersInActiveMatches.includes(player.id) &&
-    !allPlayersInCurrentRound.includes(player.id)
+    !playersInActiveUnfinishedMatches.includes(player.id)
   );
 
   const eliminatedPlayers = tournament.players.filter(p => p.eliminated);
