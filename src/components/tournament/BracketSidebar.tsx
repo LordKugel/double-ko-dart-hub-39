@@ -30,7 +30,7 @@ export const BracketSidebar = ({
         
         {/* Freilos-Spieler anzeigen */}
         {byePlayers.length > 0 && (
-          <div className="mb-4 space-y-2">
+          <div className="mb-4 space-y-0">
             <div className="text-sm font-semibold mb-1 text-[#0FA0CE]">Freilos-Spieler:</div>
             {byePlayers.map(player => (
               <div 
@@ -86,7 +86,7 @@ export const BracketSidebar = ({
       {eliminatedPlayers.length > 0 && (
         <div className="bg-[#1A1721] p-4 rounded-lg border border-red-500">
           <h2 className="text-lg font-bold mb-3 text-red-500">Ausgeschieden</h2>
-          <div className="space-y-2">
+          <div className="space-y-0">
             {eliminatedPlayers.map(player => (
               <div 
                 key={player.id} 

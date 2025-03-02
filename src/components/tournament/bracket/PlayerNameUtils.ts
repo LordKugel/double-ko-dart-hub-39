@@ -20,15 +20,22 @@ export const getPlayerNameColor = (
     if (isFinalWinner) {
       return "text-[#0FA0CE]";  // Sieger bleibt blau
     } else if (player.bracket === "losers") {
-      return "text-[#FFD700]";  // Spieler im Loser-Bracket werden kräftiger gelb
+      return "text-[#FFD700]";  // Spieler im Loser-Bracket bleiben gelb (auch wenn sie gewinnen)
     } else if (player.eliminated) {
       return "text-red-500";  // Ausgeschiedene Spieler werden rot
     }
     return "text-gray-400";  // Standardfall für Verlierer ohne Elimination
   }
   
-  // Standard für laufende Matches oder vergangene Matches (außer das letzte)
-  return "text-white";  // Standardfarbe weiß für alle anderen Spieler
+  // Für alle Spieler am Anfang des Turniers: Blau, wenn im Winner-Bracket (Standardfarbe)
+  if (player.bracket === "winners") {
+    return "text-[#0FA0CE]";  // Alle Spieler im Winner-Bracket sind blau
+  } else if (player.bracket === "losers") {
+    return "text-[#FFD700]";  // Alle Spieler im Loser-Bracket sind gelb
+  }
+  
+  // Standardfall
+  return "text-white";
 };
 
 /**
@@ -55,6 +62,13 @@ export const getTeamNameColor = (
       return "text-red-500/70";
     }
     return "text-gray-400";  // Standard für Verlierer
+  }
+  
+  // Für alle Spieler am Anfang des Turniers: Entsprechend dem Bracket
+  if (player.bracket === "winners") {
+    return "text-[#0FA0CE]/70";  // Winner-Bracket Teams sind blau
+  } else if (player.bracket === "losers") {
+    return "text-[#FFD700]/70";  // Loser-Bracket Teams sind gelb
   }
   
   // Standard für alle anderen Fälle
