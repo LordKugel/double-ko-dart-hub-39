@@ -57,30 +57,17 @@ export const MatchCard = ({
     }
   };
 
-  // Bestimme die Farben basierend auf dem Bracket
+  // Bestimme die Farben basierend auf dem Bracket - Nur eine Rahmenfarbe pro Bracket
   const getBracketColors = () => {
     switch(match.bracket) {
       case "winners":
-        return "border-[#0FA0CE]";
+        return "border-[#0FA0CE] bg-[#0e1627]";
       case "losers":
-        return "border-[#FFD700]";
+        return "border-[#FFD700] bg-[#1c1917]";
       case "final":
-        return "border-[#8B5CF6]";
+        return "border-[#8B5CF6] bg-[#1e173a]";
       default:
-        return "border-gray-700";
-    }
-  };
-
-  const getBracketBackgroundColors = () => {
-    switch(match.bracket) {
-      case "winners":
-        return "bg-[#0e1627]";
-      case "losers":
-        return "bg-[#1c1917]";
-      case "final":
-        return "bg-[#1e173a]";
-      default:
-        return "bg-gray-800";
+        return "border-gray-700 bg-gray-800";
     }
   };
 
@@ -103,7 +90,6 @@ export const MatchCard = ({
     <div 
       className={cn(
         "relative border rounded p-2 transition-colors cursor-pointer",
-        getBracketBackgroundColors(),
         getBracketColors(),
         isCurrentRound && "ring-1 ring-blue-500",
         "text-xs w-full"
@@ -120,7 +106,7 @@ export const MatchCard = ({
         onScoreUpdate={handleScoreUpdate}
         completed={match.completed}
         showScoreControls={!hideScoreControls && !match.machineNumber}
-        isMatchCompleted={match.completed}
+        isMatchCompleted={match.completed || match.countdownStarted}
         isFinalWinner={player1IsWinner}
       />
       <div className="my-1 border-t border-gray-700" />
@@ -134,7 +120,7 @@ export const MatchCard = ({
         onScoreUpdate={handleScoreUpdate}
         completed={match.completed}
         showScoreControls={!hideScoreControls && !match.machineNumber}
-        isMatchCompleted={match.completed}
+        isMatchCompleted={match.completed || match.countdownStarted}
         isFinalWinner={player2IsWinner}
       />
       {match.completed && (

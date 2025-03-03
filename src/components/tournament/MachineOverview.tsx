@@ -64,6 +64,22 @@ export const MachineOverview = ({
     }
   };
 
+  // Bestimmt die Rahmenfarbe basierend auf dem Match-Bracket
+  const getMachineBorderColor = (match: Match | null) => {
+    if (!match) return "border-[#403E43]/50";
+    
+    switch(match.bracket) {
+      case "winners":
+        return "border-[#0FA0CE]";
+      case "losers":
+        return "border-[#FFD700]";
+      case "final":
+        return "border-[#8B5CF6]";
+      default:
+        return "border-[#403E43]";
+    }
+  };
+
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-[#1A1721] border-t border-[#403E43] p-4 z-50"
          style={{ height: `${containerHeight}vh` }}>
@@ -153,10 +169,12 @@ export const MachineOverview = ({
                   machine.isOutOfOrder 
                     ? "bg-[#2A1721] border-red-900/30" 
                     : machine.currentMatchId 
-                      ? "bg-[#221F26] border-[#403E43]"
+                      ? "bg-[#221F26]" 
                       : machine.isFavorite 
                         ? "bg-[#22291F] border-yellow-700/30"
                         : "bg-[#1A1721]/50 border-dashed border-[#403E43]/50",
+                  // Bracket-basierte Rahmenfarbe für zugewiesene Matches
+                  machine.currentMatchId && getMachineBorderColor(match)
                 )}
                 style={{ height: `${machineHeight}px`, overflow: 'auto' }}
               >
@@ -211,14 +229,26 @@ export const MachineOverview = ({
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-[#0FA0CE]/20 text-[#0FA0CE]">
+                        <span className={cn(
+                          "text-xs px-2 py-0.5 rounded-full bg-opacity-20",
+                          match.bracket === "winners" 
+                            ? "bg-[#0FA0CE]/20 text-[#0FA0CE]" 
+                            : match.bracket === "losers" 
+                              ? "bg-[#FFD700]/20 text-[#FFD700]"
+                              : "bg-[#8B5CF6]/20 text-[#8B5CF6]"
+                        )}>
                           Aktiv
                         </span>
                       </div>
                     </div>
                     <div className="flex flex-col gap-1">
                       <div className="flex justify-between items-center">
-                        <span className="text-sm text-white">
+                        <span className={cn(
+                          "text-sm",
+                          match.player1.bracket === "winners" ? "text-[#0FA0CE]" :
+                          match.player1.bracket === "losers" ? "text-[#FFD700]" :
+                          "text-white"
+                        )}>
                           {match.player1.firstName} {match.player1.lastName}
                         </span>
                         <span className="text-xs px-2 py-0.5 rounded bg-[#403E43]">
@@ -226,7 +256,12 @@ export const MachineOverview = ({
                         </span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-sm text-white">
+                        <span className={cn(
+                          "text-sm",
+                          match.player2.bracket === "winners" ? "text-[#0FA0CE]" :
+                          match.player2.bracket === "losers" ? "text-[#FFD700]" :
+                          "text-white"
+                        )}>
                           {match.player2.firstName} {match.player2.lastName}
                         </span>
                         <span className="text-xs px-2 py-0.5 rounded bg-[#403E43]">

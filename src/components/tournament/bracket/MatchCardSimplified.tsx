@@ -18,15 +18,15 @@ export const MatchCardSimplified = ({
   const player2IsWinner = match.completed && 
     match.scores.filter(s => s.player2Won).length > match.scores.filter(s => s.player1Won).length;
 
-  // Bestimme die Farben basierend auf dem Bracket
+  // Bestimme die Farben basierend auf dem Bracket - Nur eine Rahmenfarbe pro Bracket
   const getBracketColors = () => {
     switch(match.bracket) {
       case "winners":
-        return "bg-[#0e1627] border-[#0FA0CE] hover:border-[#0FA0CE]";
+        return "bg-[#0e1627] border-[#0FA0CE]";
       case "losers":
-        return "bg-[#1c1917] border-[#FFD700] hover:border-[#FFD700]";
+        return "bg-[#1c1917] border-[#FFD700]";
       case "final":
-        return "bg-[#1e173a] border-[#8B5CF6] hover:border-[#8B5CF6]";
+        return "bg-[#1e173a] border-[#8B5CF6]";
       default:
         return "bg-gray-800 border-gray-700";
     }
@@ -70,7 +70,8 @@ export const MatchCardSimplified = ({
             player1IsWinner ? "text-[#0FA0CE]" : 
             match.player1.bracket === "losers" ? "text-[#FFD700]" : 
             match.player1.eliminated ? "text-red-500" : // Rot für eliminierte Spieler
-            player2IsWinner ? "text-gray-400" : "text-white"
+            match.player1.bracket === "winners" ? "text-[#0FA0CE]" : // Blau für Winner-Bracket
+            "text-white"
           )}>
             {match.player1.firstName} {match.player1.lastName}
             {match.player1.hasBye && " (Freilos)"}
@@ -82,6 +83,7 @@ export const MatchCardSimplified = ({
               player1IsWinner ? "text-[#0FA0CE]/70" :
               match.player1.bracket === "losers" ? "text-[#FFD700]/70" :
               match.player1.eliminated ? "text-red-500/70" :
+              match.player1.bracket === "winners" ? "text-[#0FA0CE]/70" : // Blau für Winner-Bracket Teams
               "text-gray-400"
             )}>
               {match.player1.team}
@@ -98,7 +100,8 @@ export const MatchCardSimplified = ({
             player2IsWinner ? "text-[#0FA0CE]" : 
             match.player2.bracket === "losers" ? "text-[#FFD700]" : 
             match.player2.eliminated ? "text-red-500" : // Rot für eliminierte Spieler
-            player1IsWinner ? "text-gray-400" : "text-white"
+            match.player2.bracket === "winners" ? "text-[#0FA0CE]" : // Blau für Winner-Bracket
+            "text-white"
           )}>
             {match.player2.firstName} {match.player2.lastName}
             {match.player2.hasBye && " (Freilos)"}
@@ -110,6 +113,7 @@ export const MatchCardSimplified = ({
               player2IsWinner ? "text-[#0FA0CE]/70" :
               match.player2.bracket === "losers" ? "text-[#FFD700]/70" :
               match.player2.eliminated ? "text-red-500/70" :
+              match.player2.bracket === "winners" ? "text-[#0FA0CE]/70" : // Blau für Winner-Bracket Teams
               "text-gray-400"
             )}>
               {match.player2.team}

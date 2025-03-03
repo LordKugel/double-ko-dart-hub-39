@@ -15,7 +15,7 @@ export const getPlayerNameColor = (
     return "text-green-400";
   }
   
-  // Farbgebung nur für das aktuelle/letzte Spiel
+  // Farbgebung für abgeschlossene Matches oder solche mit aktivem Countdown
   if (isMatchCompleted) {
     if (isFinalWinner) {
       return "text-[#0FA0CE]";  // Sieger bleibt blau
@@ -27,7 +27,7 @@ export const getPlayerNameColor = (
     return "text-gray-400";  // Standardfall für Verlierer ohne Elimination
   }
   
-  // Für alle Spieler am Anfang des Turniers: Blau, wenn im Winner-Bracket (Standardfarbe)
+  // Für alle Spieler basierend auf ihrem Bracket (auch in laufenden Matches)
   if (player.bracket === "winners") {
     return "text-[#0FA0CE]";  // Alle Spieler im Winner-Bracket sind blau
   } else if (player.bracket === "losers") {
@@ -52,7 +52,7 @@ export const getTeamNameColor = (
     return "text-green-400/70";
   }
   
-  // Farbgebung nur für das aktuelle/letzte Spiel
+  // Farbgebung für abgeschlossene Matches
   if (isMatchCompleted) {
     if (isFinalWinner) {
       return "text-[#0FA0CE]/70";
@@ -64,7 +64,7 @@ export const getTeamNameColor = (
     return "text-gray-400";  // Standard für Verlierer
   }
   
-  // Für alle Spieler am Anfang des Turniers: Entsprechend dem Bracket
+  // Für alle Spieler basierend auf ihrem Bracket
   if (player.bracket === "winners") {
     return "text-[#0FA0CE]/70";  // Winner-Bracket Teams sind blau
   } else if (player.bracket === "losers") {
