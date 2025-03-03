@@ -287,6 +287,7 @@ export const useTournament = () => {
 
   return {
     tournament,
+    setTournament, // Wichtig: Hier exportiere ich jetzt die setTournament-Funktion
     handleScoreUpdate,
     generatePlayers,
     startTournament,
