@@ -4,7 +4,6 @@ import { Tournament as TournamentType, Machine, Match } from "../types/tournamen
 import { useMatchHandling } from "./useMatchHandling";
 import { usePlayerManagement } from "./usePlayerManagement";
 import { useTournamentFlow } from "./useTournamentFlow";
-import { toast } from "@/components/ui/use-toast";
 
 const STORAGE_KEY = "dart-tournament-state";
 
@@ -47,9 +46,6 @@ export const useTournament = () => {
     return initialTournamentState;
   });
 
-  // State für den Countdown des Bestätigungsbuttons
-  const [confirmationTimers, setConfirmationTimers] = useState<{[machineId: number]: number}>({});
-
   useEffect(() => {
     if (!tournament) {
       console.error("Tournament state is undefined, resetting to initial state");
@@ -64,36 +60,6 @@ export const useTournament = () => {
       console.error("Error saving tournament state:", error);
     }
   }, [tournament]);
-
-  // Effect für die Countdown-Timer
-  useEffect(() => {
-    const timers: {[key: number]: NodeJS.Timeout} = {};
-
-    Object.keys(confirmationTimers).forEach(machineIdStr => {
-      const machineId = parseInt(machineIdStr);
-      if (confirmationTimers[machineId] > 0) {
-        timers[machineId] = setTimeout(() => {
-          setConfirmationTimers(prev => ({
-            ...prev,
-            [machineId]: prev[machineId] - 1
-          }));
-        }, 1000);
-      } else if (confirmationTimers[machineId] === 0) {
-        // Timer ist abgelaufen, Match abschließen
-        finalizeMatch(machineId);
-        setConfirmationTimers(prev => {
-          const newTimers = {...prev};
-          delete newTimers[machineId];
-          return newTimers;
-        });
-      }
-    });
-
-    return () => {
-      // Bereinigen der Timer beim Unmount oder wenn sich die Timer ändern
-      Object.values(timers).forEach(timer => clearTimeout(timer));
-    };
-  }, [confirmationTimers]);
 
   const { handleScoreUpdate } = useMatchHandling(
     tournament.matches,
@@ -113,11 +79,6 @@ export const useTournament = () => {
 
   const updateNumberOfMachines = (number: number) => {
     if (number < 1 || number > 10) {
-      toast({
-        title: "Ungültige Anzahl",
-        description: "Die Anzahl der Automaten muss zwischen 1 und 10 liegen",
-        variant: "destructive"
-      });
       return;
     }
 
@@ -144,11 +105,6 @@ export const useTournament = () => {
           machineNumber: match.machineNumber && match.machineNumber >= number ? null : match.machineNumber
         }))
       };
-    });
-
-    toast({
-      title: "Anzahl aktualisiert",
-      description: `Die Anzahl der Automaten wurde auf ${number} gesetzt`
     });
   };
 
@@ -188,13 +144,6 @@ export const useTournament = () => {
         matches: updatedMatches
       };
     });
-
-    if (matchId) {
-      toast({
-        title: "Match zugewiesen",
-        description: `Match wurde Automat ${machineId} zugewiesen`
-      });
-    }
   };
 
   const confirmMatchResult = (machineId: number) => {
@@ -211,135 +160,100 @@ export const useTournament = () => {
       const player2Wins = match.scores.filter(s => s.player2Won).length;
       
       if (player1Wins + player2Wins !== 3) {
-        toast({
-          title: "Unvollständiges Match",
-          description: "Es müssen alle drei Spiele gespielt werden.",
-          variant: "destructive"
-        });
         return prev;
       }
       
-      // Starten des 10-Sekunden-Countdowns im Button
-      setConfirmationTimers(current => ({
-        ...current,
-        [machineId]: 10
-      }));
-      
-      const updatedMatches = [...prev.matches];
-      updatedMatches[matchIndex] = {
-        ...match,
-        countdownStarted: true
-      };
-      
-      return {
-        ...prev,
-        matches: updatedMatches
-      };
+      // Sofort abschließen ohne Timer
+      return finalizeMatch(prev, machineId);
     });
   };
 
-  // Funktion zum finalen Abschließen des Matches nach Ablauf des Timers
-  const finalizeMatch = (machineId: number) => {
-    setTournament(currentState => {
-      const machine = currentState.machines.find(m => m.id === machineId);
-      if (!machine || !machine.currentMatchId) return currentState;
+  // Funktion zum finalen Abschließen des Matches
+  const finalizeMatch = (currentState: TournamentType, machineId: number): TournamentType => {
+    const machine = currentState.machines.find(m => m.id === machineId);
+    if (!machine || !machine.currentMatchId) return currentState;
+    
+    const currentMatchIndex = currentState.matches.findIndex(m => m.id === machine.currentMatchId);
+    if (currentMatchIndex === -1) return currentState;
+    
+    const currentMatch = currentState.matches[currentMatchIndex];
+    
+    const finalUpdatedMatch = { ...currentMatch, completed: true, countdownStarted: false };
+    const finalUpdatedMatches = [...currentState.matches];
+    finalUpdatedMatches[currentMatchIndex] = finalUpdatedMatch;
+    
+    const updatedPlayers = currentState.players.map(player => {
+      const isPlayer1 = player.id === currentMatch.player1.id;
+      const isPlayer2 = player.id === currentMatch.player2.id;
       
-      const currentMatchIndex = currentState.matches.findIndex(m => m.id === machine.currentMatchId);
-      if (currentMatchIndex === -1) return currentState;
+      if (!isPlayer1 && !isPlayer2) return player;
       
-      const currentMatch = currentState.matches[currentMatchIndex];
+      const p1Wins = currentMatch.scores.filter(s => s.player1Won).length;
+      const p2Wins = currentMatch.scores.filter(s => s.player2Won).length;
+      const isWinner = isPlayer1 ? p1Wins > p2Wins : p2Wins > p1Wins;
+      const isLoser = !isWinner;
       
-      const finalUpdatedMatch = { ...currentMatch, completed: true, countdownStarted: false };
-      const finalUpdatedMatches = [...currentState.matches];
-      finalUpdatedMatches[currentMatchIndex] = finalUpdatedMatch;
-      
-      const updatedPlayers = currentState.players.map(player => {
-        const isPlayer1 = player.id === currentMatch.player1.id;
-        const isPlayer2 = player.id === currentMatch.player2.id;
+      if (isLoser) {
+        const newLosses = player.losses + 1;
+        const eliminated = player.bracket === "losers" || newLosses >= 2;
         
-        if (!isPlayer1 && !isPlayer2) return player;
-        
-        const p1Wins = currentMatch.scores.filter(s => s.player1Won).length;
-        const p2Wins = currentMatch.scores.filter(s => s.player2Won).length;
-        const isWinner = isPlayer1 ? p1Wins > p2Wins : p2Wins > p1Wins;
-        const isLoser = !isWinner;
-        
-        if (isLoser) {
-          const newLosses = player.losses + 1;
-          const eliminated = player.bracket === "losers" || newLosses >= 2;
-          
-          finalUpdatedMatches.forEach((m, idx) => {
-            if (m.player1.id === player.id) {
-              finalUpdatedMatches[idx] = {
-                ...m,
-                player1: {
-                  ...m.player1,
-                  losses: newLosses,
-                  eliminated,
-                  bracket: eliminated ? null : "losers" as "winners" | "losers" | null
-                }
-              };
-            }
-            if (m.player2.id === player.id) {
-              finalUpdatedMatches[idx] = {
-                ...m,
-                player2: {
-                  ...m.player2,
-                  losses: newLosses,
-                  eliminated,
-                  bracket: eliminated ? null : "losers" as "winners" | "losers" | null
-                }
-              };
-            }
-          });
-          
-          return {
-            ...player,
-            losses: newLosses,
-            eliminated,
-            bracket: eliminated ? null : "losers" as "winners" | "losers" | null
-          };
-        }
-        
-        return player;
-      });
-      
-      const updatedMachines = currentState.machines.map(m => {
-        if (m.id === machineId) {
-          return { ...m, currentMatchId: null };
-        }
-        return m;
-      });
-      
-      toast({
-        title: "Match abgeschlossen",
-        description: "Das Match wurde abgeschlossen und die Ergebnisse wurden gespeichert."
-      });
-      
-      const remainingPlayers = updatedPlayers.filter(p => !p.eliminated);
-      const completed = remainingPlayers.length === 1;
-      
-      if (completed && remainingPlayers.length === 1) {
-        const winner = remainingPlayers[0];
-        toast({
-          title: "🏆 Turniersieger",
-          description: `${winner.firstName} ${winner.lastName} hat das Turnier gewonnen!`,
-          duration: 10000,
+        finalUpdatedMatches.forEach((m, idx) => {
+          if (m.player1.id === player.id) {
+            finalUpdatedMatches[idx] = {
+              ...m,
+              player1: {
+                ...m.player1,
+                losses: newLosses,
+                eliminated,
+                bracket: eliminated ? null : "losers" as "winners" | "losers" | null
+              }
+            };
+          }
+          if (m.player2.id === player.id) {
+            finalUpdatedMatches[idx] = {
+              ...m,
+              player2: {
+                ...m.player2,
+                losses: newLosses,
+                eliminated,
+                bracket: eliminated ? null : "losers" as "winners" | "losers" | null
+              }
+            };
+          }
         });
+        
+        return {
+          ...player,
+          losses: newLosses,
+          eliminated,
+          bracket: eliminated ? null : "losers" as "winners" | "losers" | null
+        };
       }
       
-      return {
-        ...currentState,
-        matches: finalUpdatedMatches,
-        players: updatedPlayers,
-        machines: updatedMachines,
-        completed,
-        roundStarted: !isRoundComplete(finalUpdatedMatches, currentState.currentRound),
-        winnersBracketMatches: finalUpdatedMatches.filter(m => m.bracket === "winners"),
-        losersBracketMatches: finalUpdatedMatches.filter(m => m.bracket === "losers"),
-        finalMatches: finalUpdatedMatches.filter(m => m.bracket === "final")
-      };
+      return player;
     });
+    
+    const updatedMachines = currentState.machines.map(m => {
+      if (m.id === machineId) {
+        return { ...m, currentMatchId: null };
+      }
+      return m;
+    });
+    
+    const remainingPlayers = updatedPlayers.filter(p => !p.eliminated);
+    const completed = remainingPlayers.length === 1;
+    
+    return {
+      ...currentState,
+      matches: finalUpdatedMatches,
+      players: updatedPlayers,
+      machines: updatedMachines,
+      completed,
+      roundStarted: !isRoundComplete(finalUpdatedMatches, currentState.currentRound),
+      winnersBracketMatches: finalUpdatedMatches.filter(m => m.bracket === "winners"),
+      losersBracketMatches: finalUpdatedMatches.filter(m => m.bracket === "losers"),
+      finalMatches: finalUpdatedMatches.filter(m => m.bracket === "final")
+    };
   };
 
   const isRoundComplete = (matches: Match[], round: number): boolean => {
@@ -364,21 +278,11 @@ export const useTournament = () => {
     }
     
     URL.revokeObjectURL(url);
-    
-    toast({
-      title: "Export erfolgreich",
-      description: "Die Turnierdaten wurden erfolgreich exportiert"
-    });
   };
 
   const resetTournament = () => {
     localStorage.removeItem(STORAGE_KEY);
     setTournament(initialTournamentState);
-    
-    toast({
-      title: "Turnier zurückgesetzt",
-      description: "Das Turnier wurde erfolgreich auf den Ausgangszustand zurückgesetzt"
-    });
   };
 
   return {
@@ -391,8 +295,7 @@ export const useTournament = () => {
     updateMachine,
     assignMatchToMachine,
     confirmMatchResult,
-    resetTournament,
-    confirmationTimers  // Timer-Zustand exportieren für die UI
+    resetTournament
   };
 };
 

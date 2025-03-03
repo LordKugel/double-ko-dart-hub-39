@@ -1,14 +1,12 @@
 
 import { TournamentControls } from "./tournament/TournamentControls";
 import { PlayersList } from "./tournament/PlayersList";
-import { MatchesTable } from "./tournament/MatchesTable";
 import { TournamentBracket } from "./tournament/TournamentBracket";
 import { MachineOverview } from "./tournament/MachineOverview";
 import { useTournament } from "@/hooks/useTournament";
 import { useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import { toast } from "./ui/use-toast";
 import { TooltipProvider } from "./ui/tooltip";
 import { WinnerAnnouncement } from "./tournament/WinnerAnnouncement";
 import { BracketSidebar } from "./tournament/BracketSidebar";
@@ -20,16 +18,12 @@ export const Tournament = () => {
     handleScoreUpdate, 
     generatePlayers, 
     startTournament, 
-    exportTournamentData, 
     updateNumberOfMachines,
     updateMachine,
     assignMatchToMachine,
     confirmMatchResult,
-    resetTournament,
-    confirmationTimers
+    resetTournament
   } = useTournament();
-
-  const [showMatchesTable, setShowMatchesTable] = useState(false);
 
   const winner = tournament?.completed ? tournament.players.find(p => !p.eliminated) : null;
 
@@ -99,16 +93,6 @@ export const Tournament = () => {
 
     if (availableMachine) {
       assignMatchToMachine(availableMachine.id, matchId);
-      toast({
-        title: "Match zugewiesen",
-        description: `Match wurde ${favoriteMachine ? "Favoriten-" : ""}Automat ${availableMachine.id} zugewiesen`
-      });
-    } else {
-      toast({
-        title: "Kein Automat verfügbar",
-        description: "Es gibt aktuell keinen freien Automaten",
-        variant: "destructive"
-      });
     }
   };
 
@@ -131,10 +115,6 @@ export const Tournament = () => {
     const player1Wins = match.scores.filter(s => s.player1Won).length;
     const player2Wins = match.scores.filter(s => s.player2Won).length;
     return player1Wins + player2Wins === 3;
-  };
-
-  const handleExportData = () => {
-    exportTournamentData(true);
   };
 
   const handleIncreaseMachines = () => {
@@ -171,14 +151,11 @@ export const Tournament = () => {
           <TournamentControls
             onGeneratePlayers={generatePlayers}
             onStartTournament={startTournament}
-            onExportData={handleExportData}
             isStarted={tournament.started}
             hasPlayers={tournament.players.length > 0}
             matches={tournament.matches}
             currentRound={tournament.currentRound}
             roundStarted={tournament.roundStarted}
-            onToggleMatchesTable={() => setShowMatchesTable(!showMatchesTable)}
-            showMatchesTable={showMatchesTable}
             onResetTournament={tournament.started ? resetTournament : undefined}
           />
 
@@ -212,8 +189,6 @@ export const Tournament = () => {
               </div>
             </div>
           )}
-
-          {showMatchesTable && <MatchesTable matches={tournament.matches} />}
           
           {tournament.started && (
             <MachineOverview 
@@ -229,7 +204,6 @@ export const Tournament = () => {
               onScoreUpdate={handleScoreUpdate}
               onIncreaseMaxMachines={handleIncreaseMachines}
               onDecreaseMaxMachines={handleDecreaseMachines}
-              confirmationTimers={confirmationTimers}
             />
           )}
         </div>

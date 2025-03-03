@@ -1,4 +1,4 @@
 
-import { useToast, toast } from "@/hooks/use-toast";
-
-export { useToast, toast };
+// Diese Datei ist lediglich ein Platzhalter, da Toast-Benachrichtigungen entfernt wurden
+export const useToast = () => ({});
+export const toast = () => ({});

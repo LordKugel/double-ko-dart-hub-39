@@ -1,40 +1,35 @@
 
 import { Button } from "@/components/ui/button";
 import { Download, Table2, RefreshCw } from "lucide-react";
-import { toast } from "@/components/ui/use-toast";
 import * as XLSX from "xlsx";
 import { Match } from "@/types/tournament";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
+import { useNavigate } from "react-router-dom";
 
 interface TournamentControlsProps {
   onGeneratePlayers: (count?: number) => void;
   onStartTournament: () => void;
-  onExportData: () => void;
   isStarted: boolean;
   hasPlayers: boolean;
   matches: Match[];
   currentRound: number;
   roundStarted: boolean;
-  onToggleMatchesTable: () => void;
-  showMatchesTable: boolean;
   onResetTournament?: () => void;
 }
 
 export const TournamentControls = ({
   onGeneratePlayers,
   onStartTournament,
-  onExportData,
   isStarted,
   hasPlayers,
   matches,
   currentRound,
   roundStarted,
-  onToggleMatchesTable,
-  showMatchesTable,
   onResetTournament
 }: TournamentControlsProps) => {
   const [playerCount, setPlayerCount] = useState<number>(8);
+  const navigate = useNavigate();
   
   const getButtonLabel = () => {
     if (!isStarted) return "Start Tournament";
@@ -116,11 +111,6 @@ export const TournamentControls = ({
     XLSX.utils.book_append_sheet(wb, ws, "Übersicht");
 
     XLSX.writeFile(wb, `tournament_matches_bis_runde_${currentRound}.xlsx`);
-    
-    toast({
-      title: "Export erfolgreich",
-      description: "Die Turnierdaten wurden als Excel-Datei exportiert"
-    });
   };
 
   const handleStartTournament = () => {
@@ -129,6 +119,10 @@ export const TournamentControls = ({
       exportToExcel();
     }
     onStartTournament();
+  };
+
+  const handleViewMatchesTable = () => {
+    navigate("/matches");
   };
 
   return (
@@ -149,20 +143,12 @@ export const TournamentControls = ({
         Export Excel
       </Button>
       <Button
-        onClick={onExportData}
+        onClick={handleViewMatchesTable}
         className="transition-all duration-200 hover:scale-105"
         variant="outline"
       >
-        <Download className="mr-2 h-4 w-4" />
-        Export JSON
-      </Button>
-      <Button
-        onClick={onToggleMatchesTable}
-        className="transition-all duration-200 hover:scale-105"
-        variant={showMatchesTable ? "default" : "outline"}
-      >
         <Table2 className="mr-2 h-4 w-4" />
-        {showMatchesTable ? "Tabelle ausblenden" : "Tabelle anzeigen"}
+        Tabelle anzeigen
       </Button>
       
       {onResetTournament && (
