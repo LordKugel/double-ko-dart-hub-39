@@ -1,6 +1,5 @@
 
 import { Machine, Match } from "@/types/tournament";
-import { toast } from "../ui/use-toast";
 import { DroppableMachineCard } from "./DroppableMachineCard";
 
 interface MachineManagementProps {
@@ -27,10 +26,7 @@ export const MachineManagement = ({
       ...machine,
       quality: newQuality
     });
-    toast({
-      title: "Qualität aktualisiert",
-      description: `Die Qualität von Automat ${machine.id} wurde auf ${newQuality} gesetzt`
-    });
+    // Toast entfernt
   };
 
   const handleToggleFavorite = (machine: Machine) => {
@@ -38,10 +34,7 @@ export const MachineManagement = ({
       ...machine,
       isFavorite: !machine.isFavorite
     });
-    toast({
-      title: machine.isFavorite ? "Favorit entfernt" : "Als Favorit markiert",
-      description: `Automat ${machine.id} wurde ${machine.isFavorite ? 'von den Favoriten entfernt' : 'als Favorit markiert'}`
-    });
+    // Toast entfernt
   };
 
   const handleToggleOutOfOrder = (machine: Machine) => {
@@ -50,10 +43,7 @@ export const MachineManagement = ({
       isOutOfOrder: !machine.isOutOfOrder,
       currentMatchId: null
     });
-    toast({
-      title: machine.isOutOfOrder ? "Automat verfügbar" : "Automat außer Betrieb",
-      description: `Automat ${machine.id} wurde als ${machine.isOutOfOrder ? 'verfügbar' : 'außer Betrieb'} markiert`
-    });
+    // Toast entfernt
   };
 
   return (

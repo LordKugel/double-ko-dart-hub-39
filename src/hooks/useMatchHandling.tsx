@@ -1,6 +1,6 @@
+
 import { Match as MatchType, Player } from "../types/tournament";
 import { updateMatchScores, updatePlayersAfterMatch, isMatchComplete, isRoundComplete } from "@/utils/matchUtils";
-import { toast } from "@/components/ui/use-toast";
 
 export const useMatchHandling = (
   matches: MatchType[],

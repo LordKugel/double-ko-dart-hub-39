@@ -6,7 +6,6 @@ import {
   ContextMenuItem,
   ContextMenuTrigger
 } from "@/components/ui/context-menu";
-import { toast } from "@/components/ui/use-toast";
 
 interface MatchCardContextMenuProps {
   match: Match;
@@ -29,10 +28,7 @@ export const MatchCardContextMenu = ({
   const handleAssignToMachine = (machineId: number) => {
     if (onAssignMatch) {
       onAssignMatch(machineId, match.id);
-      toast({
-        title: "Match zugewiesen",
-        description: `Match wurde Automat ${machineId} zugewiesen`
-      });
+      // Toast entfernt
     }
   };
 

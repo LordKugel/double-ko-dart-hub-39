@@ -10,7 +10,8 @@ import {
 } from "@/components/ui/toast"
 
 export function Toaster() {
-  const { toasts } = useToast()
+  // Da useToast keine toasts-Eigenschaft mehr hat, simulieren wir ein leeres Array
+  const toasts: any[] = [];
 
   return (
     <ToastProvider>

@@ -4,7 +4,6 @@ import { Machine, Match } from "@/types/tournament";
 import { Button } from "../ui/button";
 import { Star, AlertTriangle, CheckCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { toast } from "../ui/use-toast";
 import { useEffect } from 'react';
 
 interface DroppableMachineCardProps {
@@ -47,11 +46,7 @@ export const DroppableMachineCard = ({
       console.log("DROP DETECTED on machine", machine.id, item);
       if (item && item.matchId) {
         onAssignMatch(machine.id, item.matchId);
-        
-        toast({
-          title: "Match zugewiesen",
-          description: `Match wurde erfolgreich Automat ${machine.id} zugewiesen`
-        });
+        // Toast entfernt
       }
       return { machineId: machine.id };
     },

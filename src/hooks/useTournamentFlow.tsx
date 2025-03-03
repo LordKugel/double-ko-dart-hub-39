@@ -1,5 +1,4 @@
 
-import { toast } from "@/components/ui/use-toast";
 import { Match as MatchType, Player, Tournament as TournamentType } from "@/types/tournament";
 import { createInitialMatches, createNextRoundMatches } from "@/utils/tournamentUtils";
 import { isRoundComplete } from "@/utils/matchUtils";
@@ -45,11 +44,7 @@ export const useTournamentFlow = (tournament: TournamentType, setTournament: (va
   const startTournament = () => {
     if (!tournament.started) {
       if (tournament.players.length < 2) {
-        toast({
-          title: "Nicht genug Spieler",
-          description: "Bitte generieren Sie zuerst Spieler",
-          variant: "destructive"
-        });
+        // Toast entfernt
         return;
       }
 
@@ -84,12 +79,7 @@ export const useTournamentFlow = (tournament: TournamentType, setTournament: (va
         
         initialMatches = createInitialMatches(matchPlayers);
         
-        // Benachrichtigung für den Freilos-Spieler
-        toast({
-          title: "Freilos",
-          description: `${byePlayer.firstName} ${byePlayer.lastName} hat ein Freilos und kommt automatisch in die nächste Runde.`,
-          duration: 5000,
-        });
+        // Toast für Freilos entfernt
       } else {
         initialMatches = createInitialMatches(shuffledPlayers);
       }
@@ -112,18 +102,11 @@ export const useTournamentFlow = (tournament: TournamentType, setTournament: (va
         byePlayer: byePlayer
       }));
 
-      toast({
-        title: "Turnier gestartet",
-        description: "Die erste Runde wurde gestartet"
-      });
+      // Toast entfernt
     } else {
       // Prüfe, ob die aktuelle Runde abgeschlossen ist
       if (!isRoundComplete(tournament.matches, tournament.currentRound)) {
-        toast({
-          title: "Runde nicht abgeschlossen",
-          description: "Bitte spielen Sie erst alle Matches der aktuellen Runde zu Ende",
-          variant: "destructive"
-        });
+        // Toast entfernt
         return;
       }
 
@@ -132,11 +115,7 @@ export const useTournamentFlow = (tournament: TournamentType, setTournament: (va
       const hasRunningTimers = currentRoundMatches.some(m => m.countdownStarted && !m.completed);
       
       if (hasRunningTimers) {
-        toast({
-          title: "Timer noch aktiv",
-          description: "Bitte warten Sie, bis alle Timer der aktuellen Runde abgelaufen sind",
-          variant: "destructive"
-        });
+        // Toast entfernt
         return;
       }
 
@@ -149,11 +128,7 @@ export const useTournamentFlow = (tournament: TournamentType, setTournament: (va
             : player
         );
         
-        toast({
-          title: "Freilos-Spieler",
-          description: `${tournament.byePlayer.firstName} ${tournament.byePlayer.lastName} tritt in Runde 2 an.`,
-          duration: 3000,
-        });
+        // Toast für Freilos-Spieler entfernt
       }
 
       const nextRoundMatches = createNextRound(
@@ -163,11 +138,7 @@ export const useTournamentFlow = (tournament: TournamentType, setTournament: (va
       );
 
       if (nextRoundMatches.length === 0) {
-        toast({
-          title: "Turnier beendet",
-          description: "Alle Runden wurden gespielt",
-          variant: "default"
-        });
+        // Toast entfernt
         return;
       }
 
@@ -183,10 +154,7 @@ export const useTournamentFlow = (tournament: TournamentType, setTournament: (va
         byePlayer: null // Entferne Freilos-Information nach Runde 1
       }));
 
-      toast({
-        title: "Neue Runde gestartet",
-        description: `Runde ${tournament.currentRound + 1} wurde gestartet`
-      });
+      // Toast entfernt
     }
   };
 
