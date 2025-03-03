@@ -29,8 +29,9 @@ export const BracketPlayers = ({
           className={cn(
             "p-2 rounded",
             bgColorClass,
-            // Entferne die dynamische Rahmenklasse, die den doppelten Rahmen verursacht
-            // player.hasBye ? `border border-${borderColorClass}` : ""
+            // Der doppelte Rahmen wird hier verursacht:
+            // Vorher: player.hasBye ? `border border-${borderColorClass}` : ""
+            // Diese dynamische Klasse sollte entfernt werden - ist jetzt auskommentiert
           )}
         >
           <div className="flex justify-between items-center">
