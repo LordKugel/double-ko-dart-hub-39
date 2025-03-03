@@ -29,12 +29,14 @@ export const BracketPlayers = ({
           className={cn(
             "p-2 rounded",
             bgColorClass,
-            player.hasBye ? `border border-${borderColorClass}` : "" // Nur Freilos-Spieler haben einen Rahmen
+            // Entferne die dynamische Rahmenklasse, die den doppelten Rahmen verursacht
+            // player.hasBye ? `border border-${borderColorClass}` : ""
           )}
         >
           <div className="flex justify-between items-center">
             <span className={cn("text-sm", textColorClass)}>
               {player.firstName} {player.lastName}
+              {player.hasBye && " (Freilos)"}
             </span>
             {player.team && (
               <span className={cn("text-xs", `${textColorClass}/70`)}>{player.team}</span>

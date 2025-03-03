@@ -103,7 +103,7 @@ export const MatchCardSimplified = ({
             match.player2.bracket === "winners" ? "text-[#0FA0CE]" : // Blau für Winner-Bracket
             "text-white"
           )}>
-            {match.player2.firstName} {match.player2.lastName}
+            {match.player2.firstName} {player.lastName}
             {match.player2.hasBye && " (Freilos)"}
           </span>
           {match.player2.team && (

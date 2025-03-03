@@ -28,14 +28,14 @@ export const BracketSidebar = ({
       <div className="bg-[#0e1627] p-4 rounded-lg border border-[#0FA0CE]">
         <h2 className="text-xl font-bold mb-4 text-[#0FA0CE]">Winner's Bracket</h2>
         
-        {/* Freilos-Spieler anzeigen */}
+        {/* Freilos-Spieler anzeigen - ohne zusätzlichen Rahmen */}
         {byePlayers.length > 0 && (
           <div className="mb-4 space-y-0">
             <div className="text-sm font-semibold mb-1 text-[#0FA0CE]">Freilos-Spieler:</div>
             {byePlayers.map(player => (
               <div 
                 key={player.id}
-                className="p-2 bg-green-900/30 border border-green-500 rounded-lg"
+                className="p-2 bg-green-900/30 rounded-lg" // Entfernung des doppelten Rahmens
               >
                 <div className="flex justify-between items-center">
                   <span className="text-sm font-semibold text-green-400">
