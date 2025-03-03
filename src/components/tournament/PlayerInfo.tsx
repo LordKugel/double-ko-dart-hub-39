@@ -1,10 +1,10 @@
 
 import { cn } from "@/lib/utils";
 import { Match } from "@/types/tournament";
-import { MatchScore } from "./MatchScore";
-import { TeamDisplay } from "./TeamDisplay";
-import { ScoreDisplay } from "./ScoreDisplay";
-import { getPlayerNameColor } from "./PlayerNameUtils";
+import { MatchScore } from "./bracket/MatchScore";
+import { TeamDisplay } from "./bracket/TeamDisplay";
+import { ScoreDisplay } from "./bracket/ScoreDisplay";
+import { getPlayerNameColor } from "./bracket/PlayerNameUtils";
 
 interface PlayerInfoProps {
   player: Match["player1"] | Match["player2"];
