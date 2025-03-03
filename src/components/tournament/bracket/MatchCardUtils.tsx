@@ -22,11 +22,11 @@ export const getScores = (match: Match) => {
 export const getBracketColors = (bracket: Match["bracket"]) => {
   switch(bracket) {
     case "winners":
-      return "bg-[#0e1627] border-[#0FA0CE]/30 hover:border-[#0FA0CE]";
+      return "bg-[#0e1627] border-[#0FA0CE]"; // Entferne /30 und hover Effekt
     case "losers":
-      return "bg-[#1c1917] border-yellow-900/30 hover:border-yellow-500";
+      return "bg-[#1c1917] border-[#FFD700]"; // Entferne /30 und hover Effekt für gelbe Farbe
     case "final":
-      return "bg-[#1e173a] border-[#8B5CF6]/30 hover:border-[#8B5CF6]";
+      return "bg-[#1e173a] border-[#8B5CF6]"; // Entferne /30 und hover Effekt
     default:
       return "bg-gray-800 border-gray-700";
   }
