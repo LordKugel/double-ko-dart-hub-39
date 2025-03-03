@@ -168,7 +168,7 @@ export const useTournament = () => {
     });
   };
 
-  // Funktion zum finalen Abschließen des Matches
+  // Funktion zum finalen Abschließen des Matches - Korrigiert für korrekte Elimination-Logik
   const finalizeMatch = (currentState: TournamentType, machineId: number): TournamentType => {
     const machine = currentState.machines.find(m => m.id === machineId);
     if (!machine || !machine.currentMatchId) return currentState;
@@ -182,21 +182,24 @@ export const useTournament = () => {
     const finalUpdatedMatches = [...currentState.matches];
     finalUpdatedMatches[currentMatchIndex] = finalUpdatedMatch;
     
+    // Bestimme Gewinner und Verlierer
+    const p1Wins = currentMatch.scores.filter(s => s.player1Won).length;
+    const p2Wins = currentMatch.scores.filter(s => s.player2Won).length;
+    const player1IsWinner = p1Wins > p2Wins;
+    const player2IsWinner = p2Wins > p1Wins;
+    
     const updatedPlayers = currentState.players.map(player => {
       const isPlayer1 = player.id === currentMatch.player1.id;
       const isPlayer2 = player.id === currentMatch.player2.id;
       
       if (!isPlayer1 && !isPlayer2) return player;
       
-      const p1Wins = currentMatch.scores.filter(s => s.player1Won).length;
-      const p2Wins = currentMatch.scores.filter(s => s.player2Won).length;
-      const isWinner = isPlayer1 ? p1Wins > p2Wins : p2Wins > p1Wins;
-      const isLoser = !isWinner;
-      
-      if (isLoser) {
+      // Verlierer des Matches
+      if ((isPlayer1 && !player1IsWinner) || (isPlayer2 && !player2IsWinner)) {
         const newLosses = player.losses + 1;
         const eliminated = player.bracket === "losers" || newLosses >= 2;
         
+        // Aktualisiere auch die Spielerreferenz in allen Matches
         finalUpdatedMatches.forEach((m, idx) => {
           if (m.player1.id === player.id) {
             finalUpdatedMatches[idx] = {

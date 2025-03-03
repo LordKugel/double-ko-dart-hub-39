@@ -22,7 +22,7 @@ export const BracketPlayers = ({
   }
   
   return (
-    <div className="space-y-0">
+    <div className="space-y-1">
       {players.map(player => (
         <div 
           key={player.id} 
@@ -32,7 +32,7 @@ export const BracketPlayers = ({
             player.hasBye ? `border border-${borderColorClass}` : "" // Nur Freilos-Spieler haben einen Rahmen
           )}
         >
-          <div className="flex flex-col gap-1">
+          <div className="flex justify-between items-center">
             <span className={cn("text-sm", textColorClass)}>
               {player.firstName} {player.lastName}
             </span>

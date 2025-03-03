@@ -18,15 +18,15 @@ export const MatchCardSimplified = ({
   const player2IsWinner = match.completed && 
     match.scores.filter(s => s.player2Won).length > match.scores.filter(s => s.player1Won).length;
 
-  // Bestimme die Farben basierend auf dem Bracket - Nur eine Rahmenfarbe pro Bracket
+  // Bestimme die Farben basierend auf dem Bracket - Nur eine einzige Rahmenfarbe pro Bracket
   const getBracketColors = () => {
     switch(match.bracket) {
       case "winners":
-        return "bg-[#0e1627] border-[#0FA0CE]"; // Entferne /30 und hover Effekt
+        return "bg-[#0e1627] border-[#0FA0CE]";
       case "losers":
-        return "bg-[#1c1917] border-[#FFD700]"; // Entferne /30 und hover Effekt für gelbe Farbe
+        return "bg-[#1c1917] border-[#FFD700]";
       case "final":
-        return "bg-[#1e173a] border-[#8B5CF6]"; // Entferne /30 und hover Effekt
+        return "bg-[#1e173a] border-[#8B5CF6]";
       default:
         return "bg-gray-800 border-gray-700";
     }
@@ -125,6 +125,12 @@ export const MatchCardSimplified = ({
       {match.machineNumber && !match.completed && (
         <div className={cn("mt-1 text-xs text-center", getMachineColor())}>
           Automat {match.machineNumber}
+        </div>
+      )}
+      
+      {match.completed && (
+        <div className="mt-1 text-xs text-center text-gray-500">
+          Spiel beendet
         </div>
       )}
     </div>

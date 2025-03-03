@@ -1,4 +1,3 @@
-
 import { TournamentControls } from "./tournament/TournamentControls";
 import { PlayersList } from "./tournament/PlayersList";
 import { TournamentBracket } from "./tournament/TournamentBracket";
@@ -41,7 +40,6 @@ export const Tournament = () => {
   const losersMatches = availableMatches.filter(match => match.bracket === "losers");
   const finalMatches = availableMatches.filter(match => match.bracket === "final");
 
-  // Spieler in aktiven, nicht abgeschlossenen Matches der aktuellen Runde
   const playersInActiveUnfinishedMatches = tournament.matches
     .filter(match => 
       match.round === tournament.currentRound && 
@@ -49,20 +47,9 @@ export const Tournament = () => {
     )
     .flatMap(match => [match.player1.id, match.player2.id]);
 
-  // Spieler in zugewiesenen Automaten/aktiven Matches
-  const playersInActiveMatches = tournament.matches
-    .filter(match => 
-      match.round === tournament.currentRound && 
-      !match.completed && 
-      match.machineNumber !== null
-    )
-    .flatMap(match => [match.player1.id, match.player2.id]);
+  const eliminatedPlayers = tournament.players
+    .filter(p => p.eliminated === true && p.bracket === null);
 
-  const byePlayers = tournament.players.filter(player => 
-    player.hasBye && !player.eliminated
-  );
-
-  // Aktive Winner-Bracket Spieler - korrigiert, um abgeschlossene Matches zu berücksichtigen
   const activeWinnerPlayers = tournament.players.filter(player => 
     !player.eliminated && 
     player.bracket === "winners" && 
@@ -70,14 +57,15 @@ export const Tournament = () => {
     !player.hasBye
   );
 
-  // Aktive Loser-Bracket Spieler - korrigiert, um abgeschlossene Matches zu berücksichtigen
   const activeLoserPlayers = tournament.players.filter(player => 
     !player.eliminated && 
     player.bracket === "losers" && 
     !playersInActiveUnfinishedMatches.includes(player.id)
   );
 
-  const eliminatedPlayers = tournament.players.filter(p => p.eliminated);
+  const byePlayers = tournament.players.filter(player => 
+    player.hasBye && !player.eliminated
+  );
 
   const activeMatches = tournament?.matches?.filter(match => 
     match.round === tournament.currentRound && 
@@ -133,7 +121,6 @@ export const Tournament = () => {
     }
   };
 
-  // Excel-Import-Funktion
   const handleImportExcel = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -147,7 +134,6 @@ export const Tournament = () => {
         const worksheet = workbook.Sheets[sheetName];
         const jsonData = XLSX.utils.sheet_to_json(worksheet) as any[];
 
-        // Transformiere die Excel-Daten in Spieler
         const players = jsonData.map((row, index) => {
           const player: Player = {
             id: `imported-${index}`,
@@ -163,7 +149,6 @@ export const Tournament = () => {
           return player;
         });
 
-        // Setze das Turnier mit den importierten Spielern
         if (players.length > 0) {
           setTournament(prev => ({
             ...prev,
@@ -193,7 +178,6 @@ export const Tournament = () => {
                     onResetTournament={resetTournament}
                   />
                   
-                  {/* Excel-Import-Button */}
                   <div className="relative">
                     <Button variant="outline" className="bg-green-700 hover:bg-green-800">
                       Excel importieren

@@ -37,7 +37,7 @@ export const BracketSidebar = ({
                 key={player.id}
                 className="p-2 bg-green-900/30 border border-green-500 rounded-lg"
               >
-                <div className="flex flex-col">
+                <div className="flex justify-between items-center">
                   <span className="text-sm font-semibold text-green-400">
                     {player.firstName} {player.lastName}
                   </span>
@@ -86,18 +86,19 @@ export const BracketSidebar = ({
       {eliminatedPlayers.length > 0 && (
         <div className="bg-[#1A1721] p-4 rounded-lg border border-red-500">
           <h2 className="text-lg font-bold mb-3 text-red-500">Ausgeschieden</h2>
-          <div className="space-y-0">
+          <div className="space-y-1">
             {eliminatedPlayers.map(player => (
               <div 
                 key={player.id} 
                 className={cn(
-                  "text-sm flex justify-between p-2 rounded",
-                  "bg-[#121824]",
-                  "text-red-500"
+                  "text-sm p-2 rounded",
+                  "bg-[#121824]"
                 )}
               >
-                <span>{player.firstName} {player.lastName}</span>
-                {player.team && <span className="text-xs text-red-500/70">{player.team}</span>}
+                <div className="flex justify-between items-center">
+                  <span className="text-red-500">{player.firstName} {player.lastName}</span>
+                  {player.team && <span className="text-xs text-red-500/70">{player.team}</span>}
+                </div>
               </div>
             ))}
           </div>
