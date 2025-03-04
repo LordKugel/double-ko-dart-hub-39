@@ -1,5 +1,5 @@
 
-import { Player, Match } from "@/types/tournament";
+import { Player } from "@/types/tournament";
 import { cn } from "@/lib/utils";
 
 interface BracketPlayersProps {
@@ -29,9 +29,8 @@ export const BracketPlayers = ({
           className={cn(
             "p-2 rounded",
             bgColorClass,
-            // Der doppelte Rahmen wird hier verursacht:
-            // Vorher: player.hasBye ? `border border-${borderColorClass}` : ""
-            // Diese dynamische Klasse sollte entfernt werden - ist jetzt auskommentiert
+            // Für Freilos-Spieler fügen wir den Border direkt ein, ohne dynamisch zu bauen
+            player.hasBye ? `border ${borderColorClass}` : ""
           )}
         >
           <div className="flex justify-between items-center">
