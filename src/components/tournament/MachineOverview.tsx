@@ -4,7 +4,6 @@ import { cn } from "@/lib/utils";
 import { Star, AlertTriangle, CheckCircle, Plus, Minus } from "lucide-react";
 import { Button } from "../ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
-import { Slider } from "../ui/slider";
 import { useState } from "react";
 
 interface MachineOverviewProps {
@@ -36,8 +35,6 @@ export const MachineOverview = ({
   onIncreaseMaxMachines,
   onDecreaseMaxMachines
 }: MachineOverviewProps) => {
-  const [machineHeight, setMachineHeight] = useState<number>(200);
-  const [containerHeight, setContainerHeight] = useState<number>(35); // vh units
   
   const handleToggleFavorite = (machine: Machine) => {
     onUpdateMachine({
@@ -79,7 +76,7 @@ export const MachineOverview = ({
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-[#1A1721] border-t border-[#403E43] p-4 z-50"
-         style={{ height: `${containerHeight}vh` }}>
+         style={{ height: "35vh" }}>
       <div className="container mx-auto">
         <div className="flex justify-between items-center mb-2">
           <div className="flex items-center gap-2">
@@ -108,36 +105,6 @@ export const MachineOverview = ({
                   <Plus className="h-3 w-3" />
                 </Button>
               )}
-            </div>
-            
-            {/* Höhensteuerung für Automaten */}
-            <div className="ml-6 flex items-center gap-2">
-              <label className="text-xs text-gray-400">Höhe Automaten:</label>
-              <div className="w-28">
-                <Slider 
-                  defaultValue={[machineHeight]} 
-                  min={150} 
-                  max={300} 
-                  step={10}
-                  onValueChange={(values) => setMachineHeight(values[0])}
-                />
-              </div>
-              <span className="text-xs text-gray-400">{machineHeight}px</span>
-            </div>
-            
-            {/* Höhensteuerung für Container */}
-            <div className="ml-6 flex items-center gap-2">
-              <label className="text-xs text-gray-400">Höhe Container:</label>
-              <div className="w-28">
-                <Slider 
-                  defaultValue={[containerHeight]} 
-                  min={20} 
-                  max={60} 
-                  step={5}
-                  onValueChange={(values) => setContainerHeight(values[0])}
-                />
-              </div>
-              <span className="text-xs text-gray-400">{containerHeight}vh</span>
             </div>
           </div>
           
@@ -173,7 +140,7 @@ export const MachineOverview = ({
                   // Bracket-basierte Rahmenfarbe für zugewiesene Matches
                   machine.currentMatchId && getMachineBorderColor(match)
                 )}
-                style={{ height: `${machineHeight}px`, overflow: 'auto' }}
+                style={{ height: "200px", overflow: 'auto' }}
               >
                 {machine.currentMatchId && match ? (
                   <div className="space-y-2">
