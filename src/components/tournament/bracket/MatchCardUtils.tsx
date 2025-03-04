@@ -8,7 +8,7 @@ export const getScores = (match: Match) => {
   
   // Bestimmen des Gewinner-Status
   const player1IsWinner = match.completed && player1Score > player2Score;
-  const player2IsWinner = match.completed && player2Score > player2Score;
+  const player2IsWinner = match.completed && player2Score > player1Score; // Korrigiert: player2Score > player1Score
 
   return {
     player1Score,
@@ -22,11 +22,11 @@ export const getScores = (match: Match) => {
 export const getBracketColors = (bracket: Match["bracket"]) => {
   switch(bracket) {
     case "winners":
-      return "bg-[#0e1627] border-[#0FA0CE]"; // Entferne /30 und hover Effekt
+      return "bg-[#0e1627] border-[#0FA0CE]"; 
     case "losers":
-      return "bg-[#1c1917] border-[#FFD700]"; // Entferne /30 und hover Effekt für gelbe Farbe
+      return "bg-[#1c1917] border-[#FFD700]"; 
     case "final":
-      return "bg-[#1e173a] border-[#8B5CF6]"; // Entferne /30 und hover Effekt
+      return "bg-[#1e173a] border-[#8B5CF6]"; 
     default:
       return "bg-gray-800 border-gray-700";
   }

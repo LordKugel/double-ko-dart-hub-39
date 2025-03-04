@@ -29,8 +29,7 @@ export const BracketPlayers = ({
           className={cn(
             "p-2 rounded",
             bgColorClass,
-            // Für Freilos-Spieler fügen wir den Border direkt ein, ohne dynamisch zu bauen
-            player.hasBye ? `border ${borderColorClass}` : ""
+            // Komplett entfernt, kein Border für Freilos-Spieler mehr
           )}
         >
           <div className="flex justify-between items-center">
