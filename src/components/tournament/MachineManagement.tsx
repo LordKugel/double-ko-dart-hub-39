@@ -1,67 +1,56 @@
 
-import { Machine, Match } from "@/types/tournament";
-import { DroppableMachineCard } from "./DroppableMachineCard";
+import { MachineOverview } from "./MachineOverview";
+import { Match } from "@/types/tournament";
 
 interface MachineManagementProps {
-  machines: Machine[];
-  onUpdateMachine: (machine: Machine) => void;
-  onAssignMatch: (machineId: number, matchId: string | null) => void;
-  onConfirmMatch?: (machineId: number) => void;
-  getMatchForMachine?: (machineId: number) => Match | null;
-  canConfirmMatch?: (machineId: number) => boolean;
+  started: boolean;
+  activeMatches: Match[];
+  numberOfMachines: number;
+  machines: any[];
   availableMatches: Match[];
+  onUpdateMachine: (machine: any) => void;
+  onAssignMatch: (machineId: number, matchId: string | null) => void;
+  onConfirmMatch: (machineId: number) => void;
+  getMatchForMachine: (machineId: number) => Match | null;
+  canConfirmMatch: (machineId: number) => boolean;
+  onScoreUpdate: (matchId: string, gameIndex: number, player1Won: boolean) => void;
+  onIncreaseMaxMachines: () => void;
+  onDecreaseMaxMachines: () => void;
 }
 
 export const MachineManagement = ({
+  started,
+  activeMatches,
+  numberOfMachines,
   machines,
+  availableMatches,
   onUpdateMachine,
   onAssignMatch,
   onConfirmMatch,
   getMatchForMachine,
   canConfirmMatch,
-  availableMatches
+  onScoreUpdate,
+  onIncreaseMaxMachines,
+  onDecreaseMaxMachines
 }: MachineManagementProps) => {
-  const handleQualityChange = (machine: Machine, newQuality: 1 | 2 | 3) => {
-    onUpdateMachine({
-      ...machine,
-      quality: newQuality
-    });
-    // Toast entfernt
-  };
-
-  const handleToggleFavorite = (machine: Machine) => {
-    onUpdateMachine({
-      ...machine,
-      isFavorite: !machine.isFavorite
-    });
-    // Toast entfernt
-  };
-
-  const handleToggleOutOfOrder = (machine: Machine) => {
-    onUpdateMachine({
-      ...machine,
-      isOutOfOrder: !machine.isOutOfOrder,
-      currentMatchId: null
-    });
-    // Toast entfernt
-  };
+  if (!started) {
+    return null;
+  }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
-      {machines.map((machine) => (
-        <DroppableMachineCard
-          key={machine.id}
-          machine={machine}
-          onToggleFavorite={handleToggleFavorite}
-          onToggleOutOfOrder={handleToggleOutOfOrder}
-          onQualityChange={handleQualityChange}
-          onAssignMatch={onAssignMatch}
-          onConfirmMatch={onConfirmMatch}
-          availableMatches={availableMatches}
-          currentMatch={getMatchForMachine ? getMatchForMachine(machine.id) : null}
-          canConfirm={canConfirmMatch ? canConfirmMatch(machine.id) : false}
-        />
-      ))}
-    </div>
+    <MachineOverview 
+      activeMatches={activeMatches}
+      maxMachines={numberOfMachines || 3}
+      machines={machines}
+      availableMatches={availableMatches}
+      onUpdateMachine={onUpdateMachine}
+      onAssignMatch={onAssignMatch}
+      onConfirmMatch={onConfirmMatch}
+      getMatchForMachine={getMatchForMachine}
+      canConfirmMatch={canConfirmMatch}
+      onScoreUpdate={onScoreUpdate}
+      onIncreaseMaxMachines={onIncreaseMaxMachines}
+      onDecreaseMaxMachines={onDecreaseMaxMachines}
+    />
   );
 };
